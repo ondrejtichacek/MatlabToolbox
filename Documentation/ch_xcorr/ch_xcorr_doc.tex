@@ -1,0 +1,98 @@
+\documentclass[10pt]{article}
+
+% $Date: 2011-08-17 12:45:45 +0100 (Wed, 17 Aug 2011) $
+% $Revision: 47 $
+
+\newcommand{\longtitle}{ch\_xcorr.m} % title of the document (for main title)
+\newcommand{\shorttitle}{ch\_xcorr.m} % title of the document (for header)
+\newcommand{\me}{Chris Hummersone} % author name
+\newcommand{\email}{christopher.hummersone@surrey.ac.uk} % author email address
+\newcommand{\mydate}{\today} % the date
+
+\input{tex_preamble} % input standard preamble
+
+%%%%%%%%% Begin Document %%%%%%%%%
+
+\begin{document}
+
+{\sf\maketitle}
+
+This document briefly explains the workings of the \mcode{ch_xcorr} algorithm.
+
+\pdfbookmark{Algorithm}{a}\section*{Algorithm}
+
+
+\begin{lstlisting}
+function [ccg,ic] = ch_xcorr(hc_L,hc_R,frameCount,frame_length,noverlap,maxlag,tau,...
+    varargin)
+\end{lstlisting}
+
+\begin{lstlisting}
+% SYNTAX
+%   
+%   CCG = CH_XCORR(HC_L,HC_R,FRAME_LENGTH,NOVERLAP,MAXLAG,TAU)
+%   CCG = CH_XCORR(...,INHIB)
+%   CCG = CH_XCORR(...,IC_T,NORM_FLAG)
+%   CCG = CH_XCORR(...,INHIB_MODE)
+%   [CCG,IC] = CH_XCORR(...)
+\end{lstlisting}
+
+For the purposes of this document:\\*
+\mcode{HC_L} = $\tf{h}_L$\\*
+\mcode{HC_R} = $\tf{h}_R$\\*
+\mcode{FRAME_LENGTH} = $M$\\*
+\mcode{NOVERLAP} = $N$\\*
+\mcode{TAU} = $\tau$\\*
+\mcode{INHIB} = $\iota$\\*
+\mcode{IC_T} = $\Theta_\chi$\\*
+\mcode{FRAME_COUNT = floor((max(size(HC_L))-MAXLAG-1)/(FRAME_LENGTH))-NOVERLAP+1} = $L$\\*
+
+The algorithm takes two matrices of data \mcode{hc_L} and \mcode{hc_R} (such as the output of a peripheral ear model) and divides it into frames of length \mcode{frame_length} (in samples). From these data, cross-correlograms (averaged cross-correlations) are calculated for each frame. The cross-correlations and cross-correlograms can be calculated in numerous ways, with or without normalisation, and with optional inhibition.
+
+Specifically, cross-correlations are calculated in frequency channel index $\CI$, sample index $n$ and lag index $m$ using the input data in the following way:
+\begin{equation}
+\norm{\tf{c}}(\CI,m,n) = \frac{\new{\tf{c}}(\CI,m,n)}{\sqrt{\tf{a}_{L}(\CI,m,n)\tf{a}_{R}(\CI,m,n)}}
+\end{equation}
+where
+\begin{gather}
+\new{\tf{c}}(\CI,m,n) = \frac{1}{\tau} \tf{h}_L\bigl(\CI,\max(n+m,n)\bigr)\tf{h}_R\bigl(\CI,\max(n-m,n)\bigr) + \biggl(1-\frac{1}{\tau}\biggr)\new{\tf{c}}(\CI,m,n-1),\\
+\tf{a}_{L}(\CI,m,n) = \frac{1}{\tau} \tf{h}_L^2\bigl(\CI,\max(n+m,n)\bigr) + \biggl(1-\frac{1}{\tau}\biggr)\tf{a}_{L}(\CI,m,n-1),\\\tf{a}_{R}(\CI,m,n) = \frac{1}{\tau} \tf{h}_R^2\bigl(\CI,\max(n-m,n)\bigr) + \biggl(1-\frac{1}{\tau}\biggr)\tf{a}_{R}(\CI,m,n-1)\;
+\end{gather}
+and $\tau$ is the time constant of the exponentially decaying window in samples. This is used to extract the Interaural Coherence (IC) $\chi$ as:
+\begin{equation}
+\chi(\CI,n) = \max_{m}\norm{\tf{c}}(\CI,m,n)
+\end{equation}
+However, the data used in subsequent stages of the algorithm depends on \mcode{norm_flag}. Subsequent stages may use the normalised cross-correlation $\norm{\tf{c}}$ (if \mcode{norm_flag} = 1), or the un-normalised cross-correlation $\new{\tf{c}}$ (if \mcode{norm_flag} $\neq$ 1).
+
+Following this, inhibition is applied, although this procedure depends upon the \mcode{inhib_mode} supplied to the function. The default (\mcode{'multiply'}) is a multiplication mechanism:
+\begin{equation}
+\tf{c}(\CI,m,n) = \iota(\CI,n)\new{\tf{c}}(\CI,m,n) \qquad (\text{\mcode{norm_flag}} \neq 1)
+\end{equation}
+or
+\begin{equation}
+\tf{c}(\CI,m,n) = \iota(\CI,n)\norm{\tf{c}}(\CI,m,n) \qquad (\text{\mcode{norm_flag}} = 1)
+\end{equation}
+Alternatively, a subtractive procedure (\mcode{'subtract'}) may be used:
+\begin{equation}
+\tf{c}(\CI,m,n) = \max\biggl(\new{\tf{c}}(\CI,m,n)-\frac{1}{\tau}\iota(\CI,n),0\biggr) \qquad (\text{\mcode{norm_flag}} \neq 1)
+\end{equation}
+or
+\begin{equation}
+\tf{c}(\CI,m,n) = \max\biggl(\norm{\tf{c}}(\CI,m,n)-\frac{1}{\tau}\iota(\CI,n),0\biggr) \qquad (\text{\mcode{norm_flag}} = 1)
+\end{equation}
+If no inhibition is specified then $\iota(\CI,n) = 1\ (\forall\ \CI,n)$.
+
+The cross-correlograms $\tf{C}$ for frame $\FI$ are calculated by averaging only the inhibited cross-correlations within a given frame for which the corresponding IC value exceeds a threshold value $\Theta_{\chi}$:
+\begin{equation}
+\tf{C}(\CI,\FI,m) = \begin{cases}
+0 \quad &\text{if } \Psi=\varnothing\\
+\displaystyle\frac{1}{\abs{\Psi}}\sum_{d\in\Psi} \tf{c}(\CI,d,m) \quad &\text{otherwise}
+\end{cases}
+\end{equation}
+where $\{\Psi\in n : (\FI-1)M+1\leq n\leq \FI M,l\leq L-N+1,\tfg{\chi}(\CI,n) \geq \Theta_{\chi}\}$ and $\varnothing$ is the empty set. This can effectively be bypassed by setting $\Theta_\chi$ = 0.
+
+\pdfbookmark{Note}{n}\section*{Note}
+
+It is recommended that if \mcode{norm_flag} = 1 then $\tau \gg 1$. As can be seen above, as $\tau\rightarrow1$ then $\tf{a}_{\{L,R\}}(\CI,m,n-1)\rightarrow0$, and hence $\norm{\tf{c}}(\CI,m,n)\rightarrow1$.
+
+\end{document}
