@@ -16,11 +16,6 @@ function [q,N] = quantile2(X,p,dim,method)
 %   are designated 'R-1'...'R-9'; the default is R-8 as described in
 %   http://bit.ly/1kX4NcT, whereas Matlab uses 'R-5'.
 %   
-%   Q = QUANTILE2(X,P,DIM,METHOD) calculates quantiles using one of the
-%   methods described in http://en.wikipedia.org/wiki/Quantile. The method
-%   are designated 'R-1'...'R-9'; the default is 'R-8' as described in
-%   http://bit.ly/1kX4NcT, whereas Matlab uses 'R-5'.
-%   
 %   Q = QUANTILE2(X,P,[],METHOD) uses the specified METHOD, but calculates
 %   quantiles along the first non-singleton dimension.
 % 
@@ -136,20 +131,20 @@ function [q,N] = quantile2(X,p,dim,method)
     N = zeros([length(p) prod(dims_shift(2:end))]);
     for m = 1:length(p)
         for n = 1:numel(q)/length(p)
-            x2 = sort(x(~isnan(x(:,n)),n)); % sort
-            N(m,n) = length(x2); % sample size
+            xSorted = sort(x(~isnan(x(:,n)),n)); % sort
+            N(m,n) = length(xSorted); % sample size
             switch N(m,n)
                 case 0
                     q(m,n) = NaN;
                 case 1
-                    q(m,n) = x2;
+                    q(m,n) = xSorted;
                 otherwise
                     if min_con(N(m,n),p(m)) % at lower limit
-                        q(m,n) = x2(1);
+                        q(m,n) = xSorted(1);
                     elseif max_con(N(m,n),p(m)) % at upper limit
-                        q(m,n) = x2(N(m,n));
+                        q(m,n) = xSorted(N(m,n));
                     else % everything else
-                        q(m,n) = Qp(x2,h(N(m,n),p(m)));
+                        q(m,n) = Qp(xSorted,h(N(m,n),p(m)));
                     end
             end
         end
