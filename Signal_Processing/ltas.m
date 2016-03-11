@@ -39,6 +39,9 @@ function [s,f] = ltas(x,fs,varargin)
 %           vector, NFFT is the length of the vector, and the vector is
 %           multiplied with each segment.
 % 
+%   [S,F] = LTAS(...) returns the frequencies F for each corresponding bin
+%   of S.
+% 
 %   Example
 %   
 %       % Plot the 1/6th-octave-smoothed LTAS of the Handel example
