@@ -14,7 +14,7 @@ classdef mixture < audio
 %                     filename) (read-only)
 %       filename_i  - Name of the interferer audio file (based on the
 %                     Mixture filename) (read-only)
-%       hrtfs       - Aath to a SOFA file containing HRTF data
+%       hrtfs       - Path to a SOFA file containing HRTF data
 %       interferers - An array of interferer sources of type source
 %       signal_t    - The sampled data (target) (read-only)
 %       signal_i    - The sampled data (interferer) (read-only)
