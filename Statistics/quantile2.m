@@ -46,13 +46,7 @@ function [q,N] = quantile2(X,p,dim,method,weights)
 %   
 %   See also QUANTILE.
 
-%   Copyright 2015 University of Surrey.
-
-% =========================================================================
-% Last changed:     $Date: 2015-07-02 15:47:12 +0100 (Thu, 02 Jul 2015) $
-% Last committed:   $Revision: 391 $
-% Last changed by:  $Author: ch0022 $
-% =========================================================================
+%   Copyright 2016 University of Surrey.
 
     %% Check input and make default assignments
 
