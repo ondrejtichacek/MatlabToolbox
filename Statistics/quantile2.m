@@ -1,4 +1,4 @@
-function [q,N] = quantile2(X,p,dim,method)
+function [q,N] = quantile2(X,p,dim,method,weights)
 % Quantiles of a sample via various methods.
 % 
 %   Q = QUANTILE2(X,P) returns quantiles of the values in X. P is a scalar
@@ -18,6 +18,20 @@ function [q,N] = quantile2(X,p,dim,method)
 %   
 %   Q = QUANTILE2(X,P,[],METHOD) uses the specified METHOD, but calculates
 %   quantiles along the first non-singleton dimension.
+% 
+%   Q = QUANTILE2(X,P,[],METHOD,WEIGHTS) and QUANTILE2(X,P,[],[],WEIGHTS)
+%   uses the array WEIGHTS to weight the values in X when calculating
+%   quantiles. If no weighting is specified, the method determines the
+%   real-valued index in to the data that is used to calculate the P(i)-th
+%   quantile. When a weighting array WEIGHTS is specified (WEIGHTS should
+%   be the same size as X), this index is mapped to the cumulative weights
+%   (the weights are scaled to sum to N(i) - see below), and a new weighted
+%   index is returned (using linear interpolation) for the point where the
+%   cumulative weights equal the unweighted index. The weighted index is
+%   used to calculate the P(i)-th quantile. If the values in WEIGHTS are
+%   equal, then the weighted and unweighted index (and correpsonding
+%   quantile) are identical. The default method R-8 is used if METHOD is
+%   specified as an empty array ([]).
 % 
 %   [Q,N] = QUANTILE2(...) returns an array that is the same size as Q such
 %   that N(i) is the number of points used to calculate Q(i).
@@ -62,7 +76,17 @@ function [q,N] = quantile2(X,p,dim,method)
     if nargin<4
         method = 'r-8'; % default method
     else % validate input
-        assert(ischar(method),'METHOD must be a character array')
+        if isempty(method)
+            method = 'r-8'; % default method
+        else
+            assert(ischar(method),'METHOD must be a character array')
+        end
+    end
+    
+    if nargin<5
+        weights = [];
+    else
+        assert(isequal(size(X),size(weights)) || isempty(weights),'WEIGHTS must be the same size as X');
     end
 
     %% choose method
@@ -125,14 +149,23 @@ function [q,N] = quantile2(X,p,dim,method)
     order = mod(dim-1:dim+length(dims)-2,length(dims))+1;
     dims_shift = dims(order);
     x = rearrange(X,order,[dims_shift(1) prod(dims_shift(2:end))]);
+    if ~isempty(weights)
+        weights = rearrange(weights,order,[dims_shift(1) prod(dims_shift(2:end))]);
+        cumwfunc = @accumulateWeights;
+        wfunc = @weightedIndex;
+    else
+        cumwfunc = @(~,~,~,N) 1:N;
+        wfunc = @(x,~) x;
+    end
 
     % pre-allocate q
     q = zeros([length(p) prod(dims_shift(2:end))]);
     N = zeros([length(p) prod(dims_shift(2:end))]);
     for m = 1:length(p)
         for n = 1:numel(q)/length(p)
-            xSorted = sort(x(~isnan(x(:,n)),n)); % sort
+            [xSorted,ind] = sort(x(~isnan(x(:,n)),n)); % sort
             N(m,n) = length(xSorted); % sample size
+            k = cumwfunc(weights,ind,n,N(m,n));
             switch N(m,n)
                 case 0
                     q(m,n) = NaN;
@@ -144,7 +177,9 @@ function [q,N] = quantile2(X,p,dim,method)
                     elseif max_con(N(m,n),p(m)) % at upper limit
                         q(m,n) = xSorted(N(m,n));
                     else % everything else
-                        q(m,n) = Qp(xSorted,h(N(m,n),p(m)));
+                        huw = h(N(m,n),p(m)); % unweighted index
+                        hw = wfunc(huw,k);
+                        q(m,n) = Qp(xSorted,hw);
                     end
             end
         end
@@ -160,6 +195,28 @@ function [q,N] = quantile2(X,p,dim,method)
         N=reshape(N,size(p));
     end
 
+end
+
+function cumweights = accumulateWeights(weights,ind,n,N)
+%ACCUMULATEWEIGHTS accumulate the weights
+
+    wSorted = weights(ind,n); % sort weights
+    wSorted = wSorted*N/sum(wSorted); % normalize weights to sum to N
+    cumweights = cumsum(wSorted); % cumulative weights
+
+end
+
+function hw = weightedIndex(huw, cumweights)
+%WEIGHTEDINDEX calculate index from cumulative weights
+
+    ii = find(sign(cumweights-huw)<0,1,'last');
+    jj = find(sign(cumweights-huw)>0,1,'first');
+    if isempty(ii) || isempty(jj)
+        hw = huw;
+    else
+        hw = ii + (huw-cumweights(ii))/(cumweights(jj)-cumweights(ii)); % weighted index
+    end
+    
 end
 
 function y = isint(x)
