@@ -6,91 +6,189 @@ function varargout = multiwaveplot(varargin)
 %   designated row on the plot; the first row is plotted at the bottom of
 %   the plot.
 % 
-%   MULTIWAVEPLOT(WAVE) draws a series of waves contained in the rows of
-%   wave.
+%   MULTIWAVEPLOT(Z) draws a series of waves contained in the rows of the
+%   matrix Z.
 % 
-%   MULTIWAVEPLOT(X,Y,WAVE) plot the waves against the data in X and Y,
-%   such that X specifies the common x-data, and Y determines the vertical
-%   position of each row. Hence, length(X)==size(WAVE,2) and
-%   length(Y)==size(WAVE,1).
+%   MULTIWAVEPLOT(X,Y,Z) plot the waves against the data in X and Y, such
+%   that X specifies the common x-data, and Y determines the vertical
+%   position of each row. Hence, length(X)==size(Z,2) and
+%   length(Y)==size(Z,1).
 % 
-%   MULTIWAVEPLOT(...,GAIN) scales the height of each wave according to
-%   GAIN. With GAIN=1 (default), the height of the tallest wave will be
-%   limited so as not to encroach on the adjacent wave; all other waves are
-%   scaled accordingly. This can be overridden by specifying GAIN > 1.
+%   Z may also be a vector, of the same length as X and Y; the data
+%   contained in X and Y will be used to construct a matrix for plotting.
 % 
-%   MULTIWAVEPLOT(...,MODE) plots the data with the specified MODE. The
-%   default MODE depends on gain: for GAIN <= 1, mode defaults to 'plot'
-%   and plots lines for each row of WAVE; for GAIN > 1, mode defaults to
-%   'fill' and instead plots white patch objects for each row of WAVE,
-%   covering the area under each wave, such that waves with a lower row
-%   index mask those with a higher row index. This behaviour can be
-%   overridden by specifying MODE as a string (either 'plot' or 'fill').
+%   MULTIWAVEPLOT(...,'parameter','value') allows a number of options to be
+%   specified. The options are:
 % 
+%   ({} indicates the default value)
+% 
+%   'gain'          : {1} | scalar
+%       This parameter scales the height of each wave. With gain=1
+%       (default), the height of the tallest wave will be limited so as not
+%       to encroach on the adjacent wave; all other waves are scaled
+%       accordingly. With gain~=1 the height of each wave will
+%       decrease/increase by a factor gain.
+%   'horizonWidth'  : {1} | scalar
+%       The plot can be made to narrower (or wider) at the top, to give the
+%       impression of a horizon. This may be useful, for example, when y
+%       data represent time. With horizonWidth=1 (default), the top and
+%       bottom of the plot have the same width. With horizonWidth<1, the
+%       plot is narrower at the top by a factor of horizonWidth. With
+%       horizonWidth>1, the plot is narrower at the bottom by a factor of
+%       1/horizonWidth. Specifying horizonWidth>1 will cause the x-axis to
+%       be moved to the top of the plot.
+%   'horizonOffset' : {0} | scalar
+%       This parameter specifies the vanishing point of the horizon. With
+%       horizonOffset=0 (default), the vanishing point is in the centre.
+%       With horizonOffset=-1, the vanishing point is on the left of the
+%       plot. With horizonOffset=1, the vanishing point is on the right of
+%       the plot. Intermediate values specify intermediate vanishing
+%       points.
+%   'mode' : {'plot'} | 'fill'
+%       This parameter plots the data with the specified mode. The default
+%       mode depends on gain: for gain<=1, mode defaults to 'plot' and
+%       plots lines for each row of Z. For gain>1, mode defaults to 'fill'
+%       and instead plots white patch objects for each row of Z, covering
+%       the area under each wave, such that waves with a lower row index
+%       mask those with a higher row index.
+%
 %   H = MULTIWAVEPLOT(...) returns a vector of handles to patch (for mode =
 %   'fill') or lineseries (for mode = 'plot') graphics objects, one handle
 %   per wave.
 % 
 %   See also FILL, PATCH, PLOT, IMAGESC.
 
-%   Copyright 2015 University of Surrey.
-
-% =========================================================================
-% Last changed:     $Date: 2015-07-02 15:47:12 +0100 (Thu, 02 Jul 2015) $
-% Last committed:   $Revision: 391 $
-% Last changed by:  $Author: ch0022 $
-% =========================================================================
+%   Copyright 2016 University of Surrey.
 
     %% Derive inputs
-
-    input_spec = 'X and Y must be vectors, WAVE must be a matrix, GAIN must be a scalar and MODE must be a string';
-
-    % MODE
-    mode = find_inputs(@ischar,varargin,...
-        ['Unknown parameter specified. ' input_spec]);
-
-    % GAIN
-    gain = find_inputs(@(x)(isscalar(x) & ~ischar(x)),varargin,...
-        ['Unknown parameter specified. ' input_spec]);
-
-    if isempty(gain)
-        gain = 1;
+    
+    firstPar = find(cellfun(@(x) ~isnumeric(x),varargin),1,'first');
+    if isempty(firstPar)
+        firstPar = nargin+1;
     end
-
-    % Condtionally set MODE depending on GAIN
-    if isempty(mode)
-        if gain > 1
-            mode = 'fill';
+    overrides = {};
+    
+    % get inputs
+    switch firstPar-1
+        case 1
+            Z = varargin{1};
+            X = [];
+            Y = [];
+        case 2
+            error('Wrong number of input arguments.')
+        otherwise
+            X = varargin{1};
+            X = reshape(X,1,length(X));
+            Y = varargin{2};
+            Y = reshape(Y,1,length(Y));
+            Z = varargin{3};
+    end
+    
+    if firstPar < nargin
+        overrides = varargin(firstPar:end);
+    end
+    
+    % derive data
+    if isvector(Z)
+        assert(~isempty(X),'If Z is a vector, you must specify X and Y.')
+        assert(~isempty(Y),'If Z is a vector, you must specify X and Y.')
+        % if vector, make matrix
+        assert(length(X)==length(Z) && length(Y)==length(Z),'If Z is a vector, X and Y must be vectors of the same length.')
+        x = unique(X)';
+        y = unique(Y)';
+        wave = NaN(length(y),length(x));
+        for n = 1:length(x)
+            for m = 1:length(y)
+                IX = X==x(n) & Y==y(m);
+                wave(m,n) = mean(Z(IX));
+            end
+        end
+        [r,~] = size(wave);
+    else
+        % if matrix
+        if isempty(X)
+            X = 1:size(Z,2);
+        end
+        if isempty(Y)
+            Y = 1:size(Z,1);
+        end
+        assert(ismatrix(Z),'Z must be a 2-D matrix')
+        wave = Z;
+        [r,c] = size(wave);
+        assert(c==length(X),'X must be the same length as Z has columns.')
+        assert(r==length(Y),'Y must be the same length as Z has rows.')
+        if isempty(X)
+            x = 1:r;
         else
-            mode = 'plot';
+            x = reshape(X,1,length(X));
+        end
+        if isempty(Y)
+            y = 1:c;
+        else
+            y = Y;
         end
     end
+    
+    % get options
+    
+    options = struct(...
+        'gain',1,...
+        'mode',[],...
+        'horizonWidth',1,...
+        'horizonOffset',0);
 
-    % WAVE
-    wave = find_inputs(@(x)(isnumeric(x) & all(numel(x)>size(x)) & length(size(x))<3),varargin,...
-        ['Both X and Y must be specified. ' input_spec]);
-
-    assert(~isempty(wave),'Please specify WAVE (which should be a matrix)')
-
-    [r,c] = size(wave);
-
-    % X and Y
-    [x,y] = find_inputs(@(x)(~isscalar(x) & isvector(x) & ~ischar(x)),varargin,...
-        ['Both X and Y must be specified. ' input_spec]);
-
-    if isempty(x)
-        x = 1:c;
-        y = 1:r;
+    % read parameter/value inputs
+    if ~isempty(overrides) % if parameters are specified
+        % read the acceptable names
+        optionNames = fieldnames(options);
+        % count arguments
+        nArgs = length(overrides);
+        if round(nArgs/2)~=nArgs/2
+           error('MULTIWAVEPLOT needs propertyName/propertyValue pairs')
+        end
+        % overwrite defults
+        for pair = reshape(overrides,2,[]) % pair is {propName;propValue}
+           IX = strcmpi(pair{1},optionNames); % find match parameter names
+           if any(IX)
+              % do the overwrite
+              options.(optionNames{IX}) = pair{2};
+           else
+              error('%s is not a recognized parameter name',pair{1})
+           end
+        end
     end
-
+    
+    % set default plot mode
+    if isempty(options.mode)
+        if options.gain > 1
+            options.mode = 'fill';
+        else
+            options.mode = 'plot';
+        end
+    end
+    
+    assert(all(diff(x)>=0),'X must be increasing')
+    assert(all(diff(y)>=0),'Y must be increasing')
+    
     %% Plot
 
+    % horizon
+    assert(isscalar(options.horizonWidth),'''horizonWidth'' must be a scalar.')
+    assert(isscalar(options.horizonOffset),'''horizonOffset'' must be a scalar.')
+    assert(options.horizonWidth>=0,'''horizonWidth'' must be greater than or equal to 0.')
+    assert(options.horizonOffset>=-1 && options.horizonOffset<=1,'''horizonOffset'' must be in the range [-1,1].')
+    
+    horizonWidths = linspace(1,options.horizonWidth,length(y));
+    horizonWidths = horizonWidths./max(horizonWidths);
+    horizonX = linspace(-1,1,length(x))-options.horizonOffset;
+    
+    % data scaling
     if min(wave(:))>=0
         adjust = 1; % for positive data (e.g. correlograms)
         y_min = y(1)-(y(2)-y(1));
     else
         adjust = 0.5; % for wave data varying on zero
-        y_min = y(1)-((gain*adjust)*(y(2)-y(1)));
+        y_min = y(1)-((options.gain*adjust)*(y(2)-y(1)));
     end
 
     wave_max = max(abs(wave(:))); % scale relative to max of wave
@@ -107,50 +205,46 @@ function varargout = multiwaveplot(varargin)
     hold on;
 
     for n = r:-1:1
-        try % calculate scaling factor
+        % calculate scaling factor
+        try
             scale(n) = y(n+1)-y(n);
         catch
             scale(n) = y(n)-y(n-1);
         end
         wave(n,:) = wave(n,:).*scale(n);
-        switch mode % plot
+        % scale data for horizon effect
+        xinterp = interp1(horizonX,x,horizonWidths(n).*horizonX);
+        xhor = [x(1) xinterp(1) xinterp xinterp(end) x(end)];
+        yscale = reshape(options.gain.*wave(n,:)+y(n),1,size(wave,2));
+        yhor = [y(n) y(n) yscale y(n) y(n)];
+        % plot
+        switch options.mode
             case 'plot'
-                h(n) = plot(x,gain.*wave(n,:)+y(n),'k');
+                h(n) = plot(xhor,yhor,'k');
             case 'fill'
-                xa=[x(1) x(1:c) x(c) x(1)];
-                ya=[y_min gain.*wave(n,:)+y(n) y_min y_min];
-                h(n) = fill(xa,ya,'w');
+                xa=[xhor(1) xhor xhor(end) xhor(1)];
+                ya=[y_min yhor y_min y_min];
+                IX = ~(isnan(xa) | isnan(ya));
+                h(n) = fill(xa(IX),ya(IX),'w');
             otherwise
                 error('Unknown MODE specified: must be ''fill'' or ''plot''')
         end
     end
 
     % look at every row to search for max, taking y offset into account
-    plot_max = max(max(gain.*wave+repmat(y(:),[1 length(x)])));
+    plot_max = max(max(options.gain.*wave+repmat(y(:),[1 length(x)])));
 
     hold off
-    axis([x(1) x(c) y_min plot_max]); % set axis limits
+    axis([min(x) max(x) y_min plot_max]); % set axis limits
     set(gca,'layer','top') % move axis to top layer
     ytick = get(gca,'ytick');
     set(gca,'ytick',ytick(ytick<=max(y))); % remove ticks beyond y limits
     box on
+    
+    if options.horizonWidth>1
+        set(gca,'XAxisLocation','top')
+    end
 
     varargout(1:nargout) = {h};
-
-end
-
-function varargout = find_inputs(fhandle,input,msg)
-% FIND_INPUTS validate and provide inputs (if any)
-
-    indices = cellfun(fhandle,input);
-
-    if any(indices) % inputs are specified
-        if sum(indices)~=nargout
-            error(msg) % return error message
-        end
-        varargout(1:nargout) = input(indices);
-    else % unspecified returns empty matrix
-        varargout(1:nargout) = {[]};
-    end
 
 end
