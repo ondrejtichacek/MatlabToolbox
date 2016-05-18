@@ -51,6 +51,13 @@ function varargout = multiwaveplot(varargin)
 %       and instead plots white patch objects for each row of Z, covering
 %       the area under each wave, such that waves with a lower row index
 %       mask those with a higher row index.
+%   'reverseY' : {false} | true
+%       Determine the order in which data are plotted vertically. With
+%       reverseY=false (default), the first row is plotted at the bottom of
+%       the plot. With reverseY=true, the first row is plotted at the top
+%       of the plot and the axis direction is reversed, but the horizon
+%       effect is unchanged. In both cases, lower rows are plotted in front
+%       of higher rows.
 %
 %   H = MULTIWAVEPLOT(...) returns a vector of handles to patch (for mode =
 %   'fill') or lineseries (for mode = 'plot') graphics objects, one handle
@@ -135,7 +142,8 @@ function varargout = multiwaveplot(varargin)
         'gain',1,...
         'mode',[],...
         'horizonWidth',1,...
-        'horizonOffset',0);
+        'horizonOffset',0,...
+        'reverseY',false);
 
     % read parameter/value inputs
     if ~isempty(overrides) % if parameters are specified
@@ -177,7 +185,10 @@ function varargout = multiwaveplot(varargin)
     assert(isscalar(options.horizonOffset),'''horizonOffset'' must be a scalar.')
     assert(options.horizonWidth>=0,'''horizonWidth'' must be greater than or equal to 0.')
     assert(options.horizonOffset>=-1 && options.horizonOffset<=1,'''horizonOffset'' must be in the range [-1,1].')
-    
+    if options.reverseY % correct horizon when axis reversed
+        options.horizonWidth = 1/options.horizonWidth;
+    end
+    % calculate widths
     horizonWidths = linspace(1,options.horizonWidth,length(y));
     horizonWidths = horizonWidths./max(horizonWidths);
     horizonX = linspace(-1,1,length(x))-options.horizonOffset;
@@ -185,10 +196,14 @@ function varargout = multiwaveplot(varargin)
     % data scaling
     if min(wave(:))>=0
         adjust = 1; % for positive data (e.g. correlograms)
-        y_min = y(1)-(y(2)-y(1));
+        if options.reverseY
+            y0 = y(end)-(y(end-1)-y(end));
+        else
+            y0 = y(1)-(y(2)-y(1));
+        end
     else
         adjust = 0.5; % for wave data varying on zero
-        y_min = y(1)-((options.gain*adjust)*(y(2)-y(1)));
+        y0 = y(1)-((options.gain*adjust)*(y(2)-y(1)));
     end
 
     wave_max = max(abs(wave(:))); % scale relative to max of wave
@@ -202,9 +217,21 @@ function varargout = multiwaveplot(varargin)
     scale = zeros(r,1); % this parameter allows for non-linear y-values, scaling each channel accordingly
     h = zeros(r,1);
 
+    % plot
+    ax = newplot;
     hold on;
+    
+    % plotting order
+    if options.reverseY
+        set(ax,'ydir','reverse')
+        order = 1:r;
+        shift = @(z,y) y-z;
+    else
+        order = r:-1:1;
+        shift = @(z,y) z+y;
+    end
 
-    for n = r:-1:1
+    for n = order
         % calculate scaling factor
         try
             scale(n) = y(n+1)-y(n);
@@ -215,7 +242,7 @@ function varargout = multiwaveplot(varargin)
         % scale data for horizon effect
         xinterp = interp1(horizonX,x,horizonWidths(n).*horizonX);
         xhor = [x(1) xinterp(1) xinterp xinterp(end) x(end)];
-        yscale = reshape(options.gain.*wave(n,:)+y(n),1,size(wave,2));
+        yscale = reshape(shift(options.gain.*wave(n,:),y(n)),1,size(wave,2));
         yhor = [y(n) y(n) yscale y(n) y(n)];
         % plot
         switch options.mode
@@ -223,7 +250,7 @@ function varargout = multiwaveplot(varargin)
                 h(n) = plot(xhor,yhor,'k');
             case 'fill'
                 xa=[xhor(1) xhor xhor(end) xhor(1)];
-                ya=[y_min yhor y_min y_min];
+                ya=[y0 yhor y0 y0];
                 IX = ~(isnan(xa) | isnan(ya));
                 h(n) = fill(xa(IX),ya(IX),'w');
             otherwise
@@ -232,19 +259,24 @@ function varargout = multiwaveplot(varargin)
     end
 
     % look at every row to search for max, taking y offset into account
-    plot_max = max(max(options.gain.*wave+repmat(y(:),[1 length(x)])));
+    if options.reverseY
+        ex = repmat(y(:),[1 length(x)])-options.gain.*wave;
+    else
+        ex = repmat(y(:),[1 length(x)])+options.gain.*wave;
+    end
 
+    % set plot parameters
     hold off
-    axis([min(x) max(x) y_min plot_max]); % set axis limits
+    axis([min(x) max(x) min(min(ex)) max(max(ex))]); % set axis limits
     set(gca,'layer','top') % move axis to top layer
     ytick = get(gca,'ytick');
     set(gca,'ytick',ytick(ytick<=max(y))); % remove ticks beyond y limits
     box on
-    
     if options.horizonWidth>1
         set(gca,'XAxisLocation','top')
     end
 
+    % output
     varargout(1:nargout) = {h};
 
 end
