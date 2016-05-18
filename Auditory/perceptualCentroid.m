@@ -87,13 +87,7 @@ function [PCmean,PCstd,PCmax,PCmin,N] = perceptualCentroid(x,fs,varargin)
 %   
 %   See also SPECTROGRAM.
 
-%   Copyright 2015 University of Surrey.
-
-% ==========================================================
-% Last changed:     $Date: 2016-03-03 13:15:08 +0000 (Thu, 03 Mar 2016) $
-% Last committed:   $Revision: 481 $
-% Last changed by:  $Author: kh00166 $
-% ==========================================================
+%   Copyright 2016 University of Surrey.
 
     %% read inputs and make default assignments
 
