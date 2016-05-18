@@ -227,13 +227,13 @@ function [PCmean,PCstd,PCmax,PCmin,N] = perceptualCentroid(x,fs,varargin)
         case 'none'
             w_l = @(x) ones(size(x));
         case 'a'
-            w_l = @a_weighting;
+            w_l = @(x) loud_weight(x,'a');
         case 'b'
-            w_l = @b_weighting;
+            w_l = @(x) loud_weight(x,'b');
         case 'c'
-            w_l = @c_weighting;
+            w_l = @(x) loud_weight(x,'c');
         case 'd'
-            w_l = @d_weighting;
+            w_l = @(x) loud_weight(x,'d');
         case 'iso-226'
             w_l = @(x) loud_weight(x,phon);
         otherwise
@@ -298,12 +298,12 @@ end
 
 function f = cents2frequency(c,cref)
 %CENTS2FREQUENCY convert cents to frequency
-    f = cref.*(2.^(c./1200));
+    f = cref.*(2.^(c./1200)-eps);
 end
 
 function c = frequency2cents(f,cref)
 %FREQUENCY2CENTS convert frequency to cents
-    c = 1200.*log2((f./cref));
+    c = 1200.*log2((f./cref)+eps);
 end
 
 function [propValue,isset] = getProperty(options,propName,default)
@@ -315,31 +315,6 @@ function [propValue,isset] = getProperty(options,propName,default)
         propValue = default;
         isset = false;
     end
-end
-
-function w = a_weighting(f)
-%A_WEIGHTING return A-weighting magnitude coefficients
-    w = ((12200^2).*(f.^4))./...
-        (((f.^2)+(20.6^2)).*((((f.^2)+(107.7^2)).*((f.^2)+(737.9^2))).^0.5).*((f.^2)+(12200^2)));
-end
-
-function w = b_weighting(f)
-%B_WEIGHTING return B-weighting magnitude coefficients
-    w = ((12200^2).*(f.^3))./...
-        (((f.^2)+(20.6^2)).*sqrt((f.^2)+(158.5^2)).*((f.^2)+(12200^2)));
-end
-
-function w = c_weighting(f)
-%C_WEIGHTING return C-weighting magnitude coefficients
-    w = ((12200^2).*(f.^2))./...
-        (((f.^2)+(20.6^2)).*((f.^2)+(12200^2)));
-end
-
-function w = d_weighting(f)
-%D_WEIGHTING return D-weighting magnitude coefficients
-    hf = (((1037918.48-(f.^2)).^2)+(1080768.16.*(f.^2)))./...
-        (((9837328-(f.^2)).^2)+(11723776.*(f.^2)));
-    w = (f./(6.8966888496476*(10^(-5)))).*sqrt(hf./(((f.^2)+79919.29).*((f.^2)+1345600)));
 end
 
 function y = rearrange(x,order,shape)
