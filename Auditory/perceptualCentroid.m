@@ -297,13 +297,13 @@ function b = frequency2erb(f,~)
 end
 
 function f = cents2frequency(c,cref)
-%CENTS2FREQUENCY convert cents to frequency (ref. A-1)
-    f = cref.*(2.^(c./1200)-1);
+%CENTS2FREQUENCY convert cents to frequency
+    f = cref.*(2.^(c./1200));
 end
 
 function c = frequency2cents(f,cref)
-%FREQUENCY2CENTS convert frequency to cents (ref. A-1)
-    c = 1200.*log2((f./cref)+1);
+%FREQUENCY2CENTS convert frequency to cents
+    c = 1200.*log2((f./cref));
 end
 
 function [propValue,isset] = getProperty(options,propName,default)
