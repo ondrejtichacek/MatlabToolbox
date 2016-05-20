@@ -1,15 +1,15 @@
 function varargout = multiwaveplot(varargin)
-%MULTIWAVEPLOT Plot stacked waves from a multichannel matrix
+%MULTIWAVEPLOT Stacked line plots from a matrix or vectors
 % 
-%   Multiwaveplot draws a series of stacked waves (one on top of the other)
-%   contained in the rows of an input 2-D matrix. Each wave has a
+%   Multiwaveplot draws a series of stacked lines (one on top of the other)
+%   contained in the rows of an input 2-D matrix. Each line has a
 %   designated row on the plot; the first row is plotted at the bottom of
 %   the plot.
 % 
-%   MULTIWAVEPLOT(Z) draws a series of waves contained in the rows of the
+%   MULTIWAVEPLOT(Z) draws a series of lines contained in the rows of the
 %   matrix Z.
 % 
-%   MULTIWAVEPLOT(X,Y,Z) plot the waves against the data in X and Y, such
+%   MULTIWAVEPLOT(X,Y,Z) plot the lines against the data in X and Y, such
 %   that X specifies the common x-data, and Y determines the vertical
 %   position of each row. Hence, length(X)==size(Z,2) and
 %   length(Y)==size(Z,1).
@@ -23,10 +23,10 @@ function varargout = multiwaveplot(varargin)
 %   ({} indicates the default value)
 % 
 %   'gain'          : {1} | scalar
-%       This parameter scales the height of each wave. With gain=1
-%       (default), the height of the tallest wave will be limited so as not
-%       to encroach on the adjacent wave; all other waves are scaled
-%       accordingly. With gain~=1 the height of each wave will
+%       This parameter scales the height of each line. With gain=1
+%       (default), the height of the tallest line will be limited so as not
+%       to encroach on the adjacent line; all other lines are scaled
+%       accordingly. With gain~=1 the height of each line will
 %       decrease/increase by a factor gain.
 %   'horizonWidth'  : {1} | scalar
 %       The plot can be made to narrower (or wider) at the top, to give the
@@ -49,7 +49,7 @@ function varargout = multiwaveplot(varargin)
 %       mode depends on gain: for gain<=1, mode defaults to 'plot' and
 %       plots lines for each row of Z. For gain>1, mode defaults to 'fill'
 %       and instead plots white patch objects for each row of Z, covering
-%       the area under each wave, such that waves with a lower row index
+%       the area under each line, such that lines with a lower row index
 %       mask those with a higher row index.
 %   'reverseY' : {false} | true
 %       Determine the order in which data are plotted vertically. With
@@ -61,7 +61,7 @@ function varargout = multiwaveplot(varargin)
 %
 %   H = MULTIWAVEPLOT(...) returns a vector of handles to patch (for mode =
 %   'fill') or lineseries (for mode = 'plot') graphics objects, one handle
-%   per wave.
+%   per line.
 % 
 %   See also FILL, PATCH, PLOT, IMAGESC.
 
@@ -197,13 +197,17 @@ function varargout = multiwaveplot(varargin)
     if min(wave(:))>=0
         adjust = 1; % for positive data (e.g. correlograms)
         if options.reverseY
-            y0 = y(end)-(y(end-1)-y(end));
+            y0 = y(end);
         else
-            y0 = y(1)-(y(2)-y(1));
+            y0 = y(1);
         end
     else
         adjust = 0.5; % for wave data varying on zero
-        y0 = y(1)-((options.gain*adjust)*(y(2)-y(1)));
+        if options.reverseY
+            y0 = y(end)+((options.gain*adjust)*(y(end)-y(end-1)));
+        else
+            y0 = y(1)-((options.gain*adjust)*(y(2)-y(1)));
+        end
     end
 
     wave_max = max(abs(wave(:))); % scale relative to max of wave
@@ -241,14 +245,14 @@ function varargout = multiwaveplot(varargin)
         wave(n,:) = wave(n,:).*scale(n);
         % scale data for horizon effect
         xinterp = interp1(horizonX,x,horizonWidths(n).*horizonX);
-        xhor = [x(1) xinterp(1) xinterp xinterp(end) x(end)];
         yscale = reshape(shift(options.gain.*wave(n,:),y(n)),1,size(wave,2));
-        yhor = [y(n) y(n) yscale y(n) y(n)];
         % plot
         switch options.mode
             case 'plot'
-                h(n) = plot(xhor,yhor,'k');
+                h(n) = plot(xinterp,yscale,'k');
             case 'fill'
+                xhor = [x(1) xinterp(1) xinterp xinterp(end) x(end)];
+                yhor = [y(n) y(n) yscale y(n) y(n)];
                 xa=[xhor(1) xhor xhor(end) xhor(1)];
                 ya=[y0 yhor y0 y0];
                 IX = ~(isnan(xa) | isnan(ya));
@@ -260,14 +264,14 @@ function varargout = multiwaveplot(varargin)
 
     % look at every row to search for max, taking y offset into account
     if options.reverseY
-        ex = repmat(y(:),[1 length(x)])-options.gain.*wave;
+        ymin = [y(1)-((options.gain*adjust)*(y(2)-y(1))) y0];
     else
-        ex = repmat(y(:),[1 length(x)])+options.gain.*wave;
+        ymin = [y0 y(end)+((options.gain*adjust)*(y(end)-y(end-1)))];
     end
 
     % set plot parameters
     hold off
-    axis([min(x) max(x) min(min(ex)) max(max(ex))]); % set axis limits
+    axis([min(x) max(x) ymin]); % set axis limits
     set(gca,'layer','top') % move axis to top layer
     ytick = get(gca,'ytick');
     set(gca,'ytick',ytick(ytick<=max(y))); % remove ticks beyond y limits
