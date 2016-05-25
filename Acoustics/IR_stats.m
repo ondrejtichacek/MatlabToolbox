@@ -127,6 +127,13 @@ function [rt,drr,cte,cfs,edt] = IR_stats(filename,varargin)
         end
     end
     
+    % check options size and type
+    assert(isvector(options.y_fit) && numel(options.y_fit)==2,'''y_fit'' must be a two-element vector.')
+    assert(isscalar(options.correction),'''correction'' must be a scalar.')
+    assert(isscalar(options.te),'''te'' must be a scalar.')
+    assert(ischar(options.spec),'''spec'' must be a char array.')
+    assert(islogical(options.graph) && numel(options.graph)==1,'''graph'' must be logical.')
+    
     %% read in audio file
 
     % read in impulse
