@@ -134,6 +134,11 @@ function [rt,drr,cte,cfs,edt] = IR_stats(filename,varargin)
     assert(ischar(options.spec),'''spec'' must be a char array.')
     assert(islogical(options.graph) && numel(options.graph)==1,'''graph'' must be logical.')
     
+    % check for reasonable values
+    assert(all(options.y_fit<=0),'''y_fit'' values must be less than or equal to 0.')
+    assert(options.te>=0,'''te'' must be greater than or equal to 0.')
+    assert(options.correction>=0,'''correction'' must be greater than or equal to 0.')
+    
     %% read in audio file
 
     % read in impulse
@@ -192,8 +197,8 @@ function [rt,drr,cte,cfs,edt] = IR_stats(filename,varargin)
             y = filter(b(f,:),a(f,:),x(:,n)); % octave-band filter
             temp = cumtrapz(y(end:-1:1).^2); % decay curve
             z(f,:,n) = temp(end:-1:1);
-            [rt_temp(f,n),E_rt,fit_rt] = calc_decay(z(f,t0:end,n),options.y_fit,60,fs); % estimate RT
-            [edt(f,n),E_edt,fit_edt] = calc_decay(z(f,t0:end,n),[0,-10],60,fs); % estimate EDT
+            [rt_temp(f,n),E_rt,fit_rt] = calc_decay(z(f,t0:end,n),options.y_fit,60,fs,cfs(f)); % estimate RT
+            [edt(f,n),E_edt,fit_edt] = calc_decay(z(f,t0:end,n),[0,-10],60,fs,cfs(f)); % estimate EDT
             if options.graph % plot
                 % time axes for different vectors
                 ty = ((0:length(y)-1)-t0(n))./fs;
@@ -280,7 +285,7 @@ function [rt,drr,cte,cfs,edt] = IR_stats(filename,varargin)
 
 end
 
-function [t,E,fit] = calc_decay(z,y_fit,y_dec,fs)
+function [t,E,fit] = calc_decay(z,y_fit,y_dec,fs,f)
 % CALC_DECAY calculate decay time from decay curve
 % Returns the time for a specified decay y_dec calculated
 % from the fit over the range y_fit. The input is the
@@ -290,22 +295,39 @@ function [t,E,fit] = calc_decay(z,y_fit,y_dec,fs)
 
     E = 10.*log10(z); % put into dB
     E = E-max(E); % normalise to max 0
-    E = E(1:find(isinf(E),1,'first')-1); % remove trailing infinite values
-    IX = find(E<=max(y_fit),1,'first'):find(E<=min(y_fit),1,'first'); % find yfit x-range
-    if isempty(IX)
-        error('Impulse response has insufficient dynamic range to evaluate to %i dB',min(y_fit))
+    if any(isinf(E))
+        E = E(1:find(isinf(E),1,'first')-1); % remove trailing infinite values
     end
+    
+    % find yfit x-range
+    IX1 = findDB(E,max(y_fit),1,f);
+    IX2 = findDB(E,min(y_fit),length(E),f);
+    IX = IX1:IX2;
 
     % calculate fit over yfit
+    diff_y = abs(diff(y_fit)); % dB range diff
     x = reshape(IX,1,length(IX));
     y = reshape(E(IX),1,length(IX));
     p = polyfit(x,y,1);
-    fit = polyval(p,1:2*length(E)); % actual fit
-    fit2 = fit-max(fit); % fit anchored to 0dB
-
-    diff_y = abs(diff(y_fit)); % dB range diff
-    t = (y_dec/diff_y)*find(fit2<=-diff_y,1,'first')/fs; % estimate decay time
-
+    fitLength = max(length(E),(1.1*diff_y/abs(length(E)*p(1)))*length(E)); % evaluate fit over sufficient dynamic range
+    fit = polyval(p,1:fitLength); % actual fit
+    fit0 = fit-max(fit); % fit anchored to 0dB
+    t = (y_dec/diff_y)*findDB(fit0,-diff_y,[],f)/fs; % estimate decay time
     fit = fit(1:length(E));
 
+end
+
+function IX = findDB(E,dB,default,f)
+% FINDDB find dB value in energy decay
+
+    IX = find(E<=dB,1,'first');
+    if isempty(IX)
+        if isempty(default)
+            error('Impulse response has insufficient dynamic range at %i Hz to evaluate at %i dB.',f,dB)
+        else
+            warning('Impulse response has insufficient dynamic range at %i Hz to evaluate at %i dB. Evaluating at %.1f dB instead.',f,dB,E(default))
+            IX = default;
+        end
+    end
+    
 end
