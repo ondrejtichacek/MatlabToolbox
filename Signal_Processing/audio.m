@@ -22,13 +22,7 @@ classdef (Abstract) audio < matlab.mixin.Copyable
 % 
 %   See also MIXTURE, SOURCE, HANDLE, MATLAB.MIXIN.COPYABLE.
 
-%   Copyright 2015 University of Surrey.
-    
-% =========================================================================
-% Last changed:     $Date: 2016-02-09 10:42:22 +0000 (Tue, 09 Feb 2016) $
-% Last committed:   $Revision: 462 $
-% Last changed by:  $Author: ch0022 $
-% =========================================================================
+%   Copyright 2016 University of Surrey.
     
     properties (AbortSet)
         filename            % Name of the audio file

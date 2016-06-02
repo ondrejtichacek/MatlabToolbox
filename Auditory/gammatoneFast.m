@@ -35,13 +35,7 @@ function [bm,env,delay] = gammatoneFast(x,cfs,fs,align)
 % 
 %   See also MakeErbCFs.
 
-%   Copyright 2015 University of Surrey.
-
-% =========================================================================
-% Last changed:     $Date: 2015-07-02 15:47:12 +0100 (Thu, 02 Jul 2015) $
-% Last committed:   $Revision: 391 $
-% Last changed by:  $Author: ch0022 $
-% =========================================================================
+%   Copyright 2016 University of Surrey.
 
     if nargin < 3
         fs = 16000; % default sampling frequency

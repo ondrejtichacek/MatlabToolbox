@@ -77,13 +77,7 @@ function [ccg,ic] = ch_xcorr(hc_L,hc_R,fs,varargin)
 %       environments", in 128th Audio Engineering Society Convention,
 %       London, May 2010, paper 7981.
 
-%   Copyright 2015 University of Surrey.
-
-% =========================================================================
-% Last changed:     $Date: 2015-07-02 15:47:12 +0100 (Thu, 02 Jul 2015) $
-% Last committed:   $Revision: 391 $
-% Last changed by:  $Author: ch0022 $
-% =========================================================================
+%   Copyright 2016 University of Surrey.
 
     assert(nargin>=3,'Number of input arguments must be greater than or equal to three.')
 

@@ -9,13 +9,7 @@ function w = lapwin(L,b)
 %   
 %   See also GAUSSWIN, CHEBWIN, KAISER, TUKEYWIN, WINDOW.
 
-%   Copyright 2015 University of Surrey.
-
-% =========================================================================
-% Last changed:     $Date: 2015-08-06 16:09:00 +0100 (Thu, 06 Aug 2015) $
-% Last committed:   $Revision: 392 $
-% Last changed by:  $Author: ch0022 $
-% =========================================================================
+%   Copyright 2016 University of Surrey.
 
     assert(isscalar(L) && round(L)==L,'L must be a scalar and whole number.')
     

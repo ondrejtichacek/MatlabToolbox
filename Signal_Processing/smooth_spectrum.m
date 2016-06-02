@@ -48,13 +48,7 @@ function x_oct = smooth_spectrum(X,f,Noct)
 % 
 %   See also LTAS, FFT.
 
-%   Copyright 2015 University of Surrey.
-
-% =========================================================================
-% Last changed:     $Date: 2016-02-02 12:10:40 +0000 (Tue, 02 Feb 2016) $
-% Last committed:   $Revision: 456 $
-% Last changed by:  $Author: ch0022 $
-% =========================================================================
+%   Copyright 2016 University of Surrey.
 
     %% Input checking
 

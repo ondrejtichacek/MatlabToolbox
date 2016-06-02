@@ -13,14 +13,6 @@ function y = MeddisHairCell(data,sampleRate,subtractSpont)
 %   12/11/98: Changed h and added comment at suggestion of
 %   Alain de Cheveigne
 
-% !---
-% ==========================================================
-% Last changed:     $Date: 2012-10-28 13:02:39 +0000 (Sun, 28 Oct 2012) $
-% Last committed:   $Revision: 210 $
-% Last changed by:  $Author: ch0022 $
-% ==========================================================
-% !---
-
 if (nargin<3),  subtractSpont=0;  end
 
 % Parameters from Meddis' April 1990 JASA paper.

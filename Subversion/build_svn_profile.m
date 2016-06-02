@@ -41,13 +41,7 @@ function [svn_profile,svn_str] = build_svn_profile(folders,keywords,strs,rec)
 %   
 %   See also READ_SVN_KEYWORD, GET_CONTENTS.
 
-%   Copyright 2015 University of Surrey.
-
-% =========================================================================
-% Last changed:     $Date: 2015-08-21 09:40:44 +0100 (Fri, 21 Aug 2015) $
-% Last committed:   $Revision: 398 $
-% Last changed by:  $Author: ch0022 $
-% =========================================================================
+%   Copyright 2016 University of Surrey.
 
     if ischar(folders)
         folders = cellstr(folders);

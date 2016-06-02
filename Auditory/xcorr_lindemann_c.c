@@ -1,12 +1,6 @@
 /* Lindemann's precedence model.
  * 
- ==========================================================================
- Last changed:     $Date: 2015-10-20 14:17:18 +0100 (Tue, 20 Oct 2015) $
- Last committed:   $Revision: 432 $
- Last changed by:  $Author: ch0022 $
- ==========================================================================
- * 
- * Copyright 2015 University of Surrey.
+ * Copyright 2016 University of Surrey.
  * 
  */
 

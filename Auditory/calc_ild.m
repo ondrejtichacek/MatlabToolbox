@@ -20,13 +20,7 @@ function ild = calc_ild(L,R,method)
 %   The function is derived from Ben Supper's thesis "An onset-guided
 %   spatial analyser for binaural audio"
 
-%   Copyright 2015 University of Surrey.
-
-% =========================================================================
-% Last changed:     $Date: 2015-07-02 15:47:12 +0100 (Thu, 02 Jul 2015) $
-% Last committed:   $Revision: 391 $
-% Last changed by:  $Author: ch0022 $
-% =========================================================================
+%   Copyright 2016 University of Surrey.
 
     assert(isvector(L) & isvector(R),'L and R must be vectors')
     assert(all(size(L)==size(R)),'L and R must be the same size')

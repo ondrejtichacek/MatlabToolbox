@@ -20,13 +20,7 @@ function [irm,ibm] = ideal_masks(st,si,q,a)
 % 
 %   See also APPLY_MASKS, APPLY_IDEAL_MASKS.
 
-%   Copyright 2015 University of Surrey.
-
-% =========================================================================
-% Last changed:     $Date: 2016-02-02 17:35:42 +0000 (Tue, 02 Feb 2016) $
-% Last committed:   $Revision: 458 $
-% Last changed by:  $Author: ch0022 $
-% =========================================================================
+%   Copyright 2016 University of Surrey.
 
     %% check input
     

@@ -22,13 +22,7 @@ function update_contents(folder)
 %   NB: Do not use Matlab's Contents Report generator to edit the
 %   Contents.m file. Execute this function to update it.
 
-%   Copyright 2015 University of Surrey.
-
-% =========================================================================
-% Last changed:     $Date: 2015-09-21 17:48:04 +0100 (Mon, 21 Sep 2015) $
-% Last committed:   $Revision: 417 $
-% Last changed by:  $Author: ch0022 $
-% =========================================================================
+%   Copyright 2016 University of Surrey.
 
     % apply function in current directory
     if nargin<1

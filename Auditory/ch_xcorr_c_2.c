@@ -1,14 +1,8 @@
 /*
  * Calculate cross-correlograms with a range of options.
  * Called from ch_xcorr_2.m.
- * 
- * ========================================================================
- * Last changed:     $Date: 2016-02-18 11:14:39 +0000 (Thu, 18 Feb 2016) $
- * Last committed:   $Revision: 468 $
- * Last changed by:  $Author: ch0022 $
- * ========================================================================
  *
- * Copyright 2015 University of Surrey.
+ * Copyright 2016 University of Surrey.
  * 
  */
 

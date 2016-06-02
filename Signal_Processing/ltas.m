@@ -51,13 +51,7 @@ function [s,f] = ltas(x,fs,varargin)
 %   
 %   See also STFT, SMOOTH_SPECTRUM.
 
-%   Copyright 2015 University of Surrey.
-
-% =========================================================================
-% Last changed:     $Date: 2016-02-02 12:11:07 +0000 (Tue, 02 Feb 2016) $
-% Last committed:   $Revision: 457 $
-% Last changed by:  $Author: ch0022 $
-% =========================================================================
+%   Copyright 2016 University of Surrey.
 
     %% parse input
     

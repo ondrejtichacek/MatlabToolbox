@@ -39,13 +39,7 @@ classdef mixture < audio
 % 
 %   See also AUDIO, SOURCE, SOFALOAD.
 
-%   Copyright 2015 University of Surrey.
-    
-% =========================================================================
-% Last changed:     $Date: 2016-02-09 10:51:21 +0000 (Tue, 09 Feb 2016) $
-% Last committed:   $Revision: 463 $
-% Last changed by:  $Author: ch0022 $
-% =========================================================================
+%   Copyright 2016 University of Surrey.
     
     properties (AbortSet)
         hrtfs       % Path to a SOFA file containing HRTF data

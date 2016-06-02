@@ -27,13 +27,7 @@ function [rev,file] = head_rev(folders,strs,rec)
 % 
 %   See also GET_CONTENTS, BUILD_SVN_PROFILE, READ_SVN_KEYWORD.
 
-%   Copyright 2015 University of Surrey.
-
-% =========================================================================
-% Last changed:     $Date: 2015-07-02 15:47:12 +0100 (Thu, 02 Jul 2015) $
-% Last committed:   $Revision: 391 $
-% Last changed by:  $Author: ch0022 $
-% =========================================================================
+%   Copyright 2016 University of Surrey.
 
     keyword = 'Date'; % use this data to sort files (doubtful that any others would work, without considerable parsing)
 

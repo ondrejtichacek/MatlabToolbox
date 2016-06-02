@@ -26,13 +26,7 @@ function [x,t] = istft(s,nfft,hop,fs)
 % 
 %   See also STFT.
 
-%   Copyright 2015 University of Surrey.
-
-% =========================================================================
-% Last changed:     $Date: 2015-12-03 22:26:34 +0000 (Thu, 03 Dec 2015) $
-% Last committed:   $Revision: 444 $
-% Last changed by:  $Author: ch0022 $
-% =========================================================================
+%   Copyright 2016 University of Surrey.
 
     %% check input
     

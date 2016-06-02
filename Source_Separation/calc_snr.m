@@ -5,13 +5,7 @@ function snr = calc_snr(output,target)
 %   ratio in dB for a re-synthesised output compared to the ideal target.
 %   OUTPUT and TARGET should be vectors of equal length.
 
-%   Copyright 2015 University of Surrey.
-
-% =========================================================================
-% Last changed:     $Date: 2015-07-02 15:47:12 +0100 (Thu, 02 Jul 2015) $
-% Last committed:   $Revision: 391 $
-% Last changed by:  $Author: ch0022 $
-% =========================================================================
+%   Copyright 2016 University of Surrey.
 
     % check input
     if ~isvector(output)

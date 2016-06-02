@@ -64,13 +64,7 @@
 % end
 % 
 
-% !---
-% ==========================================================
-% Last changed:     $Date: 2012-10-28 13:02:39 +0000 (Sun, 28 Oct 2012) $
-% Last committed:   $Revision: 210 $
-% Last changed by:  $Author: ch0022 $
-% ==========================================================
-% !---
+%   Copyright 2016 University of Surrey.
 
 function [SearchPoint Step ReLoop] = BinSearch(Score, Target, CloseEnough, SearchPoint, Step, LoopCount, MaxLoops)
 

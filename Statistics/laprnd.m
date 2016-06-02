@@ -20,13 +20,7 @@ function r = laprnd(varargin)
 
 %   Based on code (Matlab FE File ID: #13705) written by Elvis Chen, 2007.
 
-%   Copyright 2015 University of Surrey.
-
-% =========================================================================
-% Last changed:     $Date: 2015-07-02 15:47:12 +0100 (Thu, 02 Jul 2015) $
-% Last committed:   $Revision: 391 $
-% Last changed by:  $Author: ch0022 $
-% =========================================================================
+%   Copyright 2016 University of Surrey.
 
     % Generate Laplacian noise
     u = rand(varargin{:})-0.5;

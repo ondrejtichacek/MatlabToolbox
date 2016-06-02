@@ -27,13 +27,7 @@ function [z_irm,z_ibm,t] = apply_ideal_masks(xt,xi,nfft,hop,fs)
 % 
 %   See also STFT, ISTFT, IDEAL_MASKS, APPLY_MASKS.
 
-%   Copyright 2015 University of Surrey.
-
-% =========================================================================
-% Last changed:     $Date: 2015-12-03 22:31:20 +0000 (Thu, 03 Dec 2015) $
-% Last committed:   $Revision: 448 $
-% Last changed by:  $Author: ch0022 $
-% =========================================================================
+%   Copyright 2016 University of Surrey.
     
     %% check input
     

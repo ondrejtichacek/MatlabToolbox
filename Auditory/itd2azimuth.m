@@ -13,13 +13,7 @@ function azimuth = itd2azimuth(itd,f)
 % 
 %   See also AZIMUTH2ITD, FREQ_MULTI.
 
-%   Copyright 2015 University of Surrey.
-
-% ==========================================================
-% Last changed:     $Date: 2015-07-02 15:47:12 +0100 (Thu, 02 Jul 2015) $
-% Last committed:   $Revision: 391 $
-% Last changed by:  $Author: ch0022 $
-% ==========================================================
+%   Copyright 2016 University of Surrey.
 
     assert(isnumeric(itd),'ITD must be numeric')
     assert((isscalar(f) | isscalar(itd)) | numel(f)==numel(itd),...

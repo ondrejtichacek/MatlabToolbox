@@ -44,13 +44,7 @@ function [s,f,t] = stft(x,nfft,hop,fs)
 % 
 %   See also ISTFT.
 
-%   Copyright 2015 University of Surrey.
-
-% =========================================================================
-% Last changed:     $Date: 2015-12-03 22:28:48 +0000 (Thu, 03 Dec 2015) $
-% Last committed:   $Revision: 446 $
-% Last changed by:  $Author: ch0022 $
-% =========================================================================
+%   Copyright 2016 University of Surrey.
 
     %% check input
     

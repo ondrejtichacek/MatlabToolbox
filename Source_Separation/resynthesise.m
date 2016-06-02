@@ -49,13 +49,7 @@ function output = resynthesise(x,fs,cfs,m,varargin)
 % 
 %   See also CFS2FCS, GET_FULL_MASK, SINC_FILTER.
 
-%   Copyright 2015 University of Surrey.
-
-% =========================================================================
-% Last changed:     $Date: 2015-09-21 17:01:00 +0100 (Mon, 21 Sep 2015) $
-% Last committed:   $Revision: 415 $
-% Last changed by:  $Author: ch0022 $
-% =========================================================================
+%   Copyright 2016 University of Surrey.
 
     %% parse input
 

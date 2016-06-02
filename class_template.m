@@ -25,13 +25,7 @@ classdef class_template
 %   
 %   See also RELATED_FUNCTION, SIN, COS.
 
-%   Copyright 2015 University of Surrey.
-
-% =========================================================================
-% Last changed:     $Date: 2015-09-22 10:59:14 +0100 (Tue, 22 Sep 2015) $
-% Last committed:   $Revision: 419 $
-% Last changed by:  $Author: ch0022 $
-% =========================================================================
+%   Copyright 2016 University of Surrey.
     
     properties
         prop_1 % A property

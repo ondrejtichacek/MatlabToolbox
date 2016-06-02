@@ -25,13 +25,7 @@ function m_full = get_full_mask(m,frame_d,delay,kernel)
 % 
 %   See also RESYNTHESISE.
 
-%   Copyright 2015 University of Surrey.
-
-% =========================================================================
-% Last changed:     $Date: 2015-07-01 16:38:54 +0100 (Wed, 01 Jul 2015) $
-% Last committed:   $Revision: 389 $
-% Last changed by:  $Author: ch0022 $
-% =========================================================================
+%   Copyright 2016 University of Surrey.
 
 
     if nargin < 2

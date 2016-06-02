@@ -44,13 +44,7 @@ function [spl,f] = iso226(phon,fq,sq)
 % 
 %   See also LOUD_WEIGHT.
 
-%   Copyright 2015 University of Surrey.
-
-% =========================================================================
-% Last changed:     $Date: 2015-11-23 23:10:15 +0000 (Mon, 23 Nov 2015) $
-% Last committed:   $Revision: 439 $
-% Last changed by:  $Author: ch0022 $
-% =========================================================================
+%   Copyright 2016 University of Surrey.
 
     %% Check input
 

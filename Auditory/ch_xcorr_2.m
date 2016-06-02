@@ -35,13 +35,7 @@ function [ccg,ic] = ch_xcorr_2(hc_L,hc_R,fs,varargin)
 %   [CCG,IC] = CH_XCORR_2(...) returns the calculated IC for each frame to
 %   the matrix IC.
 
-%   Copyright 2015 University of Surrey.
-
-% =========================================================================
-% Last changed:     $Date: 2015-12-15 16:12:16 +0000 (Tue, 15 Dec 2015) $
-% Last committed:   $Revision: 452 $
-% Last changed by:  $Author: ch0022 $
-% =========================================================================
+%   Copyright 2016 University of Surrey.
 
     assert(nargin>=3,'Number of input arguments must be greater than or equal to three.')
 

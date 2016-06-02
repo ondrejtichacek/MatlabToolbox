@@ -5,13 +5,7 @@ function IMR = calc_imr(m,im)
 %   calculated mask M and ideal mask IM. Masks can be logical or double,
 %   but must only contain values in the interval [0,1].
 
-%   Copyright 2015 University of Surrey.
-
-% =========================================================================
-% Last changed:     $Date: 2015-08-11 16:36:27 +0100 (Tue, 11 Aug 2015) $
-% Last committed:   $Revision: 396 $
-% Last changed by:  $Author: ch0022 $
-% =========================================================================
+%   Copyright 2016 University of Surrey.
 
     % check input
     assert(nargin>1,'You need 2 masks to calculate IMR!')

@@ -4,13 +4,7 @@ function cell2csv(C,filename)
 %   CELL2CSV(C,FILENAME) writes the cell array C to a CSV file specified by
 %   filename.
 
-%   Copyright 2015 University of Surrey.
-
-% =========================================================================
-% Last changed:     $Date: 2015-07-02 15:47:12 +0100 (Thu, 02 Jul 2015) $
-% Last committed:   $Revision: 391 $
-% Last changed by:  $Author: ch0022 $
-% =========================================================================
+%   Copyright 2016 University of Surrey.
 
     %% make sure filename has a .csv extension
 

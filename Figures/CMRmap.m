@@ -27,13 +27,7 @@ function cmap = CMRmap(M)
 % 
 % See also GRAY.
 
-%   Copyright 2015 University of Surrey.
-
-% =========================================================================
-% Last changed:     $Date: 2015-07-02 15:47:12 +0100 (Thu, 02 Jul 2015) $
-% Last committed:   $Revision: 391 $
-% Last changed by:  $Author: ch0022 $
-% =========================================================================
+%   Copyright 2016 University of Surrey.
 
     % default colormap size
     if nargin < 1, M = size(get(gcf,'colormap'),1); end

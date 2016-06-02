@@ -9,13 +9,7 @@ function rt = rt_est(abs_coeff,room,formula)
 %   RT = RT_EST(ABS_COEFF,ROOM,FORMULA) allows the formula to be specified.
 %   The options are 'sabine' (default), or 'eyring'.
 
-%   Copyright 2015 University of Surrey.
-
-% =========================================================================
-% Last changed:     $Date: 2015-07-02 15:47:12 +0100 (Thu, 02 Jul 2015) $
-% Last committed:   $Revision: 391 $
-% Last changed by:  $Author: ch0022 $
-% =========================================================================
+%   Copyright 2016 University of Surrey.
 
     assert(isnumeric(abs_coeff),'abs_coeff should be numeric')
     assert(isnumeric(room) & numel(room)==3 & isvector(room),'room should be a 3-element numeric vector')

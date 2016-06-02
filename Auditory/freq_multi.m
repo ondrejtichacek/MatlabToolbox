@@ -12,13 +12,7 @@ function PI = freq_multi(f)
 % 
 %   See also AZIMUTH2ITD, ITD2AZIMUTH.
 
-%   Copyright 2015 University of Surrey.
-
-% =========================================================================
-% Last changed:     $Date: 2015-07-02 15:47:12 +0100 (Thu, 02 Jul 2015) $
-% Last committed:   $Revision: 391 $
-% Last changed by:  $Author: ch0022 $
-% =========================================================================
+%   Copyright 2016 University of Surrey.
 
     PI = zeros(size(f));
     PI(f<=500) = 3;

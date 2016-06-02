@@ -15,13 +15,7 @@ function [z,t] = apply_mask(s,m,nfft,hop,fs)
 % 
 %   See also STFT, ISTFT, IDEAL_MASKS, APPLY_IDEAL_MASKS.
 
-%   Copyright 2015 University of Surrey.
-
-% =========================================================================
-% Last changed:     $Date: 2015-12-03 22:30:32 +0000 (Thu, 03 Dec 2015) $
-% Last committed:   $Revision: 447 $
-% Last changed by:  $Author: ch0022 $
-% =========================================================================
+%   Copyright 2016 University of Surrey.
 
     %% check input
     
