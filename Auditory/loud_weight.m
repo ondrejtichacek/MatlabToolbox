@@ -40,7 +40,7 @@ function g = loud_weight(f,phon)
         if strcmpi(method,'iso-226')
             phon = 65;
         end
-    elseif ischar(phon)
+    elseif isnumeric(phon)
         method = 'iso-226';
         assert(isscalar(phon),'phon must be a scalar.')
     else
