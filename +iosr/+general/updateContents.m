@@ -66,6 +66,7 @@ function updateContents(folder)
             H1_lines = [H1_lines; {''}; {''}]; %#ok<AGROW> % insert blank lines where no functions will be
             % determine package prefix
             pkgprefix = strrep(dirs{d},[filesep '+'],'.');
+            pkgprefix = strrep(pkgprefix,[filesep '@'],'.');
             dots = strfind(pkgprefix,'.');
             if ~isempty(dots)
                 pkgprefix = [pkgprefix(dots(1)+1:end) '.'];
