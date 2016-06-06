@@ -1,86 +1,86 @@
-% +IOSR
+% READSVNKEYWORD
 % 
 %   Contents file for +IOSR and its subfolders.
 %   
 %   +IOSR/+ACOUSTICS
-%   irStats              - Calculate RT, DRR, Cte, and EDT for impulse response file
-%   rtEst                - Estimate reverberation time based on room size and absorption
+%   iosr.acoustics.irStats           - Calculate RT, DRR, Cte, and EDT for impulse response file
+%   iosr.acoustics.rtEst             - Estimate reverberation time based on room size and absorption
 %   
 %   +IOSR/+AUDITORY
-%   azimuth2itd          - Convert azimuth in degrees to ITD
-%   binSearch            - Conduct a binary search
-%   calcIld              - Calculate normalised interaural level difference
-%   chXcorr              - Calculate cross-correlograms with a wide range of options
-%   chXcorr2             - Calculate cross-correlograms with a range of options
+%   iosr.auditory.azimuth2itd        - Convert azimuth in degrees to ITD
+%   iosr.auditory.binSearch          - Conduct a binary search
+%   iosr.auditory.calcIld            - Calculate normalised interaural level difference
+%   iosr.auditory.chXcorr            - Calculate cross-correlograms with a wide range of options
+%   iosr.auditory.chXcorr2           - Calculate cross-correlograms with a range of options
 %   chXcorr2_c.c
 %   chXcorr_c.c
-%   createWindow         - Create a Hann or exp. window with specified onsets/offsets
-%   dupWeight            - DUP_WEIGHT Calculate duplex weighting coefficients for ITD and ILD
-%   erbRate2hz           - Convert ERB rate to Hz
-%   freqMulti            - Calculate frequency coefficient for ITD-azimuth warping
-%   gammatoneFast        - Produce an array of responses from gammatone filters via FFT
-%   hz2erbRate           - Convert Hz to ERB rate
-%   instItd              - Calculate instantaneous ITD
-%   iso226               - ISO 226:2003 Normal equal-loudness-level contours
-%   itd2azimuth          - Convert ITD to azimuth
-%   lindemannInh         - Signal pre-processing for Lindemann's cross-correlation
-%   loudWeight           - Calculate loudness weighting coefficients based on ISO 226
-%   makeErbCFs           - Make a series of center frequencies equally spaced in ERB-rate
-%   meddisHairCell       - Calculate Ray Meddis' hair cell model for a number of channels
-%   perceptualCentroid   - Perceptual spectral centroid
-%   xcorrLindemann       - Cross-correlation based on Lindemann's precedence model
+%   iosr.auditory.createWindow       - Create a Hann or exp. window with specified onsets/offsets
+%   iosr.auditory.dupWeight          - DUP_WEIGHT Calculate duplex weighting coefficients for ITD and ILD
+%   iosr.auditory.erbRate2hz         - Convert ERB rate to Hz
+%   iosr.auditory.freqMulti          - Calculate frequency coefficient for ITD-azimuth warping
+%   iosr.auditory.gammatoneFast      - Produce an array of responses from gammatone filters via FFT
+%   iosr.auditory.hz2erbRate         - Convert Hz to ERB rate
+%   iosr.auditory.instItd            - Calculate instantaneous ITD
+%   iosr.auditory.iso226             - ISO 226:2003 Normal equal-loudness-level contours
+%   iosr.auditory.itd2azimuth        - Convert ITD to azimuth
+%   iosr.auditory.lindemannInh       - Signal pre-processing for Lindemann's cross-correlation
+%   iosr.auditory.loudWeight         - Calculate loudness weighting coefficients based on ISO 226
+%   iosr.auditory.makeErbCFs         - Make a series of center frequencies equally spaced in ERB-rate
+%   iosr.auditory.meddisHairCell     - Calculate Ray Meddis' hair cell model for a number of channels
+%   iosr.auditory.perceptualCentroid - Perceptual spectral centroid
+%   iosr.auditory.xcorrLindemann     - Cross-correlation based on Lindemann's precedence model
 %   xcorrLindemann_c.c
 %   
 %   +IOSR/+BSS
-%   applyIdealMasks      - Calculate and apply ideal masks via STFT
-%   applyMask            - Apply a time-frequency mask to an STFT
-%   calcImr              - Calculates the Ideal Mask Ratio (IMR)
-%   calcSnr              - Calculate the separation SNR
-%   cfs2fcs              - Calculate gammatone crossover frequencies
-%   example              - Determine STFT parameters
-%   getFullMask          - Convert frame rate mask to a sample-by-sample mask
-%   idealMasks           - Calculate ideal time-frequency masks from STFTs
-%   mixture              - Class of binaural sound source separation mixture
-%   resynthesise         - Resynthesise a target from a time-frequency mask
-%   source               - Class of sound source separation source
+%   iosr.bss.applyIdealMasks         - Calculate and apply ideal masks via STFT
+%   iosr.bss.applyMask               - Apply a time-frequency mask to an STFT
+%   iosr.bss.calcImr                 - Calculates the Ideal Mask Ratio (IMR)
+%   iosr.bss.calcSnr                 - Calculate the separation SNR
+%   iosr.bss.cfs2fcs                 - Calculate gammatone crossover frequencies
+%   iosr.bss.example                 - Determine STFT parameters
+%   iosr.bss.getFullMask             - Convert frame rate mask to a sample-by-sample mask
+%   iosr.bss.idealMasks              - Calculate ideal time-frequency masks from STFTs
+%   iosr.bss.mixture                 - Class of binaural sound source separation mixture
+%   iosr.bss.resynthesise            - Resynthesise a target from a time-frequency mask
+%   iosr.bss.source                  - Class of sound source separation source
 %   
 %   +IOSR/+DSP
-%   audio                - Abstract superclass providing audio-related properties and methods
-%   autocorr             - Perform autocorrelation via FFT
-%   convFft              - Convolve two vectors using FFT multiplication
-%   istft                - Calculate the Inverse Short-Time Fourier Transform
-%   lapwin               - Laplace window
-%   localpeaks           - Find local peaks and troughs in a vector
-%   ltas                 - Calculate the long-term average spectrum of a signal
-%   rms                  - Calculate the rms of a vector or matrix
-%   sincFilter           - Apply a near-ideal low-pass or band-pass brickwall filter
-%   smoothSpectrum       - Apply 1/N-octave smoothing to a frequency spectrum
-%   stft                 - Calculate the short-time Fourier transform of a signal
-%   vsmooth              - Smooth a vector using mathematical functions
+%   iosr.dsp.audio                   - Abstract superclass providing audio-related properties and methods
+%   iosr.dsp.autocorr                - Perform autocorrelation via FFT
+%   iosr.dsp.convFft                 - Convolve two vectors using FFT multiplication
+%   iosr.dsp.istft                   - Calculate the Inverse Short-Time Fourier Transform
+%   iosr.dsp.lapwin                  - Laplace window
+%   iosr.dsp.localpeaks              - Find local peaks and troughs in a vector
+%   iosr.dsp.ltas                    - Calculate the long-term average spectrum of a signal
+%   iosr.dsp.rms                     - Calculate the rms of a vector or matrix
+%   iosr.dsp.sincFilter              - Apply a near-ideal low-pass or band-pass brickwall filter
+%   iosr.dsp.smoothSpectrum          - Apply 1/N-octave smoothing to a frequency spectrum
+%   iosr.dsp.stft                    - Calculate the short-time Fourier transform of a signal
+%   iosr.dsp.vsmooth                 - Smooth a vector using mathematical functions
 %   
 %   +IOSR/+FIGURES
-%   chMap                - Create a monochrome-compatible colour map
-%   cmrMap               - Create a monochrome-compatible colour map
-%   multiwaveplot        - Stacked line plots from a matrix or vectors
-%   subfigrid            - Create axis positions for subfigures
+%   iosr.figures.chMap               - Create a monochrome-compatible colour map
+%   iosr.figures.cmrMap              - Create a monochrome-compatible colour map
+%   iosr.figures.multiwaveplot       - Stacked line plots from a matrix or vectors
+%   iosr.figures.subfigrid           - Create axis positions for subfigures
 %   
 %   +IOSR/+GENERAL
-%   cell2csv             - Output a cell array to a CSV file
-%   checkMexCompiled     - Check if mex file is compiled for system
-%   urn                  - Generate random number sequence without duplicates
+%   iosr.general.cell2csv            - Output a cell array to a CSV file
+%   iosr.general.checkMexCompiled    - Check if mex file is compiled for system
+%   iosr.general.urn                 - Generate random number sequence without duplicates
 %   
 %   +IOSR/+STATISTICS
-%   boxPlot              - Draw a box plot
-%   getRmse              - Calculate the root-mean-square error between input data
-%   laprnd               - Pseudorandom numbers drawn from the Laplace distribution
-%   qqPlot               - Quantile-quantile plot with patch option
-%   quantile             - Quantiles of a sample via various methods
-%   tab2box              - Prepare tabular data for boxPlot function
-%   trirnd               - Pseudorandom numbers drawn from the triangular distribution
+%   iosr.statistics.boxPlot          - Draw a box plot
+%   iosr.statistics.getRmse          - Calculate the root-mean-square error between input data
+%   iosr.statistics.laprnd           - Pseudorandom numbers drawn from the Laplace distribution
+%   iosr.statistics.qqPlot           - Quantile-quantile plot with patch option
+%   iosr.statistics.quantile         - Quantiles of a sample via various methods
+%   iosr.statistics.tab2box          - Prepare tabular data for boxPlot function
+%   iosr.statistics.trirnd           - Pseudorandom numbers drawn from the triangular distribution
 %   
 %   +IOSR/+SVN
-%   buildSvnProfile      - Read data from files tagged with SVN keywords
-%   headRev              - Retrieve the head revision for specified files
-%   readSvnKeyword       - Read data from a file tagged with an SVN keyword
+%   iosr.svn.buildSvnProfile         - Read data from files tagged with SVN keywords
+%   iosr.svn.headRev                 - Retrieve the head revision for specified files
+%   iosr.svn.readSvnKeyword          - Read data from a file tagged with an SVN keyword
 %    
-%   This file was generated by update_contents.m on 06 Jun 2016 at 12:28:48.
+%   This file was generated by update_contents.m on 06 Jun 2016 at 16:25:25.
