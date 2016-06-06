@@ -76,9 +76,9 @@ function updateContents(folder)
             for f = 1:length(temp) % read H1 lines
                 H1_lines = [H1_lines; {get_H1_line([dirs{d} filesep temp{f}])}]; %#ok<AGROW> % add H1 lines
                 % remove extension from and add package prefix to m-files
-                [~,name,ext] = fileparts(temp{f});
+                [~,fname,ext] = fileparts(temp{f});
                 if strcmpi(ext,'.m')
-                    temp{f} = [pkgprefix name];
+                    temp{f} = [pkgprefix fname];
                 end
             end
             files = [files; {''}; {upper(dirs{d}(fIX+1:end))}; temp;]; %#ok<AGROW> % add filenames
