@@ -1,4 +1,0 @@
-[submodule "Statistics/boxPlot"]
-	path = Statistics/boxPlot
-	url = git://github.com/chummersone/boxPlot.git
-	branch = master
