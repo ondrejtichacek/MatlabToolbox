@@ -47,7 +47,7 @@ function [s,f] = ltas(x,fs,varargin)
 %       % Plot the 1/6th-octave-smoothed LTAS of the Handel example
 %       load handel.mat
 %       figure
-%       ltas(y,Fs,'noct',6,'graph',true);
+%       iosr.dsp.ltas(y,Fs,'noct',6,'graph',true);
 %   
 %   See also IOSR.DSP.STFT, IOSR.DSP.SMOOTHSPECTRUM.
 
