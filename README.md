@@ -4,7 +4,15 @@ A general purpose Matlab toolbox containing functions and classes for: auditory 
 
 ## Installation
 
-Simply add this folder to your Matlab search path.
+Basic installation only requires you to add the install directory to the Matlab search path.
+
+If you wish to perform certain audio / signal processing tasks (especially spatialisation), please navigate to the install directory and type
+
+```
+iosr.install
+```
+
+This will automatically download the toolbox's dependencies for these tasks, and add the necessary paths to your search path.
 
 ## Usage
 
@@ -14,7 +22,7 @@ Use these functions as:
 iosr.<folderName>.<functionName>(<args>)
 ```
 
-Alternatively, use the `import` directive to add one or more namespaces, e.g.:
+(Ignoring the '+' in the folder name.) Alternatively, use the `import` directive to add one or more namespaces, e.g.:
 
 ```
 import iosr.auditory
