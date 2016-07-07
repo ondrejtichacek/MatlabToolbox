@@ -787,8 +787,8 @@ classdef boxPlot < matlab.mixin.SetGet
         end
         
         function set.addPrctilesColors(obj,val)
-            if ~isempty(obj.addPrctilesColors)
-                assert(iscell(obj.addPrctilesColors), '''ADDPRCTILESCOLORS'' should be a cell array')
+            if ~isempty(val)
+                assert(iscell(val), '''ADDPRCTILESCOLORS'' should be a cell array')
             end
             obj.addPrctilesColors = val;
             obj.draw();
@@ -801,8 +801,8 @@ classdef boxPlot < matlab.mixin.SetGet
         end
         
         function set.addPrctilesLabels(obj,val)
-            if ~isempty(obj.addPrctilesLabels)
-                assert(iscellstr(obj.addPrctilesLabels), '''ADDPRCTILESLABELS'' should be a cell array of strings')
+            if ~isempty(val)
+                assert(iscellstr(val), '''ADDPRCTILESLABELS'' should be a cell array of strings')
             end
             obj.addPrctilesLabels = val;
             obj.draw();
@@ -815,8 +815,8 @@ classdef boxPlot < matlab.mixin.SetGet
         end
         
         function set.addPrctilesMarkers(obj,val)
-            if ~isempty(obj.addPrctilesMarkers)
-                assert(iscellstr(obj.addPrctilesMarkers), '''ADDPRCTILESMARKERS'' should be a cell array of strings')
+            if ~isempty(val)
+                assert(iscellstr(val), '''ADDPRCTILESMARKERS'' should be a cell array of strings')
             end
             obj.addPrctilesMarkers = val;
             obj.draw();
@@ -829,8 +829,8 @@ classdef boxPlot < matlab.mixin.SetGet
         end
         
         function set.addPrctilesSize(obj,val)
-            if ~isempty(obj.addPrctilesSize)
-                assert(isnumeric(obj.addPrctilesSize) && isvector(obj.addPrctilesSize), '''ADDPRCTILESSIZE'' should be a numeric vector')
+            if ~isempty(val)
+                assert(isnumeric(val) && isvector(val), '''ADDPRCTILESSIZE'' should be a numeric vector')
             end
             obj.addPrctilesSize = val;
             obj.draw();
@@ -839,7 +839,7 @@ classdef boxPlot < matlab.mixin.SetGet
         % set additional percentiles label font size
         
         function set.addPrctilesTxtSize(obj,val)
-            assert(isnumeric(obj.addPrctilesTxtSize) && isscalar(obj.addPrctilesTxtSize), '''ADDPRCTILESTXTSIZE'' should be a numeric scalar')
+            assert(isnumeric(val) && isscalar(val), '''ADDPRCTILESTXTSIZE'' should be a numeric scalar')
             obj.addPrctilesTxtSize = val;
             obj.draw();
         end
