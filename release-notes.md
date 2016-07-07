@@ -1,3 +1,7 @@
+# v2.2 - 7th July 2016
+
+Added install function that downloads dependencies and sets path. Fixed bug in boxPlot where some set functions check the old value rather than the new value.
+
 # v2.1 - 22nd June 2016
 
 Added match EQ function.
