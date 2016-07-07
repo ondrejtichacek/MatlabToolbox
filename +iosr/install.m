@@ -13,7 +13,7 @@ function mypath = install
     % install dir
     cd([fileparts(which(mfilename('fullpath'))) filesep '..']);
     directory = pwd;
-    sofa_folder = [directory filesep 'dependencies' filesep 'SOFA_API'];
+    sofa_folder = [directory filesep 'deps' filesep 'SOFA_API'];
     
     if ~(exist(sofa_folder,'dir') == 7)
         % download and install
@@ -40,7 +40,7 @@ function mypath = install
     
     cd(directory);
     mypath = addpath(directory,...
-        [directory filesep 'dependencies' filesep 'SOFA_API']);
+        [directory filesep 'deps' filesep 'SOFA_API']);
     
     %% start SOFA
     
