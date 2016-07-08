@@ -367,7 +367,7 @@ classdef boxPlot < matlab.mixin.SetGet
        meanMarker = '+'             % Marker used for the mean.
        meanSize = 6                 % Size, in point units, of the mean markers.
        medianColor = 'auto'         % Color of the median line.
-       method = 'R-5'               % The method used to calculate the quantiles.
+       method = 'R-8'               % The method used to calculate the quantiles.
        notch = false                % Whether the box should have a notch.
        notchDepth = 0.4             % Depth of the notch as a proportion of half the box width.
        notchLineColor = 'k'         % Color of the notch line.
