@@ -1,3 +1,7 @@
+# v2.2.2 - 10th July 2016
+
+Corrected calls to other toolbox functions.
+
 # v2.2.1 - 8th July 2016
 
 Fixed erroneous default 'method' in boxPlot.
