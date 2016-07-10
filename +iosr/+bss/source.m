@@ -215,7 +215,7 @@ classdef source < iosr.dsp.audio
         %COPYELEMENT Overload copy method with additional functionality
             
             % Make a shallow copy of all properties
-            cpObj = copyElement@audio(obj);
+            cpObj = copyElement@iosr.dsp.audio(obj);
             
         end
         

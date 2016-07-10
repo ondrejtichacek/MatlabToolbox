@@ -194,7 +194,7 @@ classdef (Abstract) audio < matlab.mixin.Copyable
             % convolve
             y = zeros(length(x)+size(IR,1)-1,size(IR,2));
             for c = 1:size(IR,2)
-                y(:,c) = conv_fft(x,IR(:,c));
+                y(:,c) = iosr.dsp.convFft(x,IR(:,c));
             end
             
             % crop
