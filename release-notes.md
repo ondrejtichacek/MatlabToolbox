@@ -1,3 +1,7 @@
+# v2.2.3 - 12th July 2016
+
+Corrected boxPlot bug whereby x-separator line would disappear when setting y-axis limits to inf.
+
 # v2.2.2 - 10th July 2016
 
 Corrected calls to other toolbox functions.
