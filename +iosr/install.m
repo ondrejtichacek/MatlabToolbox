@@ -11,6 +11,7 @@ function mypath = install
     %% download and install SOFA
 
     % install dir
+    currdir = cd;
     cd([fileparts(which(mfilename('fullpath'))) filesep '..']);
     directory = pwd;
     sofa_folder = [directory filesep 'deps' filesep 'SOFA_API'];
@@ -45,5 +46,7 @@ function mypath = install
     %% start SOFA
     
     SOFAstart(0);
+    
+    cd(currdir); % return to original directory
     
 end
