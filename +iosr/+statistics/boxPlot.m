@@ -2280,7 +2280,24 @@ classdef boxPlot < matlab.mixin.SetGet
             if strcmpi(propName,'YLim')
                 % correct x separator limits
                 if isfield(obj.handles,'xseps')
-                    set(obj.handles.xseps,'YData',propValue);
+                    ydata = propValue;
+                    if any(isinf(propValue))
+                        % inf uses actual data to determine limits
+                        ylim = [NaN NaN];
+                        children = get(obj.handles.axes,'children');
+                        for n = 1:length(children)
+                            try
+                                d = get(children(n),'YData');
+                                ylim(1) = min([ylim(1); d]);
+                                ylim(2) = max([ylim(2); d]);
+                            catch
+                                % ignore objects that don't have YData
+                            end
+                        end
+                        % replace occurences of inf
+                        ydata(isinf(propValue)) = ylim(isinf(propValue));
+                    end
+                    set(obj.handles.xseps,'YData',ydata);
                 end
                 % move group labels up or down
                 if isfield(obj.handles,'groupsTxt')
