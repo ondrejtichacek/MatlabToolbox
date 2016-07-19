@@ -1,3 +1,9 @@
+# v2.3
+
+* Corrected code to restore current directory when installation is complete.
+* Added function to generate BSS mixtures by combining sources in various ways.
+* Added property to iosr.bss.mixture to return interferer filenames as char array. Also corrected bug setting properties when interferer comprises multiple sources.
+
 # v2.2.3 - 12th July 2016
 
 Corrected boxPlot bug whereby x-separator line would disappear when setting y-axis limits to inf.
