@@ -15,6 +15,8 @@ classdef mixture < iosr.dsp.audio
 %       filename_i  - Name of the interferer audio file (based on the
 %                     Mixture filename) (read-only)
 %       hrtfs       - Path to a SOFA file containing HRTF data
+%       int_fns     - A char array containing the filenames of all of the
+%                     interfering sources (read-only)
 %       interferers - An array of interferer sources of type source
 %       signal_t    - The sampled data (target) (read-only)
 %       signal_i    - The sampled data (interferer) (read-only)
@@ -57,6 +59,7 @@ classdef mixture < iosr.dsp.audio
         elevation   % The median elevation of the mixture (read-only)
         filename_t  % Name of the target audio file (read-only)
         filename_i  % Name of the interferer audio file (read-only)
+        int_fns     % Filenames of all of the interfering sources (read-only)
         signal_t    % Return target (read-only)
         signal_i    % Return interferer (read-only)
     end
@@ -135,11 +138,15 @@ classdef mixture < iosr.dsp.audio
 
                 % ensure fs for sources matches instance
                 obj.target.fs = obj.fs;
-                obj.interferers.fs = obj.fs;
+                for n = 1:numel(obj.interferers)
+                    obj.interferers(n).fs = obj.fs;
+                end
                 
                 % set parent
                 obj.target.parent = obj;
-                obj.interferers.parent = obj;
+                for n = 1:numel(obj.interferers)
+                    obj.interferers(n).parent = obj;
+                end
                 
             end
             
@@ -263,6 +270,17 @@ classdef mixture < iosr.dsp.audio
         % interferer filename
         function fn = get.filename_i(obj)
             fn = obj.make_interferer_filename(obj.filename);
+        end
+        
+        % filenames of all interferers
+        function fns = get.int_fns(obj)
+            for n = 1:length(obj.interferers)
+                if n==1
+                    fns = obj.interferers(n).filename;
+                else
+                    fns = [fns ', ' obj.interferers(n).filename]; %#ok<AGROW>
+                end
+            end
         end
         
         % return target signal
@@ -429,7 +447,9 @@ classdef mixture < iosr.dsp.audio
             switch lower(name)
                 case 'fs'
                     obj.target.fs = val;
-                    obj.interferers.fs = val;
+                    for n = 1:numel(obj.interferers)
+                        obj.interferers(n).fs = val;
+                    end
             end
             
         end
