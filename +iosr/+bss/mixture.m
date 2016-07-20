@@ -21,7 +21,7 @@ classdef mixture < iosr.dsp.audio
 %       signal_t    - The sampled data (target) (read-only)
 %       signal_i    - The sampled data (interferer) (read-only)
 %       target      - The target source of type source
-%       tir         - The target to interferer ratio (the RMS amplitudes of
+%       tir         - The target-to-interferer ratio (the RMS amplitudes of
 %                     the interferer sources are set to this level wrt the
 %                     target)
 % 
@@ -288,7 +288,7 @@ classdef mixture < iosr.dsp.audio
             if obj.rendered && exist(obj.filename_t,'file')==2 % don't bother calculating
                 signal_t = audioread(obj.filename_t);
             else % calculate
-                signal_t = return_source(obj,obj.target,[]);
+                signal_t = return_source(obj,obj.target);
             end
         end
         
@@ -297,12 +297,11 @@ classdef mixture < iosr.dsp.audio
             if obj.rendered && exist(obj.filename_i,'file')==2 % don't bother calculating
                 signal_i = audioread(obj.filename_i);
             else % calculate
-                Trms = iosr.dsp.rms(obj.target.signal(:)); % Target RMS to match to
                 signal_i = [0 0]; % initialise
                 maxlength = 0; % initialise
                 for n = 1:numel(obj.interferers) % step through each interferer
                     % source signal (ensure 2-channel)
-                    s = obj.return_source(obj.interferers(n),Trms);
+                    s = obj.return_source(obj.interferers(n));
                     % ensure signals are same length, or zero-pad
                     maxlength = max([length(s) maxlength]);
                     s = obj.setlength(s,maxlength);
@@ -311,6 +310,10 @@ classdef mixture < iosr.dsp.audio
                     signal_i = signal_i + s;
                 end
             end
+            Trms = iosr.dsp.rms(obj.signal_t(:));
+            Irms = iosr.dsp.rms(signal_i(:));
+            signal_i = signal_i./(Irms/Trms);
+            signal_i = signal_i./(10^(obj.tir/20));
         end
         
         % return mixture signal
@@ -321,6 +324,10 @@ classdef mixture < iosr.dsp.audio
                 % return target and interferers
                 T = obj.signal_t;
                 I = obj.signal_i;
+                Trms = iosr.dsp.rms(T(:));
+                Irms = iosr.dsp.rms(I(:));
+                I = I./(Irms/Trms);
+                I = I./(10^(obj.tir/20));
                 % mix, ensuring equal length
                 maxlength = max([length(T) length(I)]);
                 signal = obj.setlength(T,maxlength) + obj.setlength(I,maxlength);
@@ -371,7 +378,7 @@ classdef mixture < iosr.dsp.audio
             
         end
         
-        function s = return_source(obj,src,Trms)
+        function s = return_source(obj,src)
         %RETURN_SOURCE Return binaural signal from specified source
             
             % ensure correct channel count
@@ -380,12 +387,7 @@ classdef mixture < iosr.dsp.audio
             else
                 src.numchans = 2; % signal will be mixed directly
             end
-            x = src.signal; % return signal
-            if ~isempty(Trms) % change RMS if requested
-                rms = iosr.dsp.rms(x(:)); % get RMS
-                x = x./(rms/Trms); % match RMS to target
-                x = x./(10^(obj.tir/20)); % adjust gain according to TIR
-            end
+            x = src.signal;
             % return/convolve signal
             if ~src.precomposed && obj.hrtf_is_set() % convolve
                 s = obj.spat(obj.hrtfs,x,src.azimuth,src.elevation,obj.fs);
