@@ -289,6 +289,13 @@ classdef mixture < iosr.dsp.audio
                 signal_t = audioread(obj.filename_t);
             else % calculate
                 signal_t = return_source(obj,obj.target);
+                if obj.tir<0
+                    % attenuate according to TIR
+                    Trms = iosr.dsp.rms(signal_t(:));
+                    Irms = iosr.dsp.rms(obj.signal_i(:));
+                    signal_t = signal_t./(Trms/Irms); % match to interferer
+                    signal_t = signal_t.*(10^(obj.tir/20)); % attenuate
+                end
             end
         end
         
@@ -309,11 +316,14 @@ classdef mixture < iosr.dsp.audio
                     % add source to interferer
                     signal_i = signal_i + s;
                 end
+                if obj.tir>=0
+                    % attenuate according to TIR
+                    Trms = iosr.dsp.rms(obj.signal_t(:));
+                    Irms = iosr.dsp.rms(signal_i(:));
+                    signal_i = signal_i./(Irms/Trms); % match to interferer
+                    signal_i = signal_i./(10^(obj.tir/20)); % attenuate
+                end
             end
-            Trms = iosr.dsp.rms(obj.signal_t(:));
-            Irms = iosr.dsp.rms(signal_i(:));
-            signal_i = signal_i./(Irms/Trms);
-            signal_i = signal_i./(10^(obj.tir/20));
         end
         
         % return mixture signal
@@ -324,10 +334,6 @@ classdef mixture < iosr.dsp.audio
                 % return target and interferers
                 T = obj.signal_t;
                 I = obj.signal_i;
-                Trms = iosr.dsp.rms(T(:));
-                Irms = iosr.dsp.rms(I(:));
-                I = I./(Irms/Trms);
-                I = I./(10^(obj.tir/20));
                 % mix, ensuring equal length
                 maxlength = max([length(T) length(I)]);
                 signal = obj.setlength(T,maxlength) + obj.setlength(I,maxlength);
