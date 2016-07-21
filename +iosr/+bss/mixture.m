@@ -17,13 +17,14 @@ classdef mixture < iosr.dsp.audio
 %       hrtfs       - Path to a SOFA file containing HRTF data
 %       int_fns     - A char array containing the filenames of all of the
 %                     interfering sources (read-only)
-%       interferers - An array of interferer sources of type source
+%       interferers - An array of interferer sources of type
+%                     iosr.bss.source
 %       signal_t    - The sampled data (target) (read-only)
 %       signal_i    - The sampled data (interferer) (read-only)
-%       target      - The target source of type source
-%       tir         - The target-to-interferer ratio (the RMS amplitudes of
-%                     the interferer sources are set to this level wrt the
-%                     target)
+%       target      - The target source of type iosr.bss.source
+%       tir         - The target-to-interferer ratio (target or interferers
+%                     are attenuated in order that their RMS amplitudes
+%                     have this ratio)
 % 
 %   IOSR.BSS.MIXTURE methods:
 %       mixture     - Create the mixture
@@ -46,8 +47,8 @@ classdef mixture < iosr.dsp.audio
     properties (AbortSet)
         hrtfs       % Path to a SOFA file containing HRTF data
         tir = 0     % The target to interferer ratio
-        interferers % An array of interferer sources of type source
-        target      % The target source of type source
+        interferers % An array of interferer sources of type iosr.bss.source
+        target      % The target source of type iosr.bss.source
     end
     
     properties (Dependent, SetAccess = protected)
