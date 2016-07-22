@@ -186,12 +186,12 @@ function [y,b] = matchEQ(x,fs,mag,f,varargin)
             'noct',options.noct,...
             'win',options.win,...
             'units','none');
-        mX = fltas(sqrt(mX));
+        mX = fltas(mX);
         if ~isequal(fX(:),f)
             mag = interp1(f,mag,fX,'spline','extrap');
         end
         mag = fltas(mag);
-        matcher = mag./mX;
+        matcher = sqrt(mag./mX);
         matcher(matcher>1) = matcher(matcher>1).*boostRatio;
         matcher(matcher<1) = matcher(matcher<1).*cutRatio;
         b(:,c) = fir2(options.order,2.*fX./fs,matcher);
