@@ -1,3 +1,8 @@
+# v2.3.1
+
+* Minor tweak to magnitude calculation in matchEQ.
+* Redefined TIR in mixture class as target w.r.t. sum of interfering sources. Updated documentation.
+
 # v2.3
 
 * Corrected code to restore current directory when installation is complete.
