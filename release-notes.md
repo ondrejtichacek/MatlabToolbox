@@ -1,9 +1,9 @@
-# v2.3.1
+# v2.3.1 - 25th July 2016
 
 * Minor tweak to magnitude calculation in matchEQ.
 * Redefined TIR in mixture class as target w.r.t. sum of interfering sources. Updated documentation.
 
-# v2.3
+# v2.3 - 19th July 2016
 
 * Corrected code to restore current directory when installation is complete.
 * Added function to generate BSS mixtures by combining sources in various ways.
