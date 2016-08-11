@@ -89,6 +89,12 @@ function [rt,drr,cte,cfs,edt] = irStats(filename,varargin)
 %   Copyright 2016 University of Surrey.
 
     %% validate inputs and set options
+    
+    % check dependency
+    if exist('octdsgn','file')~=2
+        web('http://uk.mathworks.com/matlabcentral/fileexchange/69-octave','-new','-browser')
+        error('Please download and install the OCTAVE toolbox from: http://uk.mathworks.com/matlabcentral/fileexchange/69-octave')
+    end
 
     % check file exists
     assert(exist(filename,'file')==2,['iosr.acoustics.irStats: ' filename ' does not exist'])
