@@ -6,8 +6,8 @@ classdef boxPlot < matlab.mixin.SetGet
 % 
 %   For each box, the central mark is the median, the box extends
 %   vertically between the 25th and 75th percentiles, the whiskers extend
-%   to the most extreme data that are considered outliers, and the outliers
-%   are plotted individually.
+%   to the most extreme data that are not considered outliers, and the 
+%   outliers are plotted individually.
 % 
 %   BOXPLOT can draw boxes for data in Y for an arbitrary number of
 %   dimensions. If Y is an N-by-P-by-G-by-I-by-J... array then G*I*J*...
