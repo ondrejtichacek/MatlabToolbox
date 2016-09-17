@@ -188,12 +188,19 @@ function [rt,drr,cte,cfs,edt] = irStats(filename,varargin)
 
     % filter and integrate
     for n = 1:numchans
-        t0(n) = find(x(:,n).^2==max(x(:,n).^2)); % find direct impulse
+        % find direct impulse
+        peak = find(x(:,n).^2==max(x(:,n).^2));
+        if numel(peak)>1
+            warning('More than one peak found. Choosing first peak. Are you sure this is an impulse response?')
+        end
+        t0(n) = peak(1);
+        % draw figure
         if options.graph
             scrsz = get(0,'ScreenSize');
             figpos = [((n-1)/numchans)*scrsz(3) scrsz(4) scrsz(3)/2 scrsz(4)];
             figure('Name',['Channel ' num2str(n)],'OuterPosition',figpos);
         end
+        % evaluate impulse in each octave band
         for f = 1:length(cfs)
             y = filter(b(f,:),a(f,:),x(:,n)); % octave-band filter
             temp = cumtrapz(y(end:-1:1).^2); % decay curve
