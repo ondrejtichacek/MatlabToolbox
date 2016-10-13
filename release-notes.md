@@ -1,3 +1,9 @@
+# v2.3.2 - 13th October 2016
+
+* Added check for OCTAVE in irStats, and a basic check for a unique peak.
+* Corrected mistake in boxPlot documentation (pulled from TGabor).
+* Moved important bits of documentation into chXcorr.m (the only separately-documented portion of the code).
+
 # v2.3.1 - 25th July 2016
 
 * Minor tweak to magnitude calculation in matchEQ.
