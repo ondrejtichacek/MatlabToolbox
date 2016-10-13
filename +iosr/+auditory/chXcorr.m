@@ -34,7 +34,9 @@ function [ccg,ic] = chXcorr(hc_L,hc_R,fs,varargin)
 %       The maximum lag of the cross-correlation.
 %   'tau'            : {round(0.01*fs)} | scalar
 %       The time constant of the exponential window used to calculate
-%       running cross-correlations.
+%       running cross-correlations. It is recommended that if norm_flag = 1
+%       then tau >> 1. As can be seen below, as tau -> 1 then 
+%       [aL(m,i,n?1), aR(m,i,n?1)] -> 0, and hence c(m,i,n) -> 1.
 %   'inhib'          : {[]} | array
 %       Specificies an array with which to multiply the cross-correlations
 %       before they are integrated. The value defaults to an empty array,
@@ -50,8 +52,9 @@ function [ccg,ic] = chXcorr(hc_L,hc_R,fs,varargin)
 %       normalised cross-correlations are used.
 %   'inhib_mode'     : {'subtract'} | 'multiply'
 %       Specify how the inhibition is applied. The default 'subtract' will
-%       subtract inhib from the running cross-correlations; 'multiply' will
-%       multiply inhib with the running cross-correlations.
+%       subtract inhib from the running cross-correlations (negative values
+%       are set to zero); 'multiply' will multiply inhib with the running
+%       cross-correlations.
 % 
 %   [CCG,IC] = IOSR.AUDITORY.CHXCORR(...) returns the calculated IC to the
 %   matrix IC. Although the matrix returned is the same size as hc_L, IC is
@@ -60,8 +63,37 @@ function [ccg,ic] = chXcorr(hc_L,hc_R,fs,varargin)
 % 
 %   Algorithm
 % 
-%   See the enclosed documentation for more details on the workings of the
-%   algorithm and an important caveat.
+%   The running normalised cross-correlation is calculated as [1]:
+% 
+%   C(m,i,n) = c(m,i,n) / sqrt( aL(m,i,n) * aR(m,i,n)
+% 
+%   where
+% 
+%   c(m,i,n) = (1/tau) * HC_L(i, max(n+m,n)) * HC_R(i, max(n-m,n)) + ...
+%       (1-1/tau) * c(m,i,n-1),
+% 
+%   aL(m,i,n) = (1/tau) * (HC_L(i, max(n+m,n)))^2 + ...
+%       (1-1/tau) * aL(m,i,n-1),
+% 
+%   aR(m,i,n) = (1/tau) * (HC_R(i, max(n+m,n)))^2 + ...
+%       (1-1/tau) * aR(m,i,n-1),
+% 
+%   i is the frequency index, m is the lag index, and n is the sample
+%   index. The running (non-normalised) cross-correlation is calculated is
+%   simply c(m,i,n).
+% 
+%   The interaural coherence is
+% 
+%   IC(i,n) = max(C(m,i,n)) % (i.e. over m)
+% 
+%   The cross-correlogram is calculated as the sum of cross- correlations
+%   in a given frame:
+% 
+%   CCG(m,i,j) = sum(C(m,i,J),3)
+% 
+%   where
+% 
+%   J = (j-1) * frame_length + 1 : j * frame_length
 % 
 %   References
 % 
@@ -74,8 +106,8 @@ function [ccg,ic] = chXcorr(hc_L,hc_R,fs,varargin)
 %   
 %   C. Hummersone, R. Mason, and T. Brookes, "A comparison of computational
 %       precedence models for source separation in reverberant
-%       environments", in 128th Audio Engineering Society Convention,
-%       London, May 2010, paper 7981.
+%       environments", The Journal of the Audio Engineering Society, vol.
+%       61(7/8), pp.508-520, July 2013.
 
 %   Copyright 2016 University of Surrey.
 
