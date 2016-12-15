@@ -151,7 +151,7 @@ function [s,f] = ltas(x,fs,varargin)
     switch lower(options.units)
         case 'db'
             units = @(x) 10*log10(x);
-            labelY = 'Power spectral density [dB]';
+            labelY = 'Power spectral density [dBFS]';
             yscale = 'linear';
         case 'none'
             units = @(x) x;
