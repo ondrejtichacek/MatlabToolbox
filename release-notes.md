@@ -1,3 +1,7 @@
+# v2.4 - 15th December 2016
+
+Added functionalSpreadPlot for making functional box plots and related plots. Also added statsPlot class and moved some boxPlot methods to the class, as they are shared with functionalSpreadPlot.
+
 # v2.3.2 - 13th October 2016
 
 * Added check for OCTAVE in irStats, and a basic check for a unique peak.
