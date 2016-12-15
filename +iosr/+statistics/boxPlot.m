@@ -1,4 +1,4 @@
-classdef boxPlot < matlab.mixin.SetGet
+classdef (CaseInsensitiveProperties = true) boxPlot < iosr.statistics.statsPlot
 %BOXPLOT Draw a box plot
 %   
 %   Use this class to draw box plots. The class provides a number of
@@ -108,7 +108,7 @@ classdef boxPlot < matlab.mixin.SetGet
 %                             IOSR.STATISTICS.QUANTILE.
 %       notch               - Logical value indicating whether the box
 %                             should have a notch. The notch is centred on
-%                             the median and extends to Â±1.58*IQR/sqrt(N),
+%                             the median and extends to ±1.58*IQR/sqrt(N),
 %                             where N is the sample size (number of non-NaN
 %                             rows in Y). Generally if the notches of two
 %                             boxes do not overlap, this is evidence of a
@@ -259,12 +259,12 @@ classdef boxPlot < matlab.mixin.SetGet
 % 
 %   These properties can be referenced using dot notation - e.g. H.BOXCOLOR
 %   where H is an instance of the BOXPLOT object - or using the SET and GET
-%   methods - e.g. GET(H,'BOXCOLOR'). Both methods are case-sensitive.
+%   methods - e.g. GET(H,'BOXCOLOR'). Both methods are case-insensitive.
 % 
 %   Note that some handles will be empty unless the associated option is
 %   turned on.
 % 
-%     Read-only properties:
+%   Read-only properties:
 %       x                   - The x data.
 %       y                   - The y data.
 %       weights             - Array giving the weights for the data in y.
@@ -318,6 +318,7 @@ classdef boxPlot < matlab.mixin.SetGet
 %                                                   same size as Y, with
 %                                                   true values indicating
 %                                                   outliers
+%                                 'std'          : the standard deviations
 % 
 %   In addition to the above specifications, some options can be specified
 %   for each group. Parameters should be specified as a cell array of size
@@ -341,7 +342,8 @@ classdef boxPlot < matlab.mixin.SetGet
 %   IOSR.STATISTICS.BOXPLOT methods:
 %       boxPlot         - Create the box plot.
 % 
-%   See also IOSR.STATISTICS.TAB2BOX, IOSR.STATISTICS.QUANTILE, COLORMAP.
+%   See also IOSR.STATISTICS.TAB2BOX, IOSR.STATISTICS.QUANTILE, COLORMAP,
+%       IOSR.STATISTICS.FUNCTIONALSPREADPLOT.
 
 %   Copyright 2016 University of Surrey.
     
@@ -393,14 +395,6 @@ classdef boxPlot < matlab.mixin.SetGet
        theme = 'default'            % Control a range of display properties.
        xSeparator = false           % Add a separator line between x groups.
        xSpacing = 'x'               % Determine the x-axis spacing of boxes.
-       handles = struct             % Structure containing handles to plot objects.
-    end
-    
-    properties (SetAccess = private)
-        x                           % The x data.
-        y                           % The y data.
-        weights = [];               % The weights for y.
-        statistics = struct         % Structure containing the statistics used for the box plot.
     end
     
     properties (Access = private)
@@ -408,15 +402,11 @@ classdef boxPlot < matlab.mixin.SetGet
         groupXticks                 % x ticks for every box
         groupDims                   % dimensions of data for each x group
         groupRange                  % scale value range of each x group
-        outDims                     % dimensions of output
         xlabels                     % labels for the x axis
         xticks                      % x-axis tick points
-        ydims                       % dimensions of y
     end
     
     properties (SetAccess = private, Dependent, Hidden)
-        axes = []                   % The parent axes of the box plot.
-        fig = []                    % The parent figure of the box plot.
         addPrctilesHandle = []      % Chart line objects objects for the additional percentiles markers.
         addPrctilesTxtHandle = []   % Text objects for each additional percentile label.
         boxHandles = []             % Patch objects for each box.
@@ -579,66 +569,20 @@ classdef boxPlot < matlab.mixin.SetGet
             %% set x, y, and dims
             
             % check for input data
-            if nargin > 1
-                if isnumeric(varargin{2})
-                    obj.x = varargin{1};
-                    obj.y = varargin{2};
-                    if isvector(obj.y) % ensure y is column vector
-                        obj.y = obj.y(:);
-                    end
-                    start = 3;
-                else
-                    obj.y = varargin{1};
-                    if isvector(obj.y) % ensure y is column vector
-                        obj.y = obj.y(:);
-                    end
-                    obj.x = 1:size(obj.y,2);
-                    start = 2;
-                end
-            else
-                obj.y = varargin{1};
-                if isvector(obj.y) % ensure y is column vector
-                    obj.y = obj.y(:);
-                end
-                obj.x = 1:size(obj.y,2);
-                start = 1;
-            end
-
-            if size(obj.y,1)==1
-                error('Boxes are plotted for each column. Each column in the input has only one data point.')
-            end
-            
-            % check x/y data
-            assert(isvector(obj.x),'x must be a vector');
-            assert(isnumeric(obj.y),'y must be a numeric column vector or matrix');
-            assert(numel(obj.x)==size(obj.y,2),'x must have the same number of elements as y has columns')
-            
-            % size of input
-            obj.ydims = size(obj.y);
+            start = obj.getXY(varargin{:});
             obj.groupDims = obj.ydims(3:end);
-            obj.outDims = obj.ydims; obj.outDims(1) = 1;
             
             % create initial theme
             obj.createTheme();
             
             % check weights
-            if isempty(obj.weights)
-                obj.weights = ones(size(obj.y));
-            else
-                assert(isequal(size(obj.y),size(obj.weights)),'weights must be the same size as y')
-            end
+            obj.checkWeights();
             
             % set properties from varargin
             obj.setProperties(start,nargin,varargin);
             
             % remove NaN columns
-            if isnumeric(obj.x)
-                obj.x = obj.x(~isnan(obj.x));
-                obj.y = obj.y(:,~isnan(obj.x),:);
-                obj.y = reshape(obj.y,obj.ydims);
-                obj.weights = obj.weights(:,~isnan(obj.x),:);
-                obj.weights = reshape(obj.weights,obj.ydims);
-            end
+            obj.removeNaN();
             
             % set x axis properties and labels
             obj.setXprops();
@@ -666,16 +610,6 @@ classdef boxPlot < matlab.mixin.SetGet
         %% dependent handle getters
         
         % these are all deprecated and the handles moved to the obj.handles struct
-        
-        function val = get.axes(obj)
-            warning('''obj.axes'' is deprecated. Use ''obj.handles.axes'' instead.');
-            val = obj.handles.axes;
-        end
-        
-        function val = get.fig(obj)
-            warning('''obj.fig'' is deprecated. Use ''obj.handles.fig'' instead.');
-            val = obj.handles.fig;
-        end
         
         function val = get.addPrctilesHandle(obj)
             warning('''obj.addPrctilesHandle'' is deprecated. Use ''obj.handles.addPrctiles'' instead.');
@@ -1271,7 +1205,7 @@ classdef boxPlot < matlab.mixin.SetGet
         
     end
     
-    methods (Access = private)
+    methods (Access = protected)
         
         function draw(obj,varargin)
         %DRAW main draw function
@@ -1950,147 +1884,32 @@ classdef boxPlot < matlab.mixin.SetGet
         
         function calculateStats(obj)
         %CALCULATESTATS calculate the statistic for the box plot
+        
+            calculateStats@iosr.statistics.statsPlot(obj);
             
             % calculate stats
             obj.statistics.percentile = obj.percentile; % percentile
-            obj.statistics.median = iosr.statistics.quantile(obj.y,.5,[],obj.method,obj.weights); % median
             outsize = size(obj.statistics.median);
             obj.statistics.addPrctiles = zeros([length(obj.addPrctiles) outsize(2:end)]);
-            obj.statistics.mean = zeros(outsize); % sample mean
-            obj.statistics.N = zeros(outsize); % sample size
             obj.statistics.PL = zeros(outsize); % lower percentile
             obj.statistics.PU = zeros(outsize); % upper percentile
-            obj.statistics.Q1 = zeros(outsize); % lower quartile
-            obj.statistics.Q3 = zeros(outsize); % upper quartile
-            obj.statistics.IQR = zeros(outsize); % inter-quartile range
-            obj.statistics.min = zeros(outsize); % minimum (excluding outliers)
-            obj.statistics.max = zeros(outsize); % maximum (excluding outliers)
-            obj.statistics.notch_u = zeros(outsize); % high notch value
-            obj.statistics.notch_l = zeros(outsize); % low notch value
             obj.statistics.outliers = cell(outsize); % outliers (defined as more than 1.5 IQRs above/below each quartile)
             obj.statistics.outliers_IX = false(size(obj.y)); % outlier logical index
             subidx = cell(1,length(obj.outDims));
             for n = 1:prod(obj.outDims)
                 [subidx{:}] = ind2sub(obj.outDims, n);
                 subidxAll = subidx;
-                subidxLogical = subidx;
                 subidxAll{1} = ':';
                 if ~isempty(obj.addPrctiles)
                     obj.statistics.addPrctiles(subidxAll{:}) = iosr.statistics.quantile(obj.y(subidxAll{:}),obj.addPrctiles(:)./100,[],obj.method,obj.weights(subidxAll{:}));
                 end
                 obj.statistics.PL(subidx{:}) = iosr.statistics.quantile(obj.y(subidxAll{:}),min(obj.percentile)/100,[],obj.method,obj.weights(subidxAll{:}));
                 obj.statistics.PU(subidx{:}) = iosr.statistics.quantile(obj.y(subidxAll{:}),max(obj.percentile)/100,[],obj.method,obj.weights(subidxAll{:}));
-                [obj.statistics.Q1(subidx{:}),obj.statistics.N(subidx{:})] = iosr.statistics.quantile(obj.y(subidxAll{:}),0.25,[],obj.method,obj.weights(subidxAll{:}));
-                obj.statistics.Q3(subidx{:}) = iosr.statistics.quantile(obj.y(subidxAll{:}),0.75,[],obj.method,obj.weights(subidxAll{:}));
-                obj.statistics.IQR(subidx{:}) = obj.statistics.Q3(subidx{:})-obj.statistics.Q1(subidx{:});
-                obj.statistics.notch_u(subidx{:}) = obj.statistics.median(subidx{:})+(1.58*obj.statistics.IQR(subidx{:})/sqrt(obj.statistics.N(subidx{:})));
-                obj.statistics.notch_l(subidx{:}) = obj.statistics.median(subidx{:})-(1.58*obj.statistics.IQR(subidx{:})/sqrt(obj.statistics.N(subidx{:})));
-                temp = obj.y(subidxAll{:});
-                obj.statistics.mean(subidx{:}) = mean(temp(~isnan(temp)));
-                if isnumeric(obj.limit)
-                    upper_limit = iosr.statistics.quantile(obj.y(subidxAll{:}),max(obj.limit)/100,[],obj.method,obj.weights(subidxAll{:}));
-                    lower_limit = iosr.statistics.quantile(obj.y(subidxAll{:}),min(obj.limit)/100,[],obj.method,obj.weights(subidxAll{:}));
-                else
-                    switch lower(obj.limit)
-                        case '1.5iqr'
-                            upper_limit = obj.statistics.Q3(subidx{:})+1.5*obj.statistics.IQR(subidx{:});
-                            lower_limit = obj.statistics.Q1(subidx{:})-1.5*obj.statistics.IQR(subidx{:});
-                        case '3iqr'
-                            upper_limit = obj.statistics.Q3(subidx{:})+3*obj.statistics.IQR(subidx{:});
-                            lower_limit = obj.statistics.Q1(subidx{:})-3*obj.statistics.IQR(subidx{:});
-                        case 'none'
-                            upper_limit = Inf;
-                            lower_limit = -Inf;
-                        otherwise
-                            error('Unknown ''limit'': ''%s''',obj.limit)
-                    end
-                end
-                obj.statistics.outliers_IX(subidxAll{:}) = obj.y(subidxAll{:})>upper_limit | obj.y(subidxAll{:})<lower_limit;
-                subidxLogical{1} = ~obj.statistics.outliers_IX(subidxAll{:});
-                obj.statistics.min(subidx{:}) = min(min(obj.y(subidxLogical{:})),obj.statistics.Q1(subidx{:})); % min excl. outliers but not greater than lower quartile
-                obj.statistics.max(subidx{:}) = max(max(obj.y(subidxLogical{:})),obj.statistics.Q3(subidx{:})); % max excl. outliers but not less than upper quartile
-                subidxLogical{1} = obj.statistics.outliers_IX(subidxAll{:});
-                obj.statistics.outliers{subidx{:}} = obj.y(subidxLogical{:});
             end
 
             % check for notches extending beyond box
             if (any(obj.statistics.notch_u(:)>obj.statistics.Q3(:)) || any(obj.statistics.notch_l(:)<obj.statistics.Q1(:))) && (obj.notch || obj.notchLine)
                 warning('Notch extends beyond quartile. Try setting ''notch'' or ''notchLine'' to false')
-            end
-            
-        end
-        
-        function setProperties(obj,start,ngin,vgin)
-        %SETPROPERTIES set box plot properties from constructor
-            
-            % read parameter/value inputs
-            if start < ngin % if parameters are specified
-                % read the acceptable names
-                optionNames = {...
-                    'addPrctiles',...
-                    'addPrctilesColor',...
-                    'addPrctilesLabels',...
-                    'addPrctilesMarkers',...
-                    'addPrctilesSize',...
-                    'addPrctilesTxtSize',...
-                    'boxAlpha',...
-                    'boxColor',...
-                    'boxWidth',...
-                    'groupLabelFontSize',...
-                    'groupLabelHeight',...
-                    'groupLabels',...
-                    'groupWidth',...
-                    'limit',...
-                    'lineColor',...
-                    'lineStyle',...
-                    'lineWidth',...
-                    'meanColor',...
-                    'meanMarker',...
-                    'meanSize',...
-                    'medianColor',...
-                    'method',...
-                    'notch',...
-                    'notchDepth',...
-                    'notchLine',...
-                    'notchLineColor',...
-                    'notchLineStyle',...
-                    'outlierSize',...
-                    'percentile',...
-                    'sampleFontSize',...
-                    'sampleSize',...
-                    'scaleWidth',...
-                    'scatterAlpha',...
-                    'scatterColor',...
-                    'scatterLayer',...
-                    'scatterMarker',...
-                    'scatterSize',...
-                    'showLegend',...
-                    'showMean',...
-                    'showOutliers',...
-                    'showScatter',...
-                    'style',...
-                    'symbolColor',...
-                    'symbolMarker',...
-                    'theme',...
-                    'weights',...
-                    'xSeparator',...
-                    'xSpacing'...
-                    };
-                % count arguments
-                nArgs = length(vgin)-start+1;
-                if round(nArgs/2)~=nArgs/2
-                   error('BOXPLOT needs propertyName/propertyValue pairs')
-                end
-                % overwrite defults
-                for pair = reshape(vgin(start:end),2,[]) % pair is {propName;propValue}
-                   IX = strcmpi(pair{1},optionNames); % find match parameter names
-                   if any(IX)
-                      % do the overwrite
-                      obj.(optionNames{IX}) = pair{2};
-                   else
-                      error('%s is not a recognized parameter name',pair{1})
-                   end
-                end
             end
             
         end
