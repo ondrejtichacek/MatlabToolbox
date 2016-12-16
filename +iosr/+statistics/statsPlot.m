@@ -60,7 +60,7 @@ classdef (Abstract, CaseInsensitiveProperties = true) statsPlot < matlab.mixin.S
         % Get X and Y data from input
         function start = getXY(obj,varargin)
             
-            if nargin > 1
+            if length(varargin) > 1
                 if isnumeric(varargin{2})
                     obj.x = varargin{1};
                     obj.y = varargin{2};
