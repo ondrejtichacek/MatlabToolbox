@@ -55,26 +55,50 @@ classdef (Abstract, CaseInsensitiveProperties = true) statsPlot < matlab.mixin.S
         
     end
     
+    methods (Static, Access = protected)
+        
+        function [ax, axValid, axSet] = parseAxesHandle(varargin)
+            ax = [];
+            axValid = false;
+            axSet = false;
+            if ((isscalar(varargin{1}) && ishghandle(varargin{1},'axes')) ...
+            || isa(varargin{1},'matlab.graphics.axis.AbstractAxes'))
+                axSet = true;
+                ax = handle(varargin{1});
+                if isvalid(varargin{1}(1))
+                    axValid = true;
+                end
+            end
+        end
+        
+    end
+    
     methods (Access = protected)
         
         % Get X and Y data from input
         function start = getXY(obj,varargin)
             
             if length(varargin) > 1
-                if isnumeric(varargin{2})
-                    obj.x = varargin{1};
-                    obj.y = varargin{2};
+                [~, ~, axSet] = obj.parseAxesHandle(varargin{:});
+                if axSet
+                    skip = 1;
+                else
+                    skip = 0;
+                end
+                if isnumeric(varargin{2+skip})
+                    obj.x = varargin{1+skip};
+                    obj.y = varargin{2+skip};
                     if isvector(obj.y) % ensure y is column vector
                         obj.y = obj.y(:);
                     end
-                    start = 3;
+                    start = 3+skip;
                 else
-                    obj.y = varargin{1};
+                    obj.y = varargin{1+skip};
                     if isvector(obj.y) % ensure y is column vector
                         obj.y = obj.y(:);
                     end
                     obj.x = 1:size(obj.y,2);
-                    start = 2;
+                    start = 2+skip;
                 end
             else
                 obj.y = varargin{1};

@@ -453,6 +453,9 @@ classdef (CaseInsensitiveProperties = true) boxPlot < iosr.statistics.statsPlot
         %   IOSR.STATISTICS.BOXPLOT(...,'PARAMETER',VALUE) allows the
         %   plotting options to be specified when the plot is constructed.
         %
+        %   IOSR.STATISTICS.BOXPLOT(AX,...) creates the box plot in the
+        %   axes specified by AX.
+        %
         %   Examples
         % 
         %     Example 1: Basic grouped box plot with legend
@@ -595,8 +598,19 @@ classdef (CaseInsensitiveProperties = true) boxPlot < iosr.statistics.statsPlot
             %% draw
             
             % set handles
-            obj.handles.axes = newplot;
-            obj.handles.fig = gcf;
+            [ax, axValid, axSet] = obj.parseAxesHandle(varargin{:});
+            if axSet
+                if axValid
+                    obj.handles.axes = ax;
+                    axes(obj.handles.axes);
+                    obj.handles.fig = ancestor(obj.handles.axes, 'figure');
+                else
+                    error('Axes handle is invalid.')
+                end
+            else
+                obj.handles.axes = newplot;
+                obj.handles.fig = gcf;
+            end
             
             % draw the box plot
             obj.draw('all');

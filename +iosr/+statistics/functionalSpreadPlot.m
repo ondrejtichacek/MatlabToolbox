@@ -253,6 +253,9 @@ classdef (CaseInsensitiveProperties = true) functionalSpreadPlot < iosr.statisti
         %   IOSR.STATISTICS.FUNCTIONALSPREADPLOT(...,'PARAMETER',VALUE)
         %   allows the plotting options to be specified when the plot is
         %   constructed.
+        %
+        %   IOSR.STATISTICS.FUNCTIONALSPREADPLOT(AX,...) creates the plot
+        %   in the axes specified by AX.
         %   
         %   Examples
         %
@@ -301,8 +304,19 @@ classdef (CaseInsensitiveProperties = true) functionalSpreadPlot < iosr.statisti
             %% draw
             
             % set handles
-            obj.handles.axes = newplot;
-            obj.handles.fig = gcf;
+            [ax, axValid, axSet] = obj.parseAxesHandle(varargin{:});
+            if axSet
+                if axValid
+                    obj.handles.axes = ax;
+                    axes(obj.handles.axes);
+                    obj.handles.fig = ancestor(obj.handles.axes, 'figure');
+                else
+                    error('Axes handle is invalid.')
+                end
+            else
+                obj.handles.axes = newplot;
+                obj.handles.fig = gcf;
+            end
             
             % draw the box plot
             obj.draw();
