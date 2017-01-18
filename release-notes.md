@@ -1,3 +1,7 @@
+# v2.4.1 - 18th January 2017
+
+Added optional first argument to boxPlot and functionalSpreadPlot to specify axes in which to plot.
+
 # v2.4 - 15th December 2016
 
 Added functionalSpreadPlot for making functional box plots and related plots. Also added statsPlot class and moved some boxPlot methods to the class, as they are shared with functionalSpreadPlot.
