@@ -62,7 +62,7 @@ function updateContents(folder)
         if ~isempty(temp)
             temp = temp(cellfun(@(x) isempty(strfind(x,'~')),temp)); % remove temporary files
             temp = temp(cellfun(@(x) isempty(strfind(x,'.mex')),temp)); % remove compiled mex files
-            temp = temp(cellfun(@(x) isempty(strfind(x,filename)),temp)); % remove Contents.m
+            temp = temp(cellfun(@(x) ~strcmp(x,filename),temp)); % remove Contents.m
             H1_lines = [H1_lines; {''}; {''}]; %#ok<AGROW> % insert blank lines where no functions will be
             % determine package prefix
             pkgprefix = strrep(dirs{d},[filesep '+'],'.');
