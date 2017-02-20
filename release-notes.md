@@ -1,3 +1,9 @@
+# 2.5 - 20th February 2017
+
+Generalised iosr.bss.mixture class to support arbitrary spatial configurations, as well as none. Added decomposition properties to allow direct calculation of ideal masks, and application of masks. Currently, only STFT is supported; will add gammatone in due course. Added a number of of measures related to the mask and to signal overlap.
+
+A few bug fixes.
+
 # v2.4.1 - 18th January 2017
 
 Added optional first argument to boxPlot and functionalSpreadPlot to specify axes in which to plot.
