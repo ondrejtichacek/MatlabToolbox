@@ -20,8 +20,8 @@ function [rt,drr,cte,cfs,edt] = irStats(filename,varargin)
 %   impulse response.
 % 
 %   [RT,DRR] = IOSR.ACOUSTICS.IRSTATS(FILENAME) returns the
-%   direct-to-reverberant-ratio DRR for the impulse; DRR is the same size
-%   as RT. This is calculated in the following way:
+%   direct-to-reverberant-ratio DRR for the impulse; DRR is a 1xN vector.
+%   This is calculated in the following way:
 %   
 %   DRR = 10 * log10( X(T0-C:T0+C)^2 / X(T0+C+1:end)^2 )
 % 
@@ -29,7 +29,7 @@ function [rt,drr,cte,cfs,edt] = irStats(filename,varargin)
 %   the direct impulse, and C=2.5ms [1].
 % 
 %   [RT,DRR,CTE] = IOSR.ACOUSTICS.IRSTATS(FILENAME) returns the
-%   early-to-late index CTE for the impulse; CTE is the same size as RT.
+%   early-to-late index CTE for the impulse; CTE is a 1xN vector.
 %   This is calculated in the following way:
 %   
 %   CTE = 10 * log10( X(T0-C:T0+TE)^2 / X(T0+TE+1:end)^2 )
@@ -260,7 +260,7 @@ function [rt,drr,cte,cfs,edt] = irStats(filename,varargin)
         end
         % DRR
         if nargout>=2
-            drr(n) = 10.*log(...
+            drr(n) = 10.*log10(...
                 trapz(x(max(1,t0(n)-correction):t0(n)+correction,n).^2)/...
                 trapz(x(t0(n)+correction+1:end,n).^2)...
                 );
@@ -271,7 +271,7 @@ function [rt,drr,cte,cfs,edt] = irStats(filename,varargin)
                 warning(['Early time limit (te) out of range in channel ' num2str(n) '. Try lowering te.'])
                 cte(n) = NaN;
             else
-                cte(n) = 10.*log(...
+                cte(n) = 10.*log10(...
                     trapz(x(max(1,t0(n)-correction):t0(n)+te).^2)/...
                     trapz(x(t0(n)+te+1:end,n).^2)...
                     );
