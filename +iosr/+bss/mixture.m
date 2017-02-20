@@ -1,38 +1,61 @@
 classdef mixture < iosr.dsp.audio
-%MIXTURE Class of binaural sound source separation mixture.
+%MIXTURE Class of sound source separation mixture.
 % 
-%   iosr.bss.mixture objects contain information about a binaural mixture
-%   of sound sources.
+%   iosr.bss.mixture objects contain information about a mixture of sound
+%   sources.
 % 
 %   IOSR.BSS.MIXTURE is a subclass of IOSR.DSP.AUDIO.
 % 
 %   IOSR.BSS.MIXTURE properties:
-%       azi_sep     - The azimuthal separation of the widest sources
-%                     (read-only)
-%       elevation   - The median elevation of the mixture (read-only)
-%       filename_t  - Name of the target audio file (based on the mixture
-%                     filename) (read-only)
-%       filename_i  - Name of the interferer audio file (based on the
-%                     Mixture filename) (read-only)
-%       hrtfs       - Path to a SOFA file containing HRTF data
-%       int_fns     - A char array containing the filenames of all of the
-%                     interfering sources (read-only)
-%       interferers - An array of interferer sources of type
-%                     iosr.bss.source
-%       signal_t    - The sampled data (target) (read-only)
-%       signal_i    - The sampled data (interferer) (read-only)
-%       target      - The target source of type iosr.bss.source
-%       tir         - The target-to-interferer ratio (target or interferers
-%                     are attenuated in order that their RMS amplitudes
-%                     have this ratio)
+%       azi_sep         - The azimuthal separation of the widest sources
+%                         (read-only)
+%       decomp          - The result of the time-frequency decomposition
+%                         (mixture) (read-only)
+%       decomp_i        - The result of the time-frequency decomposition
+%                         (interferer) (read-only)
+%       decomp_t        - The result of the time-frequency decomposition
+%                         (target) (read-only)
+%       decomposition   - Set the time-frequency decomposition. The options
+%                         are:
+%                             'stft' : short-time fourier transform
+%                                      (default)
+%       elevation       - The median elevation of the mixture (read-only)
+%       filename_t      - Name of the target audio file (based on the
+%                         mixture filename) (read-only)
+%       filename_i      - Name of the interferer audio file (based on the
+%                         Mixture filename) (read-only)
+%       hop             - The hop size used by the selected decomposition
+%       sofa_path       - Path to a SOFA file containing spatialisation data
+%       ibm             - The ideal binary mask
+%       irm             - The ideal ratio mask
+%       int_fns         - A char array containing the filenames of all of
+%                         the interfering sources (read-only)
+%       interferers     - An array of interferer sources of type
+%                         iosr.bss.source
+%       signal_t        - The sampled data (target) (read-only)
+%       signal_i        - The sampled data (interferer) (read-only)
+%       target          - The target source of type iosr.bss.source
+%       tir             - The target-to-interferer ratio (target or
+%                         interferers are attenuated in order that their
+%                         RMS amplitudes have this ratio)
+%       wdo             - The w-disjoint orthogonality (read-only)
+%       wdo_lw          - The loudness-weighted w-disjoint orthogonality
+%                         (read-only)
+%       win             - The window/fft length, window vector, or frame
+%                         length used by the selected decomposition
 % 
 %   IOSR.BSS.MIXTURE methods:
-%       mixture     - Create the mixture
-%       copy        - Create an independent copy of the mixture, its
-%                     sources, and any rendered files
-%       sound_t     - Replay the target
-%       sound_i     - Replay the interferer
-%       write       - Save the mixture to an audio file
+%       mixture         - Create the mixture
+%       copy            - Create an independent copy of the mixture, its
+%                         sources, and any rendered files
+%       applyMask       - Apply a time-frequency mask
+%       sound_t         - Replay the target
+%       sound_i         - Replay the interferer
+%       write           - Save the mixture to an audio file
+%     Static methods:
+%       maskCentroid    - Calculate the centroid of a time-frequency mask
+%       mixWdo          - WDO of a mixture
+%       mixWdo_lw       - LLoudness-weighted WDO of a mixture
 % 
 %   Note that target and interferer properties may be modified as
 %   MIXTURE.TARGET.PROPERTY_NAME and MIXTURE.INTERFERERS(N).PROPERTY_NAME,
@@ -43,26 +66,40 @@ classdef mixture < iosr.dsp.audio
 %   See also IOSR.DSP.AUDIO, IOSR.BSS.SOURCE, SOFALOAD.
 
 %   Copyright 2016 University of Surrey.
+
+%TODO: Add more decompositions.
     
     properties (AbortSet)
-        hrtfs       % Path to a SOFA file containing HRTF data
-        tir = 0     % The target to interferer ratio
-        interferers % An array of interferer sources of type iosr.bss.source
-        target      % The target source of type iosr.bss.source
+        decomposition = 'stft'  % The time-frequency decomposition
+        hop = 512               % The hop size used by the selected decomposition
+        sofa_path               % Path to a SOFA file containing spatialisation data
+        tir = 0                 % The target to interferer ratio
+        interferers             % An array of interferer sources of type iosr.bss.source
+        target                  % The target source of type iosr.bss.source
+        win = 1024              % The window/fft length, window vector, or frame length
     end
     
     properties (Dependent, SetAccess = protected)
-        signal      % The sampled data (read-only)
+        signal          % The sampled data (read-only)
     end
         
     properties (Dependent, SetAccess = private)
         azi_sep     % The azimuthal separation of the widest sources (read-only)
+        decomp      % The result of the time-frequency decomposition (mixture) (read-only)
+        decomp_i    % The result of the time-frequency decomposition (interferer) (read-only)
+        decomp_t    % The result of the time-frequency decomposition (target) (read-only)
         elevation   % The median elevation of the mixture (read-only)
         filename_t  % Name of the target audio file (read-only)
         filename_i  % Name of the interferer audio file (read-only)
+        ibm         % Ideal binary mask (read-only)
+        irm         % Ideal ratio mask (read-only)
         int_fns     % Filenames of all of the interfering sources (read-only)
+        nfft        % Return the fft length (read-only)
+        numchans    % Number of audio channels in the mixture (read-only)
         signal_t    % Return target (read-only)
         signal_i    % Return interferer (read-only)
+        wdo         % Return the w-disjoint orthogonality metric (read-only)
+        wdo_lw      % Return the loudness-weighted w-disjoint orthogonality metric (read-only)
     end
     
     methods
@@ -73,11 +110,10 @@ classdef mixture < iosr.dsp.audio
         % 
         %   OBJ = IOSR.BSS.MIXTURE(TARGET,INTERFERER) creates a mixture by
         %   summing together the target source and the interferer
-        %   source(s). Monaural sources are mixed to stereo. The sources
-        %   are mixed together such that their RMS amplitudes are equal
-        %   (target-to-interferer ratio is 0dB). The OBJ sampling rate is
-        %   equal to the target sampling rate. Information about the
-        %   sources' spatial location is ignored.
+        %   source(s). The sources are mixed together such that their RMS
+        %   amplitudes are equal (target-to-interferer ratio is 0dB). The
+        %   OBJ sampling rate is equal to the target sampling rate.
+        %   Information about the sources' spatial location is ignored.
         %   
         %   OBJ = IOSR.BSS.MIXTURE(...,'PARAMETER',VALUE) allows additional
         %   options to be specified. The options are ({} indicate
@@ -93,7 +129,7 @@ classdef mixture < iosr.dsp.audio
         %           The sampling frequency of the mixture. All HRTFs and/or
         %           sources will be resampled to this frequency each time
         %           the signal is requested.
-        %       'hrtfs'     : {[]} | str
+        %       'sofa_path'     : {[]} | str
         %           A path to a SOFA file containing HRTFs that are
         %           convolved with sources in order to generate the
         %           mixture.
@@ -114,7 +150,7 @@ classdef mixture < iosr.dsp.audio
                 
                 assert(nargin>1,'Not enough input arguments')
         
-                propNames = {'filename','fs','hrtfs','tir'};
+                propNames = {'filename','fs','sofa_path','tir'};
 
                 % set sources
                 obj.target = target;
@@ -122,7 +158,7 @@ classdef mixture < iosr.dsp.audio
 
                 % defaults
                 obj.fs = obj.target.fs;
-                obj.hrtfs = [];
+                obj.sofa_path = [];
                 obj.tir = 0;
                 obj.rendered = false;
 
@@ -132,8 +168,8 @@ classdef mixture < iosr.dsp.audio
                 end
 
                 % set sample rate to SOFA file if set and fs not specified
-                if ~isempty(obj.hrtfs) && all(~strcmp('fs',varargin))
-                    SOFAobj = SOFAload(obj.hrtfs); % load SOFA object
+                if ~isempty(obj.sofa_path) && all(~strcmp('fs',varargin))
+                    SOFAobj = SOFAload(obj.sofa_path); % load SOFA object
                     obj.fs = SOFAobj.Data.SamplingRate;
                 end
 
@@ -149,6 +185,32 @@ classdef mixture < iosr.dsp.audio
                     obj.interferers(n).parent = obj;
                 end
                 
+            end
+            
+        end
+        
+        function z = applyMask(obj,m)
+        %APPLYMASK Apply a time-frequency mask to the mixture
+        % 
+        %   Z = IOSR.BSS.MIXTURE.APPLYMASK(M) applies the time-frequency
+        %   mask M to the mixture. The mixture is transformed according to
+        %   the objects decomposition settings. The transform is then
+        %   multiplied with M. Lastly, the result is then inverse
+        %   transformed (or reynthesised). The time-domain output Z is
+        %   returned.
+            
+            switch lower(obj.decomposition)
+                case 'stft'
+                    s = obj.decompose(obj.signal);
+                    for c = 1:obj.numchans
+                        z(:,c) = iosr.bss.applyMask( ...
+                            s(:,:,c), ...
+                            m(:,:,min(c,size(m,3))), ...
+                            obj.win, ...
+                            obj.hop, ...
+                            obj.fs ...
+                        ); %#ok<AGROW>
+                    end
             end
             
         end
@@ -221,20 +283,32 @@ classdef mixture < iosr.dsp.audio
 
         % set/validate properties
         
+        % set decomposition
+        function set.decomposition(obj,val)
+            assert(strcmpi(val,{'stft'}), '''decomposition'' must be ''stft''');
+            obj.decomposition = val;
+        end
+        
         % set tir
         function set.tir(obj,val)
             obj.tir = val;
             obj.property_changed('tir',val);
         end
         
-        % validate hrtfs
-        function set.hrtfs(obj,val)
-            assert(ischar(val) || isempty(val),'HRTFs must be a char array or an empty array')
-            if ~isempty(obj.hrtfs)
-                assert(exist(val,'file')==2,'HRTFs file does not exist')
+        % set hop
+        function set.hop(obj,val)
+            assert(isscalar(val), '''hop'' must be a scalar')
+            obj.hop = val;
+        end
+        
+        % validate sofa_path
+        function set.sofa_path(obj,val)
+            assert(ischar(val) || isempty(val),'sofa_path must be a char array or an empty array')
+            if ~isempty(obj.sofa_path)
+                assert(exist(val,'file')==2,'SOFA file does not exist')
             end
-            obj.hrtfs = val;
-            obj.property_changed('hrtfs',val);
+            obj.sofa_path = val;
+            obj.property_changed('sofa_path',val);
         end
         
         % validate interferers
@@ -251,7 +325,28 @@ classdef mixture < iosr.dsp.audio
             obj.property_changed('target',val);
         end
         
+        % set window
+        function set.win(obj,val)
+            assert(isvector(val) || isscalar(val), '''win'' must be a vector or scalar')
+            obj.win = val;
+        end
+        
         % dependent properties
+        
+        % get decomposition result (mixture)
+        function s = get.decomp(obj)
+            s = obj.decompose(obj.signal);
+        end
+        
+        % get decomposition result (interferer)
+        function s = get.decomp_i(obj)
+            s = obj.decompose(obj.signal_i);
+        end
+        
+        % get decomposition result (target)
+        function s = get.decomp_t(obj)
+            s = obj.decompose(obj.signal_t);
+        end
         
         % get azimuthal separation
         function s = get.azi_sep(obj)
@@ -273,6 +368,32 @@ classdef mixture < iosr.dsp.audio
             fn = obj.make_interferer_filename(obj.filename);
         end
         
+        % ibm
+        function m = get.ibm(obj)
+            switch lower(obj.decomposition)
+                case 'stft'
+                    for c = 1:obj.numchans
+                        [~,m(:,:,c)] = iosr.bss.idealMasks( ...
+                            iosr.dsp.stft(obj.signal_t(:,c),obj.win,obj.hop,obj.fs), ...
+                            iosr.dsp.stft(obj.signal_i(:,c),obj.win,obj.hop,obj.fs) ...
+                        ); %#ok<AGROW>
+                    end
+            end
+        end
+        
+        % irm
+        function m = get.irm(obj)
+            switch lower(obj.decomposition)
+                case 'stft'
+                    for c = 1:obj.numchans
+                        m(:,:,c) = iosr.bss.idealMasks( ...
+                            iosr.dsp.stft(obj.signal_t(:,c),obj.win,obj.hop,obj.fs), ...
+                            iosr.dsp.stft(obj.signal_i(:,c),obj.win,obj.hop,obj.fs) ...
+                        ); %#ok<AGROW>
+                    end
+            end
+        end
+        
         % filenames of all interferers
         function fns = get.int_fns(obj)
             for n = 1:length(obj.interferers)
@@ -281,6 +402,16 @@ classdef mixture < iosr.dsp.audio
                 else
                     fns = [fns ', ' obj.interferers(n).filename]; %#ok<AGROW>
                 end
+            end
+        end
+        
+        % number of audio channels
+        function n = get.numchans(obj)
+            if obj.hrtf_is_set
+                s = SOFAload(obj.sofa_path);
+                n = size(s.Data.IR,2);
+            else
+                n = max([obj.target.numchans; obj.interferers.numchans]);
             end
         end
         
@@ -305,7 +436,7 @@ classdef mixture < iosr.dsp.audio
             if obj.rendered && exist(obj.filename_i,'file')==2 % don't bother calculating
                 signal_i = audioread(obj.filename_i);
             else % calculate
-                signal_i = [0 0]; % initialise
+                signal_i = zeros(1, obj.numchans); % initialise
                 maxlength = 0; % initialise
                 for n = 1:numel(obj.interferers) % step through each interferer
                     % source signal (ensure 2-channel)
@@ -340,6 +471,92 @@ classdef mixture < iosr.dsp.audio
                 signal = obj.setlength(T,maxlength) + obj.setlength(I,maxlength);
             end
         end
+        
+        % return wdo
+        function w = get.wdo(obj)
+            w = obj.mixWdo(abs(obj.decomp_t), abs(obj.decomp_i));
+        end
+        
+        % return loudness-weighted wdo
+        function w = get.wdo_lw(obj)
+            [S,f] = obj.decompose(obj.signal_t);
+            w = obj.mixWdo_lw(abs(S), abs(obj.decomp_i), f);
+        end
+        
+    end
+    
+    methods (Static, Access = public)
+       
+        function [C, Ct, Cf] = maskCentroids(m, fs, nfft, hop)
+        %MASKCENTROIDS Return various time-frequency mask centroids
+        %
+        %   C = IOSR.BSS.MIXTURE.MASKCENTROIDS(M,FS,NFFT,HOP) returns the
+        %   time-frequency mask centroid C calculated from mask M, sample
+        %   rate FS, FFT-length NFFT, and and hop size HOP. The mask
+        %   centroid is a unitless measure of the centroid of a
+        %   time-frequency mask. The mask centroid is a measure of the
+        %   frequency content of a time-frequency mask.
+        %   
+        %   [C,Ct,Cf] = IOSR.BSS.MIXTURE.MASKCENTROIDS(...) returns the
+        %   time-related spectral centroid (in Hz) Ct and the
+        %   frequency-related spectral centroid (in seconds) Cf.
+        
+            frame_frequency = fs/hop;
+            quefrency = fs/nfft;
+            numchans = size(m,3);
+            f_dct = repmat((((0:size(m,1)-1)./size(m,1)).*frame_frequency)',1,size(m,2));
+            c_dct = repmat(((0:size(m,2)-1)./size(m,2)).*quefrency,size(m,1),1);
+            
+            C = zeros(1, numchans);
+            Ct = zeros(1, numchans);
+            Cf = zeros(1, numchans);
+            for c = 1:numchans
+                X = dct(m(:,:,c));
+                sumX = sum(sum(X));
+                C(c) = sum(sum(X.*f_dct.*c_dct))./sumX;
+                Ct(c) = sum(sum(X.*f_dct))./sumX;
+                Cf(c) = sum(sum(X.*c_dct))./sumX;
+            end
+            
+        end
+        
+        function w = mixWdo(st, si)
+        %MIXWDO Calculate the mixture w-disjoint orthogonality
+        %
+        %   W = IOSR.BSS.MIXTURE.MIXWDO(St,Si) calculates the w-disjoint
+        %   orthogonality of a target and interferer(s) from their
+        %   time-frequency magnitudes St and Si. The w-disjoint
+        %   orthogonality is estimated by the two-dimensional
+        %   cross-correlation coefficient of the source magnitudes.
+            
+            numchans = size(st,3);
+            w = zeros(1,numchans);
+            for c = 1:numchans
+                w(c) = corr2(st,si);
+            end
+            
+        end
+        
+        function w = mixWdo_lw(st, si, f)
+        %MIXWDO_LW Calculate the loudness-weighted w-disjoint orthogonality
+        %
+        %   W = IOSR.BSS.MIXTURE.MIXWDO_LW(St,Si,F) calculates the
+        %   loudness-weighted w-disjoint orthogonality of a target and
+        %   interferer(s) from their time-frequency magnitudes St and Si.
+        %   The weighting is calculated from the ISO-226 65-phon equal
+        %   loudness contour using the frequency vector F containing the
+        %   frequency of each bin of St and Si. The magnitudes are
+        %   multiplied with the loudness-weighting factor prior to
+        %   calculating the WDO.
+        %   
+        %   See also IOSR.AUDITORY.LOUDWEIGHT.
+        
+            lw = iosr.auditory.loudWeight(f(:), 65);
+            lw = repmat(lw,1,size(st,2),size(st,3));
+            w = iosr.bss.mixture.mixWdo(st.*lw,si.*lw);
+            
+        end
+        
     end
         
     methods (Static, Access = private)
@@ -350,7 +567,7 @@ classdef mixture < iosr.dsp.audio
             if length(x)>signal_length % need to crop
                 y = x(1:signal_length,:);
             elseif length(x)<signal_length % need to zero-pad
-                y = [x; zeros(signal_length-length(x)+1,size(x,2))];
+                y = [x; zeros(signal_length-length(x),size(x,2))];
             else % do nothing
                 y = x;
             end
@@ -381,23 +598,23 @@ classdef mixture < iosr.dsp.audio
         function c = hrtf_is_set(obj)
         %HRTF_IS_SET Determine whether HRTFs are specified
             
-            c = ~isempty(obj.hrtfs);
+            c = ~isempty(obj.sofa_path);
             
         end
         
         function s = return_source(obj,src)
-        %RETURN_SOURCE Return binaural signal from specified source
+        %RETURN_SOURCE Return signal from specified source
             
             % ensure correct channel count
             if ~src.precomposed && obj.hrtf_is_set()
-                src.numchans = 1; % signal will be binauralised
+                src.numchans = 1; % signal will be spatialised
             else
-                src.numchans = 2; % signal will be mixed directly
+                src.numchans = obj.numchans; % signal will be mixed directly
             end
             x = src.signal;
             % return/convolve signal
             if ~src.precomposed && obj.hrtf_is_set() % convolve
-                s = obj.spat(obj.hrtfs,x,src.azimuth,src.elevation,obj.fs);
+                s = obj.spat(obj.sofa_path,x,src.azimuth,src.elevation,obj.fs);
             else % return directly
                 s = x; 
             end
@@ -488,6 +705,18 @@ classdef mixture < iosr.dsp.audio
             % Make a deep copy of target and interferers
             cpObj.target = copy(obj.target);
             cpObj.interferers = copy(obj.interferers);
+            
+        end
+        
+        function [s,f,t] = decompose(obj,x)
+        %DECOMPOSE Transform a signal into the time-frequency domain
+            
+            switch lower(obj.decomposition)
+                case 'stft'
+                    for c = 1:obj.numchans
+                        [s(:,:,c),f,t] = iosr.dsp.stft(x(:,c),obj.win,obj.hop,obj.fs); %#ok<AGROW>
+                    end
+            end
             
         end
         
