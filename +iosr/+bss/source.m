@@ -47,7 +47,7 @@ classdef source < iosr.dsp.audio
         % 
         %   OBJ = IOSR.BSS.SOURCE(FILENAME) creates a source whose signal
         %   is contained in the audio file FILENAME. The source will have
-        %   and azimuth and elevation of 0. The number of channels and
+        %   an azimuth and elevation of 0. The number of channels and
         %   sampling frequency will be determined by the audio file.
         % 
         %   OBJ = IOSR.BSS.SOURCE(...,'PARAMETER',VALUE) allows additional
