@@ -17,14 +17,20 @@ classdef mixture < iosr.dsp.audio
 %                         (target) (read-only)
 %       decomposition   - Set the time-frequency decomposition. The options
 %                         are:
-%                             'stft' : short-time fourier transform
-%                                      (default)
+%                             'stft'        : short-time fourier transform
+%                                             (default)
+%                             'gammatone'   : gammatone filterbank
 %       elevation       - The median elevation of the mixture (read-only)
 %       filename_t      - Name of the target audio file (based on the
 %                         mixture filename) (read-only)
 %       filename_i      - Name of the interferer audio file (based on the
 %                         Mixture filename) (read-only)
-%       hop             - The hop size used by the selected decomposition
+%       gammatone       - Settings for the gammatone filterbank
+%                         decomposition. The property is a structure
+%                         containing the following fields:
+%                             'cfs'     : the centre frequencies of the
+%                                         gammatone filterbank
+%                             'frame'   : the frame length (in samples)
 %       sofa_path       - Path to a SOFA file containing spatialisation data
 %       ibm             - The ideal binary mask
 %       irm             - The ideal ratio mask
@@ -34,6 +40,11 @@ classdef mixture < iosr.dsp.audio
 %                         iosr.bss.source
 %       signal_t        - The sampled data (target) (read-only)
 %       signal_i        - The sampled data (interferer) (read-only)
+%       stft            - Settings for the STFT decomposition. The property
+%                         is a structure containing the following fields:
+%                             'hop'     : the hop size of the STFT
+%                             'win'     : the STFT window
+%                         See iosr.dsp.stft for more information
 %       target          - The target source of type iosr.bss.source
 %       tir             - The target-to-interferer ratio (target or
 %                         interferers are attenuated in order that their
@@ -41,8 +52,6 @@ classdef mixture < iosr.dsp.audio
 %       wdo             - The w-disjoint orthogonality (read-only)
 %       wdo_lw          - The loudness-weighted w-disjoint orthogonality
 %                         (read-only)
-%       win             - The window/fft length, window vector, or frame
-%                         length used by the selected decomposition
 % 
 %   IOSR.BSS.MIXTURE methods:
 %       mixture         - Create the mixture
@@ -53,7 +62,7 @@ classdef mixture < iosr.dsp.audio
 %       sound_i         - Replay the interferer
 %       write           - Save the mixture to an audio file
 %     Static methods:
-%       maskCentroid    - Calculate the centroid of a time-frequency mask
+%       maskCentroids   - Calculate the centroids of a time-frequency mask
 %       mixWdo          - WDO of a mixture
 %       mixWdo_lw       - LLoudness-weighted WDO of a mixture
 % 
@@ -63,7 +72,8 @@ classdef mixture < iosr.dsp.audio
 %   ensures that the sampling frequencies are identical for the mixture and
 %   its sources.
 % 
-%   See also IOSR.DSP.AUDIO, IOSR.BSS.SOURCE, SOFALOAD.
+%   See also IOSR.DSP.AUDIO, IOSR.BSS.SOURCE, SOFALOAD, IOSR.DSP.STFT,
+%   IOSR.AUDITORY.GAMMATONEFAST.
 
 %   Copyright 2016 University of Surrey.
 
@@ -71,12 +81,12 @@ classdef mixture < iosr.dsp.audio
     
     properties (AbortSet)
         decomposition = 'stft'  % The time-frequency decomposition
-        hop = 512               % The hop size used by the selected decomposition
+        gammatone = struct      % Settings for the gammatone filterbank decomposition
         sofa_path               % Path to a SOFA file containing spatialisation data
+        stft = struct           % Settings for the STFT decomposition
         tir = 0                 % The target to interferer ratio
         interferers             % An array of interferer sources of type iosr.bss.source
         target                  % The target source of type iosr.bss.source
-        win = 1024              % The window/fft length, window vector, or frame length
     end
     
     properties (Dependent, SetAccess = protected)
@@ -94,7 +104,6 @@ classdef mixture < iosr.dsp.audio
         ibm         % Ideal binary mask (read-only)
         irm         % Ideal ratio mask (read-only)
         int_fns     % Filenames of all of the interfering sources (read-only)
-        nfft        % Return the fft length (read-only)
         numchans    % Number of audio channels in the mixture (read-only)
         signal_t    % Return target (read-only)
         signal_i    % Return interferer (read-only)
@@ -119,13 +128,14 @@ classdef mixture < iosr.dsp.audio
         %   options to be specified. The options are ({} indicate
         %   defaults):
         %   
-        %       'filename'  : {[]} | str
+        %       'decomposition' : {'stft'} | 'gammatone'
+        %       'filename'      : {[]} | str
         %           A filename used when writing the file with the write()
         %           method. The filename may also be set when calling the
         %           write() method. Filenames for the target and interferer
         %           are determined automatically, by append the filename
         %           with '_target' and '_interferer' respectively.
-        %       'fs'        : {obj.target.fs} | scalar
+        %       'fs'            : {obj.target.fs} | scalar
         %           The sampling frequency of the mixture. All HRTFs and/or
         %           sources will be resampled to this frequency each time
         %           the signal is requested.
@@ -133,7 +143,7 @@ classdef mixture < iosr.dsp.audio
         %           A path to a SOFA file containing HRTFs that are
         %           convolved with sources in order to generate the
         %           mixture.
-        %       'tir'       : {0} | scalar
+        %       'tir'           : {0} | scalar
         %           The RMS ratio of the target and interfer sources.
         %           Interferer sources are individually set to this level
         %           prior to their summation.
@@ -145,12 +155,15 @@ classdef mixture < iosr.dsp.audio
         %   and interferer(s) are hence passed by reference. Use the COPY()
         %   method to create an independent copy of the mixture and its
         %   sources.
-        
+            
+            obj.stft.win = 1024;
+            obj.stft.hop = 512;
+            
             if nargin > 0
                 
                 assert(nargin>1,'Not enough input arguments')
         
-                propNames = {'filename','fs','sofa_path','tir'};
+                propNames = {'filename','fs','sofa_path','tir','decomposition'};
 
                 % set sources
                 obj.target = target;
@@ -161,6 +174,10 @@ classdef mixture < iosr.dsp.audio
                 obj.sofa_path = [];
                 obj.tir = 0;
                 obj.rendered = false;
+                
+                % gammatone settings
+                obj.gammatone.cfs = iosr.auditory.makeErbCFs(20, obj.fs/2, 64);
+                obj.gammatone.frame = round(0.01*obj.fs);
 
                 % read parameter/value inputs
                 if nargin > 1 % if parameters are specified
@@ -201,17 +218,32 @@ classdef mixture < iosr.dsp.audio
             
             switch lower(obj.decomposition)
                 case 'stft'
-                    s = obj.decompose(obj.signal);
                     for c = 1:obj.numchans
+                        s = obj.decomp;
                         z(:,c) = iosr.bss.applyMask( ...
                             s(:,:,c), ...
                             m(:,:,min(c,size(m,3))), ...
-                            obj.win, ...
-                            obj.hop, ...
+                            obj.stft.win, ...
+                            obj.stft.hop, ...
                             obj.fs ...
                         ); %#ok<AGROW>
                     end
+                case 'gammatone'
+                    x = obj.signal;
+                    for c = 1:obj.numchans
+                        z(:,c) =  iosr.bss.resynthesise( ...
+                            x(:,c), ...
+                            obj.fs, ...
+                            iosr.bss.cfs2fcs(obj.gammatone.cfs, obj.fs), ...
+                            m(:,:,c), ...
+                            'frame_length', obj.gammatone.frame, ...
+                            'filter', 'sinc', ...
+                            'kernel', gausswin(obj.gammatone.frame) ...
+                        ); %#ok<AGROW>
+                    end
             end
+            
+            z = obj.setlength(z,length(obj.signal));
             
         end
         
@@ -244,17 +276,23 @@ classdef mixture < iosr.dsp.audio
         %   IOSR.BSS.MIXTURE.WRITE(FILENAME) uses the specified FILENAME
         %   and updates MIXTURE.FILENAME.
             
-            if obj.rendered && exist('filename','var')==1
-                obj.ensure_path(filename);
-                copyfile(obj.filename,filename);
-                copyfile(obj.filename_t,obj.make_target_filename(filename));
-                copyfile(obj.filename_i,obj.make_interferer_filename(filename));
-                obj.filename = filename;
+            if exist('filename','var')==1
+                fn = filename;
             else
-                if exist('filename','var')==1
-                    obj.filename = filename;
+                fn = obj.filename;
+            end
+        
+            if obj.rendered
+                if strcmp(obj.filename,fn)
+                    % nothing to do
+                else
+                    copyfile(obj.filename,fn);
+                    copyfile(obj.filename_t,obj.make_target_filename(fn));
+                    copyfile(obj.filename_i,obj.make_interferer_filename(fn));
                 end
+            else
                 % check filename is valid
+                obj.filename = fn;
                 assert(ischar(obj.filename) && ~isempty(obj.filename),'FILENAME must be a non-empty char array. Set filename as MIXTURE.FILENAME or MIXTURE.WRITE(FILENAME).')
 
                 % normalize
@@ -285,7 +323,7 @@ classdef mixture < iosr.dsp.audio
         
         % set decomposition
         function set.decomposition(obj,val)
-            assert(strcmpi(val,{'stft'}), '''decomposition'' must be ''stft''');
+            assert(any(strcmpi(val,{'stft','gammatone'})), '''decomposition'' must be ''stft'' or ''gammatone''');
             obj.decomposition = val;
         end
         
@@ -293,12 +331,6 @@ classdef mixture < iosr.dsp.audio
         function set.tir(obj,val)
             obj.tir = val;
             obj.property_changed('tir',val);
-        end
-        
-        % set hop
-        function set.hop(obj,val)
-            assert(isscalar(val), '''hop'' must be a scalar')
-            obj.hop = val;
         end
         
         % validate sofa_path
@@ -323,12 +355,6 @@ classdef mixture < iosr.dsp.audio
             assert(isa(val,'iosr.bss.source') && numel(val)==1,'TARGET must be a scalar of type source')
             obj.target = val;
             obj.property_changed('target',val);
-        end
-        
-        % set window
-        function set.win(obj,val)
-            assert(isvector(val) || isscalar(val), '''win'' must be a vector or scalar')
-            obj.win = val;
         end
         
         % dependent properties
@@ -374,10 +400,14 @@ classdef mixture < iosr.dsp.audio
                 case 'stft'
                     for c = 1:obj.numchans
                         [~,m(:,:,c)] = iosr.bss.idealMasks( ...
-                            iosr.dsp.stft(obj.signal_t(:,c),obj.win,obj.hop,obj.fs), ...
-                            iosr.dsp.stft(obj.signal_i(:,c),obj.win,obj.hop,obj.fs) ...
+                            obj.decomp_t(:,:,c), ...
+                            obj.decomp_i(:,:,c) ...
                         ); %#ok<AGROW>
                     end
+                case 'gammatone'
+                    T = obj.tf_power(obj.decomp_t);
+                    I = obj.tf_power(obj.decomp_i);
+                    m = +(T>I);
             end
         end
         
@@ -387,11 +417,16 @@ classdef mixture < iosr.dsp.audio
                 case 'stft'
                     for c = 1:obj.numchans
                         m(:,:,c) = iosr.bss.idealMasks( ...
-                            iosr.dsp.stft(obj.signal_t(:,c),obj.win,obj.hop,obj.fs), ...
-                            iosr.dsp.stft(obj.signal_i(:,c),obj.win,obj.hop,obj.fs) ...
+                            obj.decomp_t(:,:,c), ...
+                            obj.decomp_i(:,:,c) ...
                         ); %#ok<AGROW>
                     end
+                case 'gammatone'
+                    T = obj.tf_power(obj.decomp_t);
+                    I = obj.tf_power(obj.decomp_i);
+                    m = T./(T+I);
             end
+            m(isnan(m) | isinf(m)) = 0;
         end
         
         % filenames of all interferers
@@ -411,7 +446,8 @@ classdef mixture < iosr.dsp.audio
                 s = SOFAload(obj.sofa_path);
                 n = size(s.Data.IR,2);
             else
-                n = max([obj.target.numchans; obj.interferers.numchans]);
+                iN = [obj.interferers.numchans];
+                n = max([obj.target.numchans; iN(:)]);
             end
         end
         
@@ -487,7 +523,7 @@ classdef mixture < iosr.dsp.audio
     
     methods (Static, Access = public)
        
-        function [C, Ct, Cf] = maskCentroids(m, fs, nfft, hop)
+        function [C, Ct, Cf] = maskCentroids(m, fs, decomposition, nfft, hop)
         %MASKCENTROIDS Return various time-frequency mask centroids
         %
         %   C = IOSR.BSS.MIXTURE.MASKCENTROIDS(M,FS,NFFT,HOP) returns the
@@ -500,10 +536,23 @@ classdef mixture < iosr.dsp.audio
         %   [C,Ct,Cf] = IOSR.BSS.MIXTURE.MASKCENTROIDS(...) returns the
         %   time-related spectral centroid (in Hz) Ct and the
         %   frequency-related spectral centroid (in seconds) Cf.
+            
+            assert(ischar(decomposition),'''decomposition'' must be a char array')
         
-            frame_frequency = fs/hop;
-            quefrency = fs/nfft;
             numchans = size(m,3);
+            frame_frequency = fs/hop;
+            switch lower(decomposition)
+                case 'stft'
+                    assert(isscalar(nfft),'''nfft'' must be a scalar')
+                    quefrency = fs/nfft;
+                case 'gammatone'
+                    assert(isvector(nfft),'''cfs'' must be a scalar')
+                    cfs = nfft;
+                    quefrency = fs/min(diff(iosr.auditory.erbRate2hz(cfs)));
+                otherwise
+                    error('Unknown decomposition.')
+            end
+            
             f_dct = repmat((((0:size(m,1)-1)./size(m,1)).*frame_frequency)',1,size(m,2));
             c_dct = repmat(((0:size(m,2)-1)./size(m,2)).*quefrency,size(m,1),1);
             
@@ -511,7 +560,7 @@ classdef mixture < iosr.dsp.audio
             Ct = zeros(1, numchans);
             Cf = zeros(1, numchans);
             for c = 1:numchans
-                X = dct(m(:,:,c));
+                X = abs(dct(m(:,:,c)));
                 sumX = sum(sum(X));
                 C(c) = sum(sum(X.*f_dct.*c_dct))./sumX;
                 Ct(c) = sum(sum(X.*f_dct))./sumX;
@@ -551,8 +600,8 @@ classdef mixture < iosr.dsp.audio
         %   
         %   See also IOSR.AUDITORY.LOUDWEIGHT.
         
-            lw = iosr.auditory.loudWeight(f(:), 65);
-            lw = repmat(lw,1,size(st,2),size(st,3));
+            lw = iosr.auditory.loudWeight(f(:), 65)';
+            lw = repmat(lw,size(st,1),1,size(st,3));
             w = iosr.bss.mixture.mixWdo(st.*lw,si.*lw);
             
         end
@@ -567,7 +616,7 @@ classdef mixture < iosr.dsp.audio
             if length(x)>signal_length % need to crop
                 y = x(1:signal_length,:);
             elseif length(x)<signal_length % need to zero-pad
-                y = [x; zeros(signal_length-length(x),size(x,2))];
+                y = [x; zeros(signal_length-size(x,1),size(x,2))];
             else % do nothing
                 y = x;
             end
@@ -661,6 +710,67 @@ classdef mixture < iosr.dsp.audio
             
         end
         
+        function [s,f,t] = decompose(obj,x)
+        %DECOMPOSE Transform a signal into the time-frequency domain
+            
+            switch lower(obj.decomposition)
+                case 'stft'
+                    for c = 1:obj.numchans
+                        [s(:,:,c),f,t] = iosr.dsp.stft(x(:,c), obj.stft.win, obj.stft.hop, obj.fs); %#ok<AGROW>
+                    end
+                case 'gammatone'
+                    f = obj.gammatone.cfs;
+                    t = (0:length(x)-1)./obj.fs;
+                    for c = 1:obj.numchans
+                        s(:,:,c) = iosr.auditory.gammatoneFast(x(:,c), obj.gammatone.cfs, obj.fs); %#ok<AGROW>
+                    end
+            end
+            
+        end
+        
+        function y = tf_power(obj,x)
+        %TF_POWER Calculate TF power.
+        
+            switch lower(obj.decomposition)
+                case 'gammatone'
+                    frame_count = obj.get_frame_count(size(x,1));
+                    y = zeros(frame_count,length(obj.gammatone.cfs),obj.numchans);
+                    for m = 1:frame_count
+                        samples = (m-1)*obj.gammatone.frame+1:m*obj.gammatone.frame;
+                        for N = 1:size(x,3)
+                            y(m,:,N) = sum(x(samples,:,N).^2);
+                        end
+                    end
+                case 'stft'
+                    y = abs(x).^2;
+            end
+            
+        end
+        
+        function frame_count = get_frame_count(obj, signal_length)
+        %GET_FRAME_COUNT Calculate number of T-F frames.
+
+            assert(isscalar(signal_length),'SIGNAL_LENGTH must be a scalar.')
+
+            switch lower(obj.decomposition)
+                case 'gammatone'
+                    frame_count = floor(signal_length/obj.gammatone.frame);
+                case 'stft'
+                    frame_count = fix((signal_length-(obj.nfft-obj.stft.hop))/obj.stft.hop);
+            end
+
+        end
+        
+        function n = nfft(obj)
+        %NFFT return the fft length
+        
+            if isscalar(obj.stft.win)
+                n = obj.stft.win;
+            else
+                n = length(obj.stft.win);
+            end
+        end
+        
     end
     
     methods(Access = protected)
@@ -705,18 +815,6 @@ classdef mixture < iosr.dsp.audio
             % Make a deep copy of target and interferers
             cpObj.target = copy(obj.target);
             cpObj.interferers = copy(obj.interferers);
-            
-        end
-        
-        function [s,f,t] = decompose(obj,x)
-        %DECOMPOSE Transform a signal into the time-frequency domain
-            
-            switch lower(obj.decomposition)
-                case 'stft'
-                    for c = 1:obj.numchans
-                        [s(:,:,c),f,t] = iosr.dsp.stft(x(:,c),obj.win,obj.hop,obj.fs); %#ok<AGROW>
-                    end
-            end
             
         end
         

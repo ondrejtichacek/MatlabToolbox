@@ -25,10 +25,10 @@ function mixtures = generateMixtures(targets,interferers,varargin)
 %       'elevations'    : {zeros([1 size(interferers,2)+1])} | array
 %           Specify the elevations for the sources. The specification is
 %           the same as for azimuths.
-%       'hrtfs'         : {[]} | str | cellstr
-%           Specify the HRTFs for the mixtures as one or more paths to SOFA
-%           files containing HRTFs that are convolved with sources. The
-%           parameter should be a character array or cell array of strings.
+%       'sofa_paths'         : {[]} | str | cellstr
+%           Specify the SOFA file(s) for the mixtures as one or more paths
+%           to SOFA files that are convolved with sources. The parameter
+%           should be a character array or cell array of strings.
 %       'tirs'          : {0} | scalar
 %           Specify the target-to-interferer ratios for the mixtures.
 % 
@@ -55,6 +55,8 @@ function mixtures = generateMixtures(targets,interferers,varargin)
 %           combined in all combinations. This is the 'all' option, which
 %           is the default when variables have rows of different lengths;
 %           variables may each have any number of rows.
+%       'decomposition' : {'stft'} | 'gammatone'
+%           The time-frequency decomposition used by the mixture.
 %       'folder'        : {'mixture_temp'} | str
 %           Specify a folder for storing cached audio files.
 % 
@@ -67,7 +69,7 @@ function mixtures = generateMixtures(targets,interferers,varargin)
     IVs = struct(...
         'azimuths',zeros([1 size(interferers,2)+1]),...
         'elevations',zeros([1 size(interferers,2)+1]),...
-        'hrtfs',[],...
+        'sofa_paths',[],...
         'tirs',0);
     
     settings = struct(...
@@ -89,11 +91,11 @@ function mixtures = generateMixtures(targets,interferers,varargin)
     assert(size(IVs.azimuths,2)==size(interferers,2)+1,'''AZIMUTHS'' should have one more column than INTERFERERS')
     assert(isnumeric(IVs.elevations),'''ELEVATIONS'' must be numeric')
     assert(size(IVs.elevations,2)==size(interferers,2)+1,'''ELEVATIONS'' should have one more column than INTERFERERS')
-    if ~isempty(IVs.hrtfs)
-        if ischar(IVs.hrtfs)
-            IVs.hrtfs = cellstr(IVs.hrtfs);
-        elseif ~iscellstr(IVs.hrtfs)
-            error('HRTFs should be a char array or cell array of strings')
+    if ~isempty(IVs.sofa_paths)
+        if ischar(IVs.sofa_paths)
+            IVs.sofa_paths = cellstr(IVs.sofa_paths);
+        elseif ~iscellstr(IVs.sofa_paths)
+            error('sofa_paths should be a char array or cell array of strings')
         end
     end
     
@@ -106,7 +108,7 @@ function mixtures = generateMixtures(targets,interferers,varargin)
     assert(isnumeric(settings.fs) && isscalar(settings.fs),'''FS'' must be a numeric scalar')
     
     % ensure column vectors
-    IVs.hrtfs = IVs.hrtfs(:);
+    IVs.sofa_paths = IVs.sofa_paths(:);
     IVs.tirs = IVs.tirs(:);
     targets = targets(:);
     
@@ -137,7 +139,7 @@ function mixtures = generateMixtures(targets,interferers,varargin)
             IV_size = [...
                 max(numel(IVs.targets),1),...
                 max(size(IVs.interferers,1),1),...
-                max(numel(IVs.hrtfs),1),...
+                max(numel(IVs.sofa_paths),1),...
                 max(numel(IVs.tirs),1),...
                 max(size(IVs.azimuths,1),1),...
                 max(size(IVs.elevations,1),1)];
@@ -159,7 +161,7 @@ function mixtures = generateMixtures(targets,interferers,varargin)
                 % read rows together
                 target = copy(getIV('targets',m));
                 interferer = copy(getIV('interferers',m));
-                hrtf = getIV('hrtfs',m);
+                sofa_path = getIV('sofa_paths',m);
                 tir = getIV('tirs',m);
                 azimuths = getIV('azimuths',m);
                 elevations = getIV('elevations',m);
@@ -168,7 +170,7 @@ function mixtures = generateMixtures(targets,interferers,varargin)
                 [n,p,q,r,s,t] = ind2sub(IV_size,m);
                 target = copy(getIV('targets',n));
                 interferer = copy(getIV('interferers',p));
-                hrtf = getIV('hrtfs',q);
+                sofa_path = getIV('sofa_paths',q);
                 tir = getIV('tirs',r);
                 azimuths = getIV('azimuths',s);
                 elevations = getIV('elevations',t);
@@ -185,7 +187,7 @@ function mixtures = generateMixtures(targets,interferers,varargin)
             target,...
             interferer,...
             'tir',tir,...
-            'hrtfs',hrtf,...
+            'sofa_path',sofa_path,...
             'fs',settings.fs);
         if settings.cache
             mixtures(m,1).write([settings.folder filesep sprintf('mixture-%05d.wav',m)])
