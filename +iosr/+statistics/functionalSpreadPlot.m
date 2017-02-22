@@ -89,7 +89,7 @@ classdef (CaseInsensitiveProperties = true) functionalSpreadPlot < iosr.statisti
 %       outerLineStyle          - Specifies the style of the outer lines.
 %                                 See 'mainLineStyle' for details of how to
 %                                 specify styles. The default is '-'.
-%       outerLineWidth          - Specifies the width of the central line.
+%       outerLineWidth          - Specifies the width of the outer line.
 %                                 See 'mainLineWidth' for details of how to
 %                                 specify widths. The default is 1.
 %       outerMode               - Specifies what the outer lines plot. The
@@ -130,6 +130,10 @@ classdef (CaseInsensitiveProperties = true) functionalSpreadPlot < iosr.statisti
 %                                 See 'addPrctilesLineColor' for details of
 %                                 how to specify colors. The default is
 %                                 'auto'.
+%       whiskers                - Specify whether the box is connected to
+%                                 the outer line via a whisker. The line is
+%                                 drawn with the same style as the outer
+%                                 line. The default is false.
 % 
 %   These properties can be referenced using dot notation - e.g. H.BOXCOLOR
 %   where H is an instance of the FUNCTIONALSPREADPLOT object - or using
@@ -224,6 +228,7 @@ classdef (CaseInsensitiveProperties = true) functionalSpreadPlot < iosr.statisti
         spreadColor = 'auto'            % The color of the shaded regions.
         spreadBorderLineWidth = 1       % The width of the shaded region borders.
         spreadBorderLineColor = 'none'  % The color of the shaded region borders.
+        whiskers = false                % Specify whether a line connects the box to the outer lines.
     end
     
     methods
@@ -539,6 +544,14 @@ classdef (CaseInsensitiveProperties = true) functionalSpreadPlot < iosr.statisti
             obj.draw();
         end
         
+        % whisker
+        
+        function set.whiskers(obj,val)
+            assert(islogical(val) && isscalar(val), '''whisker'' must be a scalar and logical');
+            obj.whiskers = val;
+            obj.draw();
+        end
+        
     end
     
     methods (Access = protected)
@@ -709,6 +722,37 @@ classdef (CaseInsensitiveProperties = true) functionalSpreadPlot < iosr.statisti
                             'LineWidth', obj.outlierLineWidth{n});
                     end
                     
+                end
+                
+                % draw whiskers
+                if obj.whiskers
+                    x_range = max(obj.x) - min(obj.x);
+                    whisker_xlim = [(min(obj.x) + (1/3)*x_range) (max(obj.x) - (1/3)*x_range)];
+                    if nlines==1
+                        whisker_x = mean(whisker_xlim);
+                    else
+                        whisker_x = linspace(whisker_xlim(1),whisker_xlim(2),nlines);
+                    end
+                    for n = nlines:-1:1
+                        % interpolate to find y
+                        [~,x_ix] = min(abs(obj.x-whisker_x(n)));
+                        x_interp_ix = [max(1,x_ix-1) x_ix min(length(obj.x),x_ix+1)];
+                        x_interp_ix = unique(x_interp_ix);
+                        y_i_l = interp1(obj.x(x_interp_ix), obj.statistics.inner_l(:,x_interp_ix,n), whisker_x(n));
+                        y_i_u = interp1(obj.x(x_interp_ix), obj.statistics.inner_u(:,x_interp_ix,n), whisker_x(n));
+                        y_o_l = interp1(obj.x(x_interp_ix), obj.statistics.outer_l(:,x_interp_ix,n), whisker_x(n));
+                        y_o_u = interp1(obj.x(x_interp_ix), obj.statistics.outer_u(:,x_interp_ix,n), whisker_x(n));
+                        
+                        % plot
+                        line([whisker_x(n) whisker_x(n)],[y_i_l y_o_l], ...
+                            'linestyle', obj.outerLineStyle{n}, ...
+                            'linewidth', obj.outerLineWidth{n}, ...
+                            'color', obj.outerLineColor{n});
+                        line([whisker_x(n) whisker_x(n)],[y_i_u y_o_u], ...
+                            'linestyle', obj.outerLineStyle{n}, ...
+                            'linewidth', obj.outerLineWidth{n}, ...
+                            'color', obj.outerLineColor{n});
+                    end
                 end
             
             end
