@@ -64,7 +64,8 @@ classdef mixture < iosr.dsp.audio
 %     Static methods:
 %       maskCentroids   - Calculate the centroids of a time-frequency mask
 %       mixWdo          - WDO of a mixture
-%       mixWdo_lw       - LLoudness-weighted WDO of a mixture
+%       mixWdo_lw       - Loudness-weighted WDO of a mixture
+%       mixWdo_Stokes   - WDO calculated using Stokes's method
 % 
 %   Note that target and interferer properties may be modified as
 %   MIXTURE.TARGET.PROPERTY_NAME and MIXTURE.INTERFERERS(N).PROPERTY_NAME,
@@ -109,6 +110,7 @@ classdef mixture < iosr.dsp.audio
         signal_i    % Return interferer (read-only)
         wdo         % Return the w-disjoint orthogonality metric (read-only)
         wdo_lw      % Return the loudness-weighted w-disjoint orthogonality metric (read-only)
+        wdo_stokes  % Return the w-disjoint orthogonality metric using Stokes's method (read-only)
     end
     
     methods
@@ -519,6 +521,11 @@ classdef mixture < iosr.dsp.audio
             w = obj.mixWdo_lw(abs(S), abs(obj.decomp_i), f);
         end
         
+        % return Stokes's wdo
+        function w = get.wdo_stokes(obj)
+            w = obj.mixWdo_Stokes(obj.irm);
+        end
+        
     end
     
     methods (Static, Access = public)
@@ -603,6 +610,27 @@ classdef mixture < iosr.dsp.audio
             lw = iosr.auditory.loudWeight(f(:), 65)';
             lw = repmat(lw,size(st,1),1,size(st,3));
             w = iosr.bss.mixture.mixWdo(st.*lw,si.*lw);
+            
+        end
+        
+        function w = mixWdo_Stokes(irm)
+        %MIXWDO_LW Calculate the w-disjoint orthogonality using Stokes's method
+        %
+        %   W = IOSR.BSS.MIXTURE.MIXWDO_STOKES(IRM) calculates the
+        %   w-disjoint orthogonality using Stokes's method [1]. The method
+        %   utilizes the ideal ratio mask (IRM), which is 0.5 when the
+        %   target and interferer have equal power, and tends towards 0 or
+        %   1 when either source dominates.
+        %   
+        %   References
+        %
+        %   [1] Stokes, Tobias W. (2015) Improving the perceptual quality
+        %       of single-channel blind audio source separation. Doctoral
+        %       thesis, University of Surrey.
+        
+            h = hist(irm(:),11)./numel(irm);
+            hw = [0:0.2:1 0.8:-0.2:0];
+            w = sum(h.*hw);
             
         end
         
