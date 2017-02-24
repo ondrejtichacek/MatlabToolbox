@@ -60,7 +60,7 @@ classdef mixture < iosr.dsp.audio
 %       applyMask       - Apply a time-frequency mask
 %       sound_t         - Replay the target
 %       sound_i         - Replay the interferer
-%       write           - Save the mixture to an audio file
+%       write           - Save the mixture, target, and interferers to audio files
 %     Static methods:
 %       maskCentroids   - Calculate the centroids of a time-frequency mask
 %       mixWdo          - WDO of a mixture
@@ -220,8 +220,13 @@ classdef mixture < iosr.dsp.audio
             
             switch lower(obj.decomposition)
                 case 'stft'
+                    s = obj.decomp;
+                    % correct dims
+                    d = obj.stft_shifted_dims(s);
+                    s = ipermute(s,d);
+                    m = ipermute(m,d);
                     for c = 1:obj.numchans
-                        s = obj.decomp;
+                        % apply mask
                         z(:,c) = iosr.bss.applyMask( ...
                             s(:,:,c), ...
                             m(:,:,min(c,size(m,3))), ...
@@ -588,7 +593,7 @@ classdef mixture < iosr.dsp.audio
             numchans = size(st,3);
             w = zeros(1,numchans);
             for c = 1:numchans
-                w(c) = corr2(st,si);
+                w(c) = corr2(st(:,:,c),si(:,:,c));
             end
             
         end
@@ -641,10 +646,12 @@ classdef mixture < iosr.dsp.audio
         function y = setlength(x,signal_length)
         %SETLENGTH Crop or zero-pad signal to specified length
             
-            if length(x)>signal_length % need to crop
-                y = x(1:signal_length,:);
-            elseif length(x)<signal_length % need to zero-pad
-                y = [x; zeros(signal_length-size(x,1),size(x,2))];
+            d = size(x);
+            if size(x,1)>signal_length % need to crop
+                subsidx = [{1:signal_length} repmat({':'},1,ndims(x)-1)];
+                y = x(subsidx{:});
+            elseif size(x,1)<signal_length % need to zero-pad
+                y = [x; zeros([signal_length-size(x,1),d(2:end)])];
             else % do nothing
                 y = x;
             end
@@ -666,6 +673,17 @@ classdef mixture < iosr.dsp.audio
                 end
             end
             
+        end
+        
+        function d = stft_shifted_dims(s)
+        %STFT_SHIFTED_DIMS Dim order for STFT, swapping time and bins
+        
+            dim_order = 1:ndims(s);
+            if ndims(s) > 2 %#ok<ISMAT>
+                d = dim_order([2 1 dim_order(3:end)]);
+            else
+                d = [2 1];
+            end
         end
         
     end
@@ -746,6 +764,9 @@ classdef mixture < iosr.dsp.audio
                     for c = 1:obj.numchans
                         [s(:,:,c),f,t] = iosr.dsp.stft(x(:,c), obj.stft.win, obj.stft.hop, obj.fs); %#ok<AGROW>
                     end
+                    % put time down column
+                    s = permute(s,obj.stft_shifted_dims(s));
+                    s = obj.setlength(s, obj.get_frame_count(length(obj.signal)));
                 case 'gammatone'
                     f = obj.gammatone.cfs;
                     t = (0:length(x)-1)./obj.fs;
