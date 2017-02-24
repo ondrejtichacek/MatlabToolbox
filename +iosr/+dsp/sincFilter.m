@@ -1,26 +1,27 @@
 function y = sincFilter(x,Wn,N,dim)
 %SINCFILTER Apply a near-ideal low-pass or band-pass brickwall filter
 % 
-%   Y = IOSR.DSP.SINCFILTER(X,WN) applies a near-ideal low-pass or band-pass
-%   brickwall filter to the array X, operating along the first non-
-%   singleton dimension (e.g. down the columns of a matrix). The cutoff
-%   frequency/frequencies are specified in WN. If WN is a scalar, then WN
-%   specifies the low-pass cutoff frequency. If WN is a two-element vector,
-%   then WN specifies the band-pass interval. WN must be 0.0 < WN < 1.0,
-%   with 1.0 corresponding to half the sample rate.
+%   Y = IOSR.DSP.SINCFILTER(X,WN) applies a near-ideal low-pass or
+%   band-pass brickwall filter to the array X, operating along the first
+%   non-singleton dimension (e.g. down the columns of a matrix). The
+%   cutoff frequency/frequencies are specified in WN. If WN is a scalar,
+%   then WN specifies the low-pass cutoff frequency. If WN is a two-element
+%   vector, then WN specifies the band-pass interval. WN must be 0.0 < WN <
+%   1.0, with 1.0 corresponding to half the sample rate.
 % 
 %   The filtering is performed by FFT-based convolution of X with the sinc
 %   kernel.
 % 
-%   Y = IOSR.DSP.SINCFILTER(X,WN,N) allows the filter length to be specified. The
-%   default value is N=1025. The filter length is doubled in the band-pass
-%   case. In either case, if N is even the final filter length will be N+1.
+%   Y = IOSR.DSP.SINCFILTER(X,WN,N) allows the filter length to be
+%   specified. The default value is N=1025. The filter length is doubled in
+%   the band-pass case. In either case, if N is even the final filter
+%   length will be N+1.
 %   
-%   Y = IOSR.DSP.SINCFILTER(X,WN,N,DIM) applies the specified filter along the
-%   dimension DIM.
+%   Y = IOSR.DSP.SINCFILTER(X,WN,N,DIM) applies the specified filter along
+%   the dimension DIM.
 %   
-%   Y = IOSR.DSP.SINCFILTER(X,WN,[],DIM) applies the specified filter along the
-%   dimension dim using the default filter length.
+%   Y = IOSR.DSP.SINCFILTER(X,WN,[],DIM) applies the specified filter along
+%   the dimension dim using the default filter length.
 % 
 %   See also IOSR.DSP.CONVFFT.
 
