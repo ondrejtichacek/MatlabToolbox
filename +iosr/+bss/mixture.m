@@ -343,7 +343,7 @@ classdef mixture < iosr.dsp.audio
         % validate sofa_path
         function set.sofa_path(obj,val)
             assert(ischar(val) || isempty(val),'sofa_path must be a char array or an empty array')
-            if ~isempty(obj.sofa_path)
+            if ~isempty(val)
                 assert(exist(val,'file')==2,'SOFA file does not exist')
             end
             obj.sofa_path = val;
