@@ -1,13 +1,12 @@
 function mixtures = generateMixtures(targets,interferers,varargin)
 %GENERATEMIXTURES Generate arrays of mixtures from targets and interferers.
 % 
-%   MIXTURES = IOSR.BSS.GENERATEMIXTURES(TARGETS,INTERFERERS)
-%   generates an array of MIXTURE objects using
-%   SOURCE objects TARGETS and INTERFERERS. Each mixture
-%   object contains one target element and SIZE(INTERFERERS,2) interferers
-%   (i.e. as many interferers as there are columns). How the inputs are
-%   combined is determined by the nature of the input or the 'COMBINE'
-%   setting (see below).
+%   MIXTURES = IOSR.BSS.GENERATEMIXTURES(TARGETS,INTERFERERS) generates an
+%   array of MIXTURE objects using SOURCE objects TARGETS and INTERFERERS.
+%   Each mixture object contains one target element and SIZE(INTERFERERS,2)
+%   interferers (i.e. as many interferers as there are columns). How the
+%   inputs are combined is determined by the nature of the input or the
+%   'COMBINE' setting (see below).
 % 
 %   MIXTURES = IOSR.BSS.GENERATEMIXTURES(...,'PARAMETER',VALUE) allows
 %   additional options to be specified. The options are listed below ({}
@@ -36,8 +35,6 @@ function mixtures = generateMixtures(targets,interferers,varargin)
 % 
 %     Settings
 % 
-%       'fs'            : {16000} | scalar
-%           Sampling frequency for the mixtures.
 %       'cache'         : {false} | true
 %           Specify whether mixtures are cached as audio files, rather than
 %           being rendered ono-the-fly. The setting invokes
@@ -59,6 +56,8 @@ function mixtures = generateMixtures(targets,interferers,varargin)
 %           The time-frequency decomposition used by the mixture.
 %       'folder'        : {'mixture_temp'} | str
 %           Specify a folder for storing cached audio files.
+%       'fs'            : {16000} | scalar
+%           Sampling frequency for the mixtures.
 % 
 %   See also IOSR.BSS.MIXTURE, IOSR.BSS.SOURCE, SOFALOAD.
 
@@ -76,13 +75,27 @@ function mixtures = generateMixtures(targets,interferers,varargin)
         'fs',16000,...
         'cache',false,...
         'combine',[],...
-        'folder','mixture_temp');
+        'folder','mixture_temp',...
+        'decomposition','stft',...
+        'stft',[],...
+        'gammatone',[]);
+    
+    validOptions = [fieldnames(IVs); fieldnames(settings)];
     
     %% check input
     
     % overwrite the default settings
-    IVs = overwrite(IVs,varargin);
-    settings = overwrite(settings,varargin);
+    IVs = overwrite(IVs,validOptions,varargin);
+    settings = overwrite(settings,validOptions,varargin);
+    
+    % decomposition settings
+    if isempty(settings.stft)
+        settings.stft = struct('win',1024','hop',512);
+    end
+    if isempty(settings.gammatone)
+        settings.gammatone = struct('cfs',iosr.auditory.makeErbCFs(20, settings.fs/2, 64),...
+            'frame',round(0.01*settings.fs));
+    end
     
     % check IVs
     assert(isa(targets,'iosr.bss.source'),'''TARGETS'' must be of type iosr.bss.source')
@@ -188,7 +201,8 @@ function mixtures = generateMixtures(targets,interferers,varargin)
             interferer,...
             'tir',tir,...
             'sofa_path',sofa_path,...
-            'fs',settings.fs);
+            'fs',settings.fs,...
+            'decomposition',settings.decomposition);
         if settings.cache
             mixtures(m,1).write([settings.folder filesep sprintf('mixture-%05d.wav',m)])
         end
@@ -220,7 +234,7 @@ function mixtures = generateMixtures(targets,interferers,varargin)
     
 end
 
-function opts = overwrite(opts,vgin)
+function opts = overwrite(opts,validOptions,vgin)
 %OVERWRITE overwrite the default properties with varargin
 
     % count arguments
@@ -235,6 +249,10 @@ function opts = overwrite(opts,vgin)
        if any(IX)
           % do the overwrite
           opts.(optionNames{IX}) = pair{2};
+       else
+           if ~any(strcmpi(pair{1},validOptions))
+                error(['''' pair{1} ''' is not a valid option'])
+           end
        end
     end
 end
