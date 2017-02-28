@@ -141,10 +141,26 @@ classdef mixture < iosr.dsp.audio
         %           The sampling frequency of the mixture. All HRTFs and/or
         %           sources will be resampled to this frequency each time
         %           the signal is requested.
+        %       'gammatone'
+        %           Settings for the gammatone filterbank
+        %           decomposition. The property is a structure
+        %           containing the following fields:
+        %               'cfs'     : the centre frequencies of the gammatone
+        %                           filterbank (default is 64 channels
+        %                           equally spaced on the ERB scale between
+        %                           20Hz and the Nyquist limit
+        %               'frame'   : the frame length (in samples) (the
+        %                           default is 20ms)
         %       'sofa_path'     : {[]} | str
         %           A path to a SOFA file containing HRTFs that are
         %           convolved with sources in order to generate the
         %           mixture.
+        %       'stft'
+        %           Settings for the STFT decomposition. The property
+        %           is a structure containing the following fields:
+        %               'hop'     : the hop size of the STFT (the default
+        %                           is 512)
+        %               'win'     : the STFT window (the default is 1024)
         %       'tir'           : {0} | scalar
         %           The RMS ratio of the target and interfer sources.
         %           Interferer sources are individually set to this level
@@ -158,14 +174,11 @@ classdef mixture < iosr.dsp.audio
         %   method to create an independent copy of the mixture and its
         %   sources.
             
-            obj.stft.win = 1024;
-            obj.stft.hop = 512;
-            
             if nargin > 0
                 
                 assert(nargin>1,'Not enough input arguments')
         
-                propNames = {'filename','fs','sofa_path','tir','decomposition'};
+                propNames = {'filename','fs','sofa_path','tir','decomposition','stft','gammatone'};
 
                 % set sources
                 obj.target = target;
@@ -177,9 +190,12 @@ classdef mixture < iosr.dsp.audio
                 obj.tir = 0;
                 obj.rendered = false;
                 
-                % gammatone settings
-                obj.gammatone.cfs = iosr.auditory.makeErbCFs(20, obj.fs/2, 64);
-                obj.gammatone.frame = round(0.01*obj.fs);
+                % default decomposition settings
+                obj.stft = struct('win',1024,'hop',512);
+                obj.gammatone = struct(...
+                    'cfs',iosr.auditory.makeErbCFs(20, obj.fs/2, 64),...
+                    'frame', round(0.01*obj.fs)...
+                );
 
                 % read parameter/value inputs
                 if nargin > 1 % if parameters are specified
@@ -332,6 +348,20 @@ classdef mixture < iosr.dsp.audio
         function set.decomposition(obj,val)
             assert(any(strcmpi(val,{'stft','gammatone'})), '''decomposition'' must be ''stft'' or ''gammatone''');
             obj.decomposition = val;
+        end
+        
+        % set gammatone settings
+        function set.gammatone(obj,val)
+            assert(isstruct(val),'''gammatone'' must be a struct')
+            assert(all(ismember(fieldnames(val)',{'cfs','frame'})),'gammatone structure must contain fields ''cfs'' and ''frame''')
+            obj.gammatone = val;
+        end
+        
+        % set stft settings
+        function set.stft(obj,val)
+            assert(isstruct(val),'''stft'' must be a struct')
+            assert(all(ismember(fieldnames(val)',{'win','hop'})),'stft structure must contain fields ''win'' and ''hop''')
+            obj.stft = val;
         end
         
         % set tir
