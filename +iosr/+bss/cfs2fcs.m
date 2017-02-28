@@ -22,7 +22,11 @@ function fcs = cfs2fcs(cfs,fs)
     imp(1) = 1;
 
     % Pre-allocate gammatone transfer functions
-    z_length = floor(imp_length/2)+1;
+    if mod(imp_length,2)==0
+        z_length = (imp_length/2)+1;
+    else
+        z_length = (imp_length+1)/2;
+    end
     gamma_TF = zeros(z_length,length(cfs));
 
     % Filter impulses and calculate transfer functions.
@@ -34,16 +38,20 @@ function fcs = cfs2fcs(cfs,fs)
         gamma_TF(:,i) = temp(1:z_length);
     end
 
-    f = ((0:z_length)./imp_length).*fs;
+    f = ((0:z_length-1)./imp_length).*fs;
 
     % Find cross point of transfer functions.
     for i = 1:length(cfs)-1
         IX = f>cfs(i) & f<cfs(i+1);
-        f_temp = f(IX);
-        low_TF = gamma_TF(IX,i);
-        high_TF = gamma_TF(IX,i+1);
-        diff_TF = abs(high_TF-low_TF);
-        fcs(i) = f_temp(find(diff_TF==min(diff_TF),1,'first'));
+        if sum(IX)>0
+            f_temp = f(IX);
+            low_TF = gamma_TF(IX,i);
+            high_TF = gamma_TF(IX,i+1);
+            diff_TF = abs(high_TF-low_TF);
+            fcs(i) = f_temp(find(diff_TF==min(diff_TF),1,'first'));
+        else
+            fcs(i) = mean([cfs(i) cfs(i+1)]);
+        end
     end
 
 end
