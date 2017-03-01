@@ -1,5 +1,5 @@
 function [w_itd,w_ild] = dupWeight(f)
-%DUP_WEIGHT Calculate duplex weighting coefficients for ITD and ILD
+%DUPWEIGHT Calculate duplex weighting coefficients for ITD and ILD
 % 
 %   [W_ITD,W_ILD] = IOSR.AUDITORY.DUPWEIGHT(F) returns the weighting
 %   coefficients for ITD W_ITD and ILD W_ILD for frequency F (Hz).
