@@ -28,7 +28,7 @@ function [s,f] = ltas(x,fs,varargin)
 %       'scaling' : {'none'} | 'max0'
 %           Specifies any scaling to apply to S. By default, no scaling is
 %           applied. If scaling is set to 'max0', S will be scaled to have
-%           a maximum value of 0.
+%           a maximum value of 0dB.
 %       'units'   : {dB} | 'none'
 %           Specifies the output units. By default the PSD is calculated in
 %           dB. Otherwise the PSD is returned directly.
@@ -151,10 +151,12 @@ function [s,f] = ltas(x,fs,varargin)
     switch lower(options.units)
         case 'db'
             units = @(x) 10*log10(x);
+            max0scale = @(s) s-max(s(:));
             labelY = 'Power spectral density [dBFS]';
             yscale = 'linear';
         case 'none'
             units = @(x) x;
+            max0scale = @(s) s./max(s(:));
             labelY = 'Power spectral density';
             yscale = 'log';
         otherwise
@@ -176,7 +178,7 @@ function [s,f] = ltas(x,fs,varargin)
     % scale output
     switch lower(options.scaling)
         case 'max0'
-            s = s-max(s(:));
+            s = max0scale(s);
         case 'none'
             % do nothing
         otherwise
