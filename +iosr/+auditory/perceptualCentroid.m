@@ -1,8 +1,8 @@
 function [PCmean,PCstd,PCmax,PCmin,N] = perceptualCentroid(x,fs,varargin)
 %PERCEPTUALCENTROID Perceptual spectral centroid
 % 
-%   PCMEAN = IOSR.AUDITORY.PERCEPTUALCENTROID(X,FS) calculates the spectral centroid of
-%   signal X, sampled at FS, with respect to mel-frequency.
+%   PCMEAN = IOSR.AUDITORY.PERCEPTUALCENTROID(X,FS) calculates the spectral
+%   centroid of signal X, sampled at FS, with respect to mel-frequency.
 %   
 %   The algorithm first calculates the spectrogram of X; each segment has
 %   the maximum of length(X)/8 or 2048 samples, calculated with 50% overlap
