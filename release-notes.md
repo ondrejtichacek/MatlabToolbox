@@ -1,3 +1,7 @@
+# v2.6 - 6th March 2017
+
+Added a number of properties and methods to the iosr.bss.mixture class. Added whiskers property to iosr.statistics.functionalSpreadPlot. Other minor bug fixes and documentation improvements.
+
 # v2.5 - 20th February 2017
 
 Generalised iosr.bss.mixture class to support arbitrary spatial configurations, as well as none. Added decomposition properties to allow direct calculation of ideal masks, and application of masks. Currently, only STFT is supported; will add gammatone in due course. Added a number of of measures related to the mask and to signal overlap.
