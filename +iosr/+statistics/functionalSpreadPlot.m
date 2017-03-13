@@ -1,13 +1,18 @@
-classdef (CaseInsensitiveProperties = true) functionalSpreadPlot < iosr.statistics.statsPlot
+classdef (CaseInsensitiveProperties = true) functionalSpreadPlot < ...
+        iosr.statistics.functionalPlot
 %FUNCTIONALSPREADPLOT Draw a functional plot showing data spread
 % 
 %   Use this class to plot the spread of data against a continuous
-%   variable. Measures of spread include parametric and non-parametric
-%   confidence intervals, interquartile range, standard deviation, or
-%   arbitrary percentile ranges. The spread is indicated by a shaded
-%   region, with a central line indicating the primary metric (mean or
-%   median). Additional percentiles, outliers, and the limits of the data
-%   may also be plotted.
+%   variable. The class calculates point-wise statistics for each set of
+%   observations on the x-axis. For a plot of spread where each _function_
+%   constitutes a single observation, use IOSR.STATISTICS.FUNCTIONALBOXPLOT
+%   instead.
+% 
+%   Measures of spread include parametric and non-parametric confidence
+%   intervals, interquartile range, standard deviation, or arbitrary
+%   percentile ranges. The spread is indicated by a shaded region, with a
+%   central line indicating the primary metric (mean or median). Additional
+%   percentiles, outliers, and the limits of the data may also be plotted.
 % 
 %   FUNCTIONALSPREADPLOT operates on the array Y, which is an N-by-M-by-P
 %   array, where N observations for each X value are stored in the columns
@@ -61,21 +66,6 @@ classdef (CaseInsensitiveProperties = true) functionalSpreadPlot < iosr.statisti
 %                                 that define outliers. See 
 %                                 iosr.statistics.boxPlot. The default is
 %                                 '1.5IQR'.
-%       mainLineColor           - Specifies the color of the central line.
-%                                 See 'addPrctilesLineColor' for details of
-%                                 how to specify colors. The default is
-%                                 'auto'.
-%       mainLineStyle           - Specifies the style of the central line.
-%                                 The property may be specified as a char
-%                                 array (e.g. '-'), or as a length-P cell
-%                                 vector of strings (if passing line styles
-%                                 for each functional plot). The default is
-%                                 '-'.
-%       mainLineWidth           - Specifies the width of the central line.
-%                                 The property may be specified as a
-%                                 length-P numeric vector, or as a cell
-%                                 vector (if passing line styles for each
-%                                 functional plot). The default is 1.
 %       mainMode                - Specifies the statistic used for the
 %                                 central line. The options are 'median' or
 %                                 'mean'. The default is 'median'.
@@ -83,15 +73,6 @@ classdef (CaseInsensitiveProperties = true) functionalSpreadPlot < iosr.statisti
 %                                 the quantiles. See
 %                                 iosr.statistics.boxPlot. The default is
 %                                 'R-8'.
-%       outerLineColor          - Specifies the color of the outer lines.
-%                                 See 'mainLineStyle' for details of how to
-%                                 specify colors. The default is 'auto'.
-%       outerLineStyle          - Specifies the style of the outer lines.
-%                                 See 'mainLineStyle' for details of how to
-%                                 specify styles. The default is '-'.
-%       outerLineWidth          - Specifies the width of the outer line.
-%                                 See 'mainLineWidth' for details of how to
-%                                 specify widths. The default is 1.
 %       outerMode               - Specifies what the outer lines plot. The
 %                                 options are 'limit' (plots the limits of
 %                                 the data as determined by the 'limit'
@@ -106,34 +87,15 @@ classdef (CaseInsensitiveProperties = true) functionalSpreadPlot < iosr.statisti
 %                                 faces. See 'addPrctilesLineColor' for
 %                                 details of how to specify colors. The
 %                                 default is 'none'.
-%       outlierLineWidth        - Specifies the width of the outlier marker
-%                                 line. See 'mainLineWidth' for details of
-%                                 how to specify widths. The default is 1.
 %       outlierMarker           - Specifies the markers used for the
 %                                 outliers. The property may be specified
 %                                 as a char array (e.g. '+'), or as a cell
 %                                 array of strings (if passing markers for
 %                                 each functional plot). The default is
 %                                 '+'.
-%       showOutliers            - Specifies whether to show outliers. The
-%                                 property must be a logical value. The
-%                                 default is false.
-%       spreadAlpha             - Set the alpha of the shaded region(s).
-%                                 The default is 0.5.
-%       spreadBorderLineColor   - Set the color of the shaded regions'
-%                                 / region's border. See
-%                                 'addPrctilesLineColor' for details of how
-%                                 to specify colors. The default is 'none'.
-%       spreadBorderLineWidth   - Set the width of the shaded regions'
-%                                 / region's border. The default is 1.
-%       spreadColor             - Set the color of the shaded region(s).
-%                                 See 'addPrctilesLineColor' for details of
-%                                 how to specify colors. The default is
-%                                 'auto'.
-%       whiskers                - Specify whether the box is connected to
-%                                 the outer line via a whisker. The line is
-%                                 drawn with the same style as the outer
-%                                 line. The default is false.
+% 
+%   Additional properties are inherited from
+%   IOSR.STATISTICS.FUNCTIONALPLOT.
 % 
 %   These properties can be referenced using dot notation - e.g. H.BOXCOLOR
 %   where H is an instance of the FUNCTIONALSPREADPLOT object - or using
@@ -152,10 +114,10 @@ classdef (CaseInsensitiveProperties = true) functionalSpreadPlot < iosr.statisti
 %                             for the box plot. With the exception of
 %                             'outliers', 'outliers_IX', 'addPrctiles', and
 %                             'percentile' noted below, each field contains
-%                             a 1-by-P-by-G-by-I-by-J... numeric array of
-%                             values (identical to that returned by
+%                             a 1-by-M-by-P numeric array of values
+%                             (identical to that returned by
 %                             IOSR.STATISTICS.QUANTILE). The fields are:
-%                                 'addPrctiles'   : an A-by-P-by-G... array
+%                                 'addPrctiles'   : an A-by-M-by-P... array
 %                                                   containing the
 %                                                   additional percentile
 %                                                   values specified by the
@@ -189,7 +151,7 @@ classdef (CaseInsensitiveProperties = true) functionalSpreadPlot < iosr.statisti
 %                                                   limit
 %                                 'outer_u'       : the outer line's upper
 %                                                   limit
-%                                 'outliers'      : a 1-by-P-by-G cell
+%                                 'outliers'      : a 1-by-M-by-P cell
 %                                                   array of outlier values
 %                                 'outliers_IX'   : a logical array, the
 %                                                   same size as Y, with
@@ -200,35 +162,27 @@ classdef (CaseInsensitiveProperties = true) functionalSpreadPlot < iosr.statisti
 %   IOSR.STATISTICS.FUNCTIONALSPREADPLOT methods:
 %       functionalSpreadPlot    - Create the plot.
 % 
-%   See also IOSR.STATISTICS.BOXPLOT, IOSR.STATISTICS.QUANTILE.
+%   See also IOSR.STATISTICS.BOXPLOT, IOSR.STATISTICS.QUANTILE,
+%   IOSR.STATISTICS.FUNCTIONALPLOT, IOSR.STATISTICS.FUNCTIONALBOXPLOT.
 
     properties (AbortSet)
         addPrctiles = []                % Additional percentiles to plot.
         addPrctilesLineColor = 'auto'   % Colors for the additional percentile lines.
         addPrctilesLineStyle = '--'     % Styles for the additional percentile lines.
-        addPrctilesLineWidth = 0.5      % Widths for the additional percentile lines
+        addPrctilesLineWidth = 0.5      % Widths for the additional percentile lines.
         innerMode = 'quartile'          % Mode of the central shaded area.
         limit = '1.5IQR'                % Mode indicating the limits that define outliers.
-        mainLineColor = 'auto'          % The color of the central line.
-        mainLineStyle = '-'             % The style of the central line.
-        mainLineWidth = 1               % The width of the central line.
         mainMode = 'median'             % The statistic used for the central line.
         method = 'R-8'                  % The method used to calculate the quantiles.
-        outerLineColor = 'auto'         % The color of the outer lines.
-        outerLineStyle = ':'            % The style of the outer lines.
-        outerLineWidth = 0.5            % The width of the outer lines.
         outerMode = 'limit'             % Mode of the outer lines.
         outlierSize = 36                % Size of the outlier markers.
         outlierEdgeColor = 'auto'       % Color of the outlier marker edges.
         outlierFaceColor = 'none'       % Color of the outlier marker faces.
-        outlierLineWidth = 1            % Width of the outlier marker edges.
         outlierMarker = '+'             % The outlier marker.
-        showOutliers = true             % Turn outliers on and off.
-        spreadAlpha = 0.5               % The alpha of the shaded regions.
-        spreadColor = 'auto'            % The color of the shaded regions.
-        spreadBorderLineWidth = 1       % The width of the shaded region borders.
-        spreadBorderLineColor = 'none'  % The color of the shaded region borders.
-        whiskers = false                % Specify whether a line connects the box to the outer lines.
+    end
+    
+    properties (Access = private)
+        data
     end
     
     methods
@@ -309,19 +263,7 @@ classdef (CaseInsensitiveProperties = true) functionalSpreadPlot < iosr.statisti
             %% draw
             
             % set handles
-            [ax, axValid, axSet] = obj.parseAxesHandle(varargin{:});
-            if axSet
-                if axValid
-                    obj.handles.axes = ax;
-                    axes(obj.handles.axes);
-                    obj.handles.fig = ancestor(obj.handles.axes, 'figure');
-                else
-                    error('Axes handle is invalid.')
-                end
-            else
-                obj.handles.axes = newplot;
-                obj.handles.fig = gcf;
-            end
+            obj.parseAxesHandle(varargin{:});
             
             % draw the box plot
             obj.draw();
@@ -357,12 +299,6 @@ classdef (CaseInsensitiveProperties = true) functionalSpreadPlot < iosr.statisti
         function set.outerMode(obj, val)
             obj.outerMode = val;
             obj.calculateStats();
-            obj.draw();
-        end
-        
-        function set.showOutliers(obj, val)
-            assert(numel(val)==1 && islogical(val), '''SHOWOUTLIERS'' must be true or false.')
-            obj.showOutliers = val;
             obj.draw();
         end
         
@@ -404,64 +340,6 @@ classdef (CaseInsensitiveProperties = true) functionalSpreadPlot < iosr.statisti
             obj.draw();
         end
         
-        % main lines
-        
-        function val = get.mainLineColor(obj)
-            val = obj.parseColor(obj.mainLineColor);
-        end
-        
-        function set.mainLineColor(obj,val)
-            obj.mainLineColor = val;
-            obj.draw();
-        end
-        
-        function val = get.mainLineStyle(obj)
-            val = obj.parseProps(obj.mainLineStyle, false);
-        end
-        
-        function set.mainLineStyle(obj,val)
-            obj.mainLineStyle = val;
-            obj.draw();
-        end
-        
-        function val = get.mainLineWidth(obj)
-            val = obj.parseProps(obj.mainLineWidth, false);
-        end
-        
-        function set.mainLineWidth(obj,val)
-            obj.mainLineWidth = val;
-            obj.draw();
-        end
-        
-        % outer lines
-        
-        function val = get.outerLineColor(obj)
-            val = obj.parseColor(obj.outerLineColor);
-        end
-        
-        function set.outerLineColor(obj,val)
-            obj.outerLineColor = val;
-            obj.draw();
-        end
-        
-        function val = get.outerLineStyle(obj)
-            val = obj.parseProps(obj.outerLineStyle, false);
-        end
-        
-        function set.outerLineStyle(obj,val)
-            obj.outerLineStyle = val;
-            obj.draw();
-        end
-        
-        function val = get.outerLineWidth(obj)
-            val = obj.parseProps(obj.outerLineWidth, false);
-        end
-        
-        function set.outerLineWidth(obj,val)
-            obj.outerLineWidth = val;
-            obj.draw();
-        end
-        
         % outlier settings
 
         function set.outlierSize(obj,val)
@@ -488,67 +366,12 @@ classdef (CaseInsensitiveProperties = true) functionalSpreadPlot < iosr.statisti
             obj.draw();
         end
         
-        function val = get.outlierLineWidth(obj)
-            val = obj.parseProps(obj.outlierLineWidth, false);
-        end
-        
-        function set.outlierLineWidth(obj,val)
-            obj.outlierLineWidth = val;
-            obj.draw();
-        end
-        
         function val = get.outlierMarker(obj)
             val = obj.parseProps(obj.outlierMarker, false);
         end
         
         function set.outlierMarker(obj,val)
             obj.outlierMarker = val;
-            obj.draw();
-        end
-        
-        % set spread alpha
-        
-        function set.spreadAlpha(obj,val)
-            assert(isnumeric(val) && isscalar(val),'''SPREADALPHA'' must be a numeric scalar')
-            obj.spreadAlpha = val;
-            obj.draw();
-        end
-        
-        % get/set spread line colors
-        
-        function val = get.spreadBorderLineColor(obj)
-            val = obj.parseColor(obj.spreadBorderLineColor);
-        end
-        
-        function set.spreadBorderLineColor(obj,val)
-            obj.spreadBorderLineColor = val;
-            obj.draw();
-        end
-        
-        % set spread border line width
-        
-        function set.spreadBorderLineWidth(obj,val)
-            assert(isnumeric(val) && isscalar(val),'''SPREADBORDERLINEWIDTH'' must be a numeric scalar')
-            obj.spreadBorderLineWidth = val;
-            obj.draw();
-        end
-        
-        % set/get spread color
-        
-        function val = get.spreadColor(obj)
-            val = obj.parseColor(obj.spreadColor);
-        end
-        
-        function set.spreadColor(obj,val)
-            obj.spreadColor = val;
-            obj.draw();
-        end
-        
-        % whisker
-        
-        function set.whiskers(obj,val)
-            assert(islogical(val) && isscalar(val), '''whisker'' must be a scalar and logical');
-            obj.whiskers = val;
             obj.draw();
         end
         
@@ -561,7 +384,7 @@ classdef (CaseInsensitiveProperties = true) functionalSpreadPlot < iosr.statisti
             
             % Most statistics are calculated in the base class
             calculateStats@iosr.statistics.statsPlot(obj);
-            
+
             % Calculate specific stats
             outsize = size(obj.statistics.median);
             obj.statistics.addPrctiles = zeros([length(obj.addPrctiles) outsize(2:end)]);
@@ -575,7 +398,7 @@ classdef (CaseInsensitiveProperties = true) functionalSpreadPlot < iosr.statisti
                 [subidx{:}] = ind2sub(obj.outDims, n);
                 subidxAll = subidx;
                 subidxAll{1} = ':';
-                
+
                 if isnumeric(obj.innerMode)
                     assert(numel(obj.innerMode) == 2, 'If numeric, INNERMODE must be a two-element vector.')
                     obj.statistics.inner_u(subidx{:}) = iosr.statistics.quantile(obj.y(subidxAll{:}), ...
@@ -611,12 +434,12 @@ classdef (CaseInsensitiveProperties = true) functionalSpreadPlot < iosr.statisti
                             error('Unkonwn INNERMODE.')
                     end
                 end
-                
+
                 if isnumeric(obj.outerMode)
                     assert(numel(obj.outerMode) == 2, 'If numeric, OUTERMODE must be a two-element vector.')
-                    obj.statistics.inner_u(subidx{:}) = iosr.statistics.quantile(obj.y(subidxAll{:}), ...
+                    obj.statistics.outer_u(subidx{:}) = iosr.statistics.quantile(obj.y(subidxAll{:}), ...
                         max(obj.outerMode)/100, [], obj.method, obj.weights(subidxAll{:}));
-                    obj.statistics.inner_l(subidx{:}) = iosr.statistics.quantile(obj.y(subidxAll{:}), ...
+                    obj.statistics.outer_l(subidx{:}) = iosr.statistics.quantile(obj.y(subidxAll{:}), ...
                         min(obj.outerMode)/100, [], obj.method, obj.weights(subidxAll{:}));
                 else
                     assert(ischar(obj.outerMode), 'OUTERMODE must be numeric or a char array.')
@@ -631,7 +454,7 @@ classdef (CaseInsensitiveProperties = true) functionalSpreadPlot < iosr.statisti
                             error('Unkonwn OUTERMODE.')
                     end
                 end
-                
+
                 switch obj.mainMode
                     case 'mean'
                         obj.statistics.main(subidx{:}) = obj.statistics.mean(subidx{:});
@@ -640,12 +463,12 @@ classdef (CaseInsensitiveProperties = true) functionalSpreadPlot < iosr.statisti
                     otherwise
                             error('Unkonwn MAINMODE.')
                 end
-                
+
                 if ~isempty(obj.addPrctiles)
                     obj.statistics.addPrctiles(subidxAll{:}) = ...
                         iosr.statistics.quantile(obj.y(subidxAll{:}),obj.addPrctiles(:)./100,[],obj.method,obj.weights(subidxAll{:}));
                 end
-                
+
                 temp = obj.y(subidxAll{:});
                 obj.statistics.mean(subidx{:}) = mean(temp(~isnan(temp)));
             end
@@ -656,7 +479,7 @@ classdef (CaseInsensitiveProperties = true) functionalSpreadPlot < iosr.statisti
         function draw(obj)
             
             if isfield(obj.handles,'axes')
-            
+
                 axes(obj.handles.axes);
                 cla;
                 hold on;
@@ -666,20 +489,11 @@ classdef (CaseInsensitiveProperties = true) functionalSpreadPlot < iosr.statisti
                 else
                     nlines = 1;
                 end
-                for n = nlines:-1:1
-                    % draw inner patch
-                    obj.handles.spreads(n) = patch(...
-                        [obj.x obj.x(end:-1:1)], ...
-                        [obj.statistics.inner_u(:,:,n) obj.statistics.inner_l(:,end:-1:1,n)], ...
-                        obj.spreadColor{n} , ...
-                        'FaceAlpha', obj.spreadAlpha, ...
-                        'EdgeColor', obj.spreadBorderLineColor{n}, ...
-                        'LineWidth', obj.spreadBorderLineWidth ...
-                    );
-                end
+                
+                draw@iosr.statistics.functionalPlot(obj);
 
                 for n = nlines:-1:1
-                    
+
                     % draw additional percentiles
                     if ~isempty(obj.addPrctiles)
                         for p = 1:numel(obj.addPrctiles)
@@ -689,26 +503,7 @@ classdef (CaseInsensitiveProperties = true) functionalSpreadPlot < iosr.statisti
                                 'linestyle', obj.addPrctilesLineStyle{n,p});
                         end
                     end
-                    
-                    % draw outer limits
-                    obj.handles.outer_u(n) = line(obj.x, obj.statistics.outer_u(:,:,n), ...
-                        'linestyle', obj.outerLineStyle{n}, ...
-                        'linewidth', obj.outerLineWidth{n}, ...
-                        'color', obj.outerLineColor{n} ...
-                        );
-                    obj.handles.outer_l(n) = line(obj.x, obj.statistics.outer_l(:,:,n), ...
-                        'linestyle', obj.outerLineStyle{n}, ...
-                        'linewidth', obj.outerLineWidth{n}, ...
-                        'color', obj.outerLineColor{n} ...
-                        );
 
-                    % draw centre line
-                    obj.handles.main(n) = line(obj.x, obj.statistics.main(:,:,n), ...
-                        'linestyle', obj.mainLineStyle{n}, ...
-                        'linewidth', obj.mainLineWidth{n}, ...
-                        'color', obj.mainLineColor{n} ...
-                        );
-                    
                     % draw outliers
                     if (obj.showOutliers)
                         xOutliers = repmat(obj.x,size(obj.y, 1), 1);
@@ -721,118 +516,9 @@ classdef (CaseInsensitiveProperties = true) functionalSpreadPlot < iosr.statisti
                             'MarkerFaceColor', obj.outlierFaceColor{n}, ...
                             'LineWidth', obj.outlierLineWidth{n});
                     end
-                    
+
                 end
-                
-                % draw whiskers
-                if obj.whiskers
-                    x_range = max(obj.x) - min(obj.x);
-                    whisker_xlim = [(min(obj.x) + (1/3)*x_range) (max(obj.x) - (1/3)*x_range)];
-                    if nlines==1
-                        whisker_x = mean(whisker_xlim);
-                    else
-                        whisker_x = linspace(whisker_xlim(1),whisker_xlim(2),nlines);
-                    end
-                    for n = nlines:-1:1
-                        % interpolate to find y
-                        [~,x_ix] = min(abs(obj.x-whisker_x(n)));
-                        x_interp_ix = [max(1,x_ix-1) x_ix min(length(obj.x),x_ix+1)];
-                        x_interp_ix = unique(x_interp_ix);
-                        y_i_l = interp1(obj.x(x_interp_ix), obj.statistics.inner_l(:,x_interp_ix,n), whisker_x(n));
-                        y_i_u = interp1(obj.x(x_interp_ix), obj.statistics.inner_u(:,x_interp_ix,n), whisker_x(n));
-                        y_o_l = interp1(obj.x(x_interp_ix), obj.statistics.outer_l(:,x_interp_ix,n), whisker_x(n));
-                        y_o_u = interp1(obj.x(x_interp_ix), obj.statistics.outer_u(:,x_interp_ix,n), whisker_x(n));
-                        
-                        % plot
-                        line([whisker_x(n) whisker_x(n)],[y_i_l y_o_l], ...
-                            'linestyle', obj.outerLineStyle{n}, ...
-                            'linewidth', obj.outerLineWidth{n}, ...
-                            'color', obj.outerLineColor{n});
-                        line([whisker_x(n) whisker_x(n)],[y_i_u y_o_u], ...
-                            'linestyle', obj.outerLineStyle{n}, ...
-                            'linewidth', obj.outerLineWidth{n}, ...
-                            'color', obj.outerLineColor{n});
-                    end
-                end
-            
-            end
-            
-        end
-        
-    end
-    
-    methods (Access = private)
-        
-        % Make properties in to a cell array
-        function val = parseProps(obj, prop, addP)
-            
-            nLines = obj.outDims(3);
-            if ~addP
-                nAdd = 1;
-            else
-                nAdd = length(obj.addPrctiles);
-            end
-            val = cell(nLines, nAdd);
-            if isnumeric(prop)
-                cellprop = num2cell(prop);
-            elseif ischar(prop)
-                cellprop = cellstr(prop);
-            else
-                cellprop = prop;
-            end
-            try
-            for n = 1:nLines
-                if ~addP
-                    val(n) = cellprop(mod(n-1, numel(cellprop)) + 1);
-                else
-                    for p = 1:nAdd
-                        ixn = mod(n-1, size(cellprop, 1)) + 1;
-                        ixp = mod(p-1, size(cellprop, 2)) + 1;
-                        val(n,p) = cellprop(ixn, ixp);
-                    end
-                end
-            end
-            catch
-                keyboard
-            end
-            
-        end
-        
-        % Put colors in to a cell array
-        function val = parseColor(obj, inColor)
-            
-            nLines = obj.outDims(3);
-            val = cell(nLines, 1);
-            if isnumeric(inColor)
-                if size(inColor, 2) ~= 3
-                    error('Color must be an N-by-3 array, where N is any positive integer.')
-                end
-                for n = 1:nLines
-                    val(n,:) = {inColor(mod(n, size(inColor, 1)) + 1, :)};
-                end
-            elseif ischar(inColor)
-                if strcmp(inColor, 'auto')
-                    colors = lines(nLines);
-                    for n = 1:nLines
-                        val(n,:) = {colors(n, :)};
-                    end
-                else
-                    colors = cellstr(inColor);
-                    for n = 1:nLines
-                        val(n,:) = colors(mod(n, size(inColor, 1)) + 1);
-                    end
-                end
-            elseif isa(inColor,'function_handle')
-                colors = inColor(nLines);
-                for n = 1:nLines
-                    val(n,:) = {colors(mod(n, numel(inColor)) + 1)};
-                end
-            elseif iscellstr(inColor)
-                for n = 1:nLines
-                    val(n,:) = inColor(mod(n, numel(inColor)) + 1);
-                end
-            else
-                error('Unknown color format specified.')
+
             end
             
         end

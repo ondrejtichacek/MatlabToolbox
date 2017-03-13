@@ -343,7 +343,8 @@ classdef (CaseInsensitiveProperties = true) boxPlot < iosr.statistics.statsPlot
 %       boxPlot         - Create the box plot.
 % 
 %   See also IOSR.STATISTICS.TAB2BOX, IOSR.STATISTICS.QUANTILE, COLORMAP,
-%       IOSR.STATISTICS.FUNCTIONALSPREADPLOT.
+%       IOSR.STATISTICS.FUNCTIONALSPREADPLOT,
+%       IOSR.STATISTICS.FUNCTIONALBOXPLOT.
 
 %   Copyright 2016 University of Surrey.
     

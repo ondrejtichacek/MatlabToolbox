@@ -1,18 +1,14 @@
-classdef (Abstract, CaseInsensitiveProperties = true) statsPlot < matlab.mixin.SetGet
+classdef (Abstract, CaseInsensitiveProperties = true) statsPlot < ...
+        matlab.mixin.SetGet
 %STATSPLOT An abstract superclass for classes that plot statistics
 % 
 %   As an abstract class, this class cannot be instantiated. It provides no
 %   public methods. The class is a super class for:
 %       - iosr.statistics.boxPlot
-%       - iosr.statistics.functionalSpreadPlot
+%       - iosr.statistics.functionalPlot
 
     properties (AbortSet)
         handles = struct             % Structure containing handles to plot objects.
-    end
-    
-    properties (AbortSet, Abstract)
-        limit                       % Mode indicating the limits that define outliers.
-        method                      % The method used to calculate the quantiles.
     end
     
     properties (SetAccess = protected)
@@ -34,13 +30,6 @@ classdef (Abstract, CaseInsensitiveProperties = true) statsPlot < matlab.mixin.S
     
     methods
         
-        % constructor
-        function obj = statsPlot()
-            
-        end
-        
-        %% dependent handle getters
-        
         % these are all deprecated and the handles moved to the obj.handles struct
     
         function val = get.axes(obj)
@@ -55,9 +44,26 @@ classdef (Abstract, CaseInsensitiveProperties = true) statsPlot < matlab.mixin.S
         
     end
     
-    methods (Static, Access = protected)
+    methods (Access = protected)
         
-        function [ax, axValid, axSet] = parseAxesHandle(varargin)
+        % set plot properties
+        function setProperties(obj,start,ngin,vgin)
+            
+            % read parameter/value inputs
+            if start < ngin % if parameters are specified
+                nArgs = length(vgin)-start+1;
+                if round(nArgs/2)~=nArgs/2
+                   error('Properties must be propertyName/propertyValue pairs')
+                end
+                % overwrite defults
+                for pair = reshape(vgin(start:end),2,[]) % pair is {propName;propValue}
+                    obj.(pair{1}) = pair{2};
+                end
+            end
+            
+        end
+        
+        function axSet = parseAxesHandle(obj, varargin)
             ax = [];
             axValid = false;
             axSet = false;
@@ -69,17 +75,27 @@ classdef (Abstract, CaseInsensitiveProperties = true) statsPlot < matlab.mixin.S
                     axValid = true;
                 end
             end
+            if nargout < 1
+                if axSet
+                    if axValid
+                        obj.handles.axes = ax;
+                        axes(obj.handles.axes); %#ok<CPROPLC>
+                        obj.handles.fig = ancestor(obj.handles.axes, 'figure');
+                    else
+                        error('Axes handle is invalid.')
+                    end
+                else
+                    obj.handles.axes = newplot;
+                    obj.handles.fig = gcf;
+                end
+            end
         end
-        
-    end
-    
-    methods (Access = protected)
         
         % Get X and Y data from input
         function start = getXY(obj,varargin)
             
             if length(varargin) > 1
-                [~, ~, axSet] = obj.parseAxesHandle(varargin{:});
+                axSet = obj.parseAxesHandle(varargin{:});
                 if axSet
                     skip = 1;
                 else
@@ -148,24 +164,9 @@ classdef (Abstract, CaseInsensitiveProperties = true) statsPlot < matlab.mixin.S
                 obj.x = obj.x(~isnan(obj.x));
                 obj.y = obj.y(:,~isnan(obj.x),:);
                 obj.y = reshape(obj.y,obj.ydims);
-                obj.weights = obj.weights(:,~isnan(obj.x),:);
-                obj.weights = reshape(obj.weights,obj.ydims);
-            end
-            
-        end
-        
-        % set plot properties
-        function setProperties(obj,start,ngin,vgin)
-            
-            % read parameter/value inputs
-            if start < ngin % if parameters are specified
-                nArgs = length(vgin)-start+1;
-                if round(nArgs/2)~=nArgs/2
-                   error('Properties must be propertyName/propertyValue pairs')
-                end
-                % overwrite defults
-                for pair = reshape(vgin(start:end),2,[]) % pair is {propName;propValue}
-                    obj.(pair{1}) = pair{2};
+                if ~isempty(obj.weights)
+                    obj.weights = obj.weights(:,~isnan(obj.x),:);
+                    obj.weights = reshape(obj.weights,obj.ydims);
                 end
             end
             
