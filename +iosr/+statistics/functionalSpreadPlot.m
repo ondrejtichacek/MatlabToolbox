@@ -97,9 +97,9 @@ classdef (CaseInsensitiveProperties = true) functionalSpreadPlot < ...
 %   Additional properties are inherited from
 %   IOSR.STATISTICS.FUNCTIONALPLOT.
 % 
-%   These properties can be referenced using dot notation - e.g. H.BOXCOLOR
+%   These properties can be referenced using dot notation - e.g. H.LIMIT
 %   where H is an instance of the FUNCTIONALSPREADPLOT object - or using
-%   the SET and GET methods - e.g. GET(H,'BOXCOLOR'). Both methods are
+%   the SET and GET methods - e.g. GET(H,'LIMIT'). Both methods are
 %   case-insensitive.
 % 
 %   Note that some handles will be empty unless the associated option is
