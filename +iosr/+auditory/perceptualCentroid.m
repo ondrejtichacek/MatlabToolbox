@@ -92,7 +92,7 @@ function [PCmean,PCstd,PCmax,PCmin,N] = perceptualCentroid(x,fs,varargin)
 
     %% read inputs and make default assignments
 
-    assert(~isscalar(x),'''X'' cannot be a scalar')
+    assert(~isscalar(x), 'iosr:perceptualCentroid:invalidX', '''X'' cannot be a scalar')
 
     dims = size(x);
 
@@ -104,7 +104,7 @@ function [PCmean,PCstd,PCmax,PCmin,N] = perceptualCentroid(x,fs,varargin)
         % count arguments
         nArgs = length(varargin);
         if round(nArgs/2)~=nArgs/2
-           error('PERCEPTUALCENTROID needs propertyName/propertyValue pairs following the x and fs arguments.')
+           error('iosr:perceptualCentroid:nameValuePairs','PERCEPTUALCENTROID needs propertyName/propertyValue pairs following the x and fs arguments.')
         end
         % write parameters to options struct
         for pair = reshape(varargin,2,[]) % pair is {propName;propValue}
@@ -112,7 +112,7 @@ function [PCmean,PCstd,PCmax,PCmin,N] = perceptualCentroid(x,fs,varargin)
                 propName = char(propNames(find(strcmpi(pair{1},propNames),1,'last')));
                 options.(propName) = pair{2};
             else
-                error(['Unknown option ''' pair{1} '''']);
+                error('iosr:perceptualCentroid:unknownOption',['Unknown option ''' pair{1} '''']);
             end
         end
     end
@@ -120,6 +120,7 @@ function [PCmean,PCstd,PCmax,PCmin,N] = perceptualCentroid(x,fs,varargin)
     % other parameters
     dim = getProperty(options,'dim',find(dims>1,1,'first'));
     assert(dim>0 && dim<=length(dims) && isscalar(dim) && round(dim)==dim,...
+        'iosr:perceptualCentroid:invalidDim', ...
         '''dim'' must be greater than zero and less than or equal to the number of dimensions in X.');
 
     % determine window and nfft
@@ -136,7 +137,7 @@ function [PCmean,PCstd,PCmax,PCmin,N] = perceptualCentroid(x,fs,varargin)
             nfft = length(window);
         end
         if nfft~=length(window)
-            error('NFFT must be equal to the window length.')
+            error('iosr:perceptualCentroid:invalidFFTlength','NFFT must be equal to the window length.')
         end
     else
         % window is not specified
@@ -151,8 +152,8 @@ function [PCmean,PCstd,PCmax,PCmin,N] = perceptualCentroid(x,fs,varargin)
     loudness = getProperty(options,'loudness','none');
 
     % tests
-    assert(noverlap<min([nfft,length(window)]),'''noverlap'' must be less than ''nfft'' and the window length.');
-    assert(isscalar(cref) && cref>0,'''cref'' must be greater than 0.');
+    assert(noverlap<min([nfft,length(window)]), 'iosr:perceptualCentroid:invalidNoverlap', '''noverlap'' must be less than ''nfft'' and the window length.');
+    assert(isscalar(cref) && cref>0, 'iosr:perceptualCentroid:invalidCref', '''cref'' must be greater than 0.');
 
     %% permute and rehape x to operate down columns
 
@@ -179,13 +180,13 @@ function [PCmean,PCstd,PCmax,PCmin,N] = perceptualCentroid(x,fs,varargin)
             fHandleFromF = @frequency2cents;
             fHandleToF = @cents2frequency;
         otherwise
-            error(['Requested scale ''' scale ''' not recognised. Options are ''linear'', ''mel'', ''erb'', or ''cents''.']);
+            error('iosr:perceptualCentroid:unknownScale',['Requested scale ''' scale ''' not recognised. Options are ''linear'', ''mel'', ''erb'', or ''cents''.']);
     end
 
     % warn if cref but scale~=cents
     if ~strcmpi(scale,'cents') && ...
             any(cell2mat(strfind(lower(varargin(cellfun(@ischar,varargin))),'cref')))
-        warning('Option ''cref'' only affects the output when ''scale'' is set to ''cents''.')
+        warning('iosr:perceptualCentroid:cref','Option ''cref'' only affects the output when ''scale'' is set to ''cents''.')
     end
 
     %% calculate centroid and stats
@@ -204,7 +205,7 @@ function [PCmean,PCstd,PCmax,PCmin,N] = perceptualCentroid(x,fs,varargin)
         case 'units'
             fHandleToF = fHandleDoNothing;
         otherwise
-            error(['Requested output ''' output ''' not recognised. Options are ''hz'', or ''units''.']);
+            error('iosr:perceptualCentroid:unknownUnits',['Requested output ''' output ''' not recognised. Options are ''hz'', or ''units''.']);
     end
 
     % determine phon, if relevant
@@ -213,7 +214,7 @@ function [PCmean,PCstd,PCmax,PCmin,N] = perceptualCentroid(x,fs,varargin)
             phon = getProperty(options,'phon',65);
         otherwise
             if isfield(options,'phon')
-                warning('''phon'' option has no effect unless using ''ISO-226'' loudness weighting.')
+                warning('iosr:perceptualCentroid:phon','''phon'' option has no effect unless using ''ISO-226'' loudness weighting.')
             end
     end
 
@@ -232,7 +233,7 @@ function [PCmean,PCstd,PCmax,PCmin,N] = perceptualCentroid(x,fs,varargin)
         case 'iso-226'
             w_l = @(x) iosr.auditory.loudWeight(x,phon);
         otherwise
-            error(['Requested loudness weighting ''' loudness ''' not recognised. Options are ''none'', or ''A''.']);
+            error('iosr:perceptualCentroid:unknownLoudness',['Requested loudness weighting ''' loudness ''' not recognised. Options are ''none'', or ''A''.']);
     end
 
     for c = 1:size(x2,2) % across the dim in input

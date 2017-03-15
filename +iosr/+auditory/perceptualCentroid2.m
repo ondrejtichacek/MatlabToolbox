@@ -79,7 +79,7 @@ function pc = perceptualCentroid2(x,fs,varargin)
 
     %% read inputs and make default assignments
 
-    assert(~isscalar(x),'''X'' cannot be a scalar')
+    assert(~isscalar(x), 'iosr:perceptualCentroid2:invalidX', '''X'' cannot be a scalar')
 
     dims = size(x);
 
@@ -91,7 +91,7 @@ function pc = perceptualCentroid2(x,fs,varargin)
         % count arguments
         nArgs = length(varargin);
         if round(nArgs/2)~=nArgs/2
-           error('PERCEPTUALCENTROID2 needs propertyName/propertyValue pairs following the x and fs arguments.')
+           error('iosr:perceptualCentroid2:nameValuePairs','PERCEPTUALCENTROID2 needs propertyName/propertyValue pairs following the x and fs arguments.')
         end
         % write parameters to options struct
         for pair = reshape(varargin,2,[]) % pair is {propName;propValue}
@@ -99,7 +99,7 @@ function pc = perceptualCentroid2(x,fs,varargin)
                 propName = char(propNames(find(strcmpi(pair{1},propNames),1,'last')));
                 options.(propName) = pair{2};
             else
-                error(['Unknown option ''' pair{1} '''']);
+                error('iosr:perceptualCentroid2:unknownOption',['Unknown option ''' pair{1} '''']);
             end
         end
     end
@@ -107,6 +107,7 @@ function pc = perceptualCentroid2(x,fs,varargin)
     % other parameters
     dim = getProperty(options,'dim',find(dims>1,1,'first'));
     assert(dim>0 && dim<=length(dims) && isscalar(dim) && round(dim)==dim,...
+        'iosr:perceptualCentroid2:invalidDim', ...
         '''dim'' must be greater than zero and less than or equal to the number of dimensions in X.');
 
     % other parameters
@@ -119,7 +120,7 @@ function pc = perceptualCentroid2(x,fs,varargin)
     loudness = getProperty(options,'loudness','none');
 
     % tests
-    assert(isscalar(cref) && cref>0,'''cref'' must be greater than 0.');
+    assert(isscalar(cref) && cref>0, 'iosr:perceptualCentroid2:invalidCref', '''cref'' must be greater than 0.');
 
     %% permute and rehape x to operate down columns
 
@@ -146,13 +147,13 @@ function pc = perceptualCentroid2(x,fs,varargin)
             fHandleFromF = @frequency2cents;
             fHandleToF = @cents2frequency;
         otherwise
-            error(['Requested scale ''' scale ''' not recognised. Options are ''linear'', ''mel'', ''erb'', or ''cents''.']);
+            error('iosr:perceptualCentroid2:unknownScale',['Requested scale ''' scale ''' not recognised. Options are ''linear'', ''mel'', ''erb'', or ''cents''.']);
     end
 
     % warn if cref but scale~=cents
     if ~strcmpi(scale,'cents') && ...
             any(cell2mat(strfind(lower(varargin(cellfun(@ischar,varargin))),'cref')))
-        warning('Option ''cref'' only affects the output when ''scale'' is set to ''cents''.')
+        warning('iosr:perceptualCentroid2:cref','Option ''cref'' only affects the output when ''scale'' is set to ''cents''.')
     end
 
     %% calculate centroid and stats
@@ -167,7 +168,7 @@ function pc = perceptualCentroid2(x,fs,varargin)
         case 'units'
             fHandleToF = fHandleDoNothing;
         otherwise
-            error(['Requested output ''' output ''' not recognised. Options are ''hz'', or ''units''.']);
+            error('iosr:perceptualCentroid2:unknownUnits',['Requested output ''' output ''' not recognised. Options are ''hz'', or ''units''.']);
     end
 
     % determine phon, if relevant
@@ -176,7 +177,7 @@ function pc = perceptualCentroid2(x,fs,varargin)
             phon = getProperty(options,'phon',65);
         otherwise
             if isfield(options,'phon')
-                warning('''phon'' option has no effect unless using ''ISO-226'' loudness weighting.')
+                warning('iosr:perceptualCentroid2:phon','''phon'' option has no effect unless using ''ISO-226'' loudness weighting.')
             end
     end
 
@@ -195,7 +196,7 @@ function pc = perceptualCentroid2(x,fs,varargin)
         case 'iso-226'
             w_l = @(x) iosr.auditory.loudWeight(x,phon);
         otherwise
-            error(['Requested loudness weighting ''' loudness ''' not recognised. Options are ''none'', or ''A''.']);
+            error('iosr:perceptualCentroid2:unknownLoudness',['Requested loudness weighting ''' loudness ''' not recognised. Options are ''none'', or ''A''.']);
     end
 
     for c = 1:size(x2,2) % across the dim in input

@@ -37,7 +37,7 @@ function r = urn(varargin)
             dimcheck = true; % dim has been specified
             dim = varargin{empties+1}; % get dim
         else
-            warning('Empty array but no dim specified. Using default.') %#ok<WNTAG>
+            warning('iosr:urn:nodim','Empty array but no dim specified. Using default.')
         end
     else
         % input array-size-data range if no dim specified

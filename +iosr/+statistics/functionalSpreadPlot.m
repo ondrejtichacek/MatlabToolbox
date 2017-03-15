@@ -246,6 +246,7 @@ classdef (CaseInsensitiveProperties = true) functionalSpreadPlot < ...
             
             % check input is valid size
             assert(ndims(obj.y) <= 3 && ndims(obj.y) >= 2, ...
+                'iosr:functionalSpreadPlot:invalidY', ...
                 'Y must be a two- or three-dimensional array.');
             
             % check weights
@@ -306,7 +307,8 @@ classdef (CaseInsensitiveProperties = true) functionalSpreadPlot < ...
         
         function set.addPrctiles(obj, val)
             if ~isempty(val)
-                assert(all(val >= 0) && all(val <= 1000), 'Additional percentiles must be in the range [0, 100].')
+                assert(all(val >= 0) && all(val <= 1000), 'iosr:functionalSpreadPlot:invalidPrctiles', ...
+                    'Additional percentiles must be in the range [0, 100].')
                 obj.addPrctiles = val;
             end
             obj.calculateStats();
@@ -343,7 +345,8 @@ classdef (CaseInsensitiveProperties = true) functionalSpreadPlot < ...
         % outlier settings
 
         function set.outlierSize(obj,val)
-            assert(isnumeric(val) && isscalar(val),'''OUTLIERSIZE'' must be a numeric scalar')
+            assert(isnumeric(val) && isscalar(val), 'iosr:functionalSpreadPlot:invalidOutlierSize', ...
+                '''OUTLIERSIZE'' must be a numeric scalar')
             obj.outlierSize = val;
             obj.draw();
         end
@@ -400,13 +403,15 @@ classdef (CaseInsensitiveProperties = true) functionalSpreadPlot < ...
                 subidxAll{1} = ':';
 
                 if isnumeric(obj.innerMode)
-                    assert(numel(obj.innerMode) == 2, 'If numeric, INNERMODE must be a two-element vector.')
+                    assert(numel(obj.innerMode) == 2, 'iosr:functionalSpreadPlot:invalidInnerMode', ...
+                        'If numeric, INNERMODE must be a two-element vector.')
                     obj.statistics.inner_u(subidx{:}) = iosr.statistics.quantile(obj.y(subidxAll{:}), ...
                         max(obj.innerMode)/100, [], obj.method, obj.weights(subidxAll{:}));
                     obj.statistics.inner_l(subidx{:}) = iosr.statistics.quantile(obj.y(subidxAll{:}), ...
                         min(obj.innerMode)/100, [], obj.method, obj.weights(subidxAll{:}));
                 else
-                    assert(ischar(obj.innerMode), 'INNERMODE must be numeric or a char array.')
+                    assert(ischar(obj.innerMode), 'iosr:functionalSpreadPlot:invalidInnerMode', ...
+                        'INNERMODE must be numeric or a char array.')
                     switch obj.innerMode
                         case 'quartile'
                             obj.statistics.inner_u(subidx{:}) = obj.statistics.Q3(subidx{:});
@@ -431,18 +436,20 @@ classdef (CaseInsensitiveProperties = true) functionalSpreadPlot < ...
                             obj.statistics.inner_u(subidx{:}) = obj.statistics.mean(subidx{:}) + cil;
                             obj.statistics.inner_l(subidx{:}) = obj.statistics.mean(subidx{:}) - cil;
                         otherwise
-                            error('Unkonwn INNERMODE.')
+                            error('iosr:functionalSpreadPlot:unknownInnerMode','Unkonwn INNERMODE.')
                     end
                 end
 
                 if isnumeric(obj.outerMode)
-                    assert(numel(obj.outerMode) == 2, 'If numeric, OUTERMODE must be a two-element vector.')
+                    assert(numel(obj.outerMode) == 2, 'iosr:functionalSpreadPlot:invalidOuterMode', ...
+                        'If numeric, OUTERMODE must be a two-element vector.')
                     obj.statistics.outer_u(subidx{:}) = iosr.statistics.quantile(obj.y(subidxAll{:}), ...
                         max(obj.outerMode)/100, [], obj.method, obj.weights(subidxAll{:}));
                     obj.statistics.outer_l(subidx{:}) = iosr.statistics.quantile(obj.y(subidxAll{:}), ...
                         min(obj.outerMode)/100, [], obj.method, obj.weights(subidxAll{:}));
                 else
-                    assert(ischar(obj.outerMode), 'OUTERMODE must be numeric or a char array.')
+                    assert(ischar(obj.outerMode), 'iosr:functionalSpreadPlot:invalidOuterMode', ...
+                        'OUTERMODE must be numeric or a char array.')
                     switch obj.outerMode
                         case 'limit'
                             obj.statistics.outer_u(subidx{:}) = obj.statistics.max(subidx{:});
@@ -451,7 +458,7 @@ classdef (CaseInsensitiveProperties = true) functionalSpreadPlot < ...
                             obj.statistics.outer_u(subidx{:}) = NaN;
                             obj.statistics.outer_l(subidx{:}) = NaN;
                         otherwise
-                            error('Unkonwn OUTERMODE.')
+                            error('iosr:functionalSpreadPlot:unknownOuterMode','Unknown OUTERMODE.')
                     end
                 end
 
@@ -461,7 +468,7 @@ classdef (CaseInsensitiveProperties = true) functionalSpreadPlot < ...
                     case 'median'
                         obj.statistics.main(subidx{:}) = obj.statistics.median(subidx{:});
                     otherwise
-                            error('Unkonwn MAINMODE.')
+                            error('iosr:functionalSpreadPlot:unknownMainMode','Unknown MAINMODE.')
                 end
 
                 if ~isempty(obj.addPrctiles)

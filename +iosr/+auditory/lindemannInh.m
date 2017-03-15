@@ -44,8 +44,8 @@ function [L_l,R_l] = lindemannInh(L,R,fs,c_inh,dim)
 
     %% check input
     
-    assert(isequal(size(L),size(R)),'L and R arrays must be the same size')
-    assert(isscalar(fs),'FS must be a scalar')
+    assert(isequal(size(L),size(R)), 'iosr:lindemannInh:invalidInputs', 'L and R arrays must be the same size')
+    assert(isscalar(fs), 'iosr:lindemannInh:invalidFs', 'FS must be a scalar')
     
     % default dim
     if nargin<5
@@ -68,8 +68,8 @@ function [L_l,R_l] = lindemannInh(L,R,fs,c_inh,dim)
     if nargin < 4
         c_inh = .3;
     else
-        assert(isscalar(c_inh) & isnumeric(c_inh),'c_inh must be a scalar');
-        assert(c_inh>=0 || c_inh<=1,'c_inh must be in the interval (0,1].')
+        assert(isscalar(c_inh) & isnumeric(c_inh), 'iosr:lindemannInh:invalidCinh', 'c_inh must be a scalar');
+        assert(c_inh>=0 || c_inh<=1, 'iosr:lindemannInh:invalidX', 'c_inh must be in the interval (0,1].')
     end
 
     % gain

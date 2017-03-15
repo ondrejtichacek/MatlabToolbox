@@ -26,7 +26,7 @@ function keydata = readSvnKeyword(filename,keyword,crop)
 %   Copyright 2016 University of Surrey.
 
 
-    assert(ischar(filename) & ischar(keyword),'FILENAME and KEYWORD must be char arrays')
+    assert(ischar(filename) & ischar(keyword), 'iosr:readSvnKeyword:invalidInputs', 'FILENAME and KEYWORD must be char arrays')
 
     if nargin < 3
         crop = false;
@@ -35,7 +35,7 @@ function keydata = readSvnKeyword(filename,keyword,crop)
     keydata = '';
 
     fid = fopen(filename); % open file
-    assert(fid~=-1,['read_svn_keyword: ''' filename ''' not found'])
+    assert(fid~=-1, 'iosr:readSvnKeyword:invalidFile', ['read_svn_keyword: ''' filename ''' not found'])
 
     tline = fgetl(fid); % read first line
     while ischar(tline)

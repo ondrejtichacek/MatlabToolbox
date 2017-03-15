@@ -31,12 +31,12 @@ function c = convFft(a,b,shape)
 
 %   Copyright 2016 University of Surrey.
 
-    assert(isvector(a) & isvector(b),'a and b must be vectors')
+    assert(isvector(a) & isvector(b), 'iosr:convFft:invalidInput', 'a and b must be vectors')
 
     if nargin<3
         shape = 'full';
     end
-    assert(ischar(shape),'Unknown shape parameter')
+    assert(ischar(shape), 'iosr:convFft:invalidShape', 'Unknown shape parameter')
 
     P = numel(a);
     Q = numel(b);
@@ -57,7 +57,7 @@ function c = convFft(a,b,shape)
         case 'valid'
             range = [min(P,Q), L-min(P,Q)+1];
         otherwise
-            error(['shape ''' shape ''' is invalid. The options are ''full'' (default), ''same'', or ''valid''.'])
+            error('iosr:convFft:unknownShape',['shape ''' shape ''' is invalid. The options are ''full'' (default), ''same'', or ''valid''.'])
     end
 
     % crop to shape

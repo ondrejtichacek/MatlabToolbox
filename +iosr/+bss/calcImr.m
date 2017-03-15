@@ -8,10 +8,10 @@ function IMR = calcImr(m,im)
 %   Copyright 2016 University of Surrey.
 
     % check input
-    assert(nargin>1,'You need 2 masks to calculate IMR!')
-    assert(size(m,1)>1 & size(m,2)>1,'m must be a two-dimensional matrix')
-    assert(size(im,1)>1 & size(im,2)>1,'im must be a two-dimensional matrix')
-    assert(all(size(m)==size(im)),'Masks must be the same size!')
+    assert(nargin>1, 'iosr:calcImr:invalidInput', 'You need 2 masks to calculate IMR!')
+    assert(size(m,1)>1 & size(m,2)>1, 'iosr:calcImr:invalidMask', 'm must be a two-dimensional matrix')
+    assert(size(im,1)>1 & size(im,2)>1, 'iosr:calcImr:invalidMask', 'im must be a two-dimensional matrix')
+    assert(all(size(m)==size(im)), 'iosr:calcImr:invalidMask', 'Masks must be the same size!')
 
     % validate masks
     m = check_mask(m);
@@ -30,7 +30,7 @@ function m = check_mask(m)
 
     if ~islogical(m)
         if any(m(:)<0) || any(m(:)>1);
-            error('Values outside of [0,1] were found.')
+            error('iosr:calcImr:maskValuesOutOfRange','Values outside of [0,1] were found.')
         end
     else % make numeric
         m = +m;

@@ -29,7 +29,7 @@ function m_full = getFullMask(m,frame_d,delay,kernel)
 
 
     if nargin < 2
-        error('Not enough input arguments')
+        error('iosr:getFullMask:nargin','Not enough input arguments')
     end
 
     numchans = size(m,2);

@@ -53,21 +53,21 @@ function [q,N] = quantile(X,p,dim,method,weights)
 
     %% Check input and make default assignments
 
-    assert(isnumeric(X),'X must be a numeric');
-    assert(isvector(p) & isnumeric(p),'P must be a numeric vector');
-    assert(all(p>=0 & p<=1),'Values in P must be in the interval [0,1].')
+    assert(isnumeric(X), 'iosr:quantile:invalidX', 'X must be a numeric');
+    assert(isvector(p) & isnumeric(p), 'iosr:quantile:invalidP', 'P must be a numeric vector');
+    assert(all(p>=0 & p<=1), 'iosr:quantile:invalidP', 'Values in P must be in the interval [0,1].')
 
     if nargin<2
-        error('Not enough input arguments.')
+        error('iosr:quantile:tooFewInputArgs','Not enough input arguments.')
     end
 
     dims = size(X);
     if nargin<3 || isempty(dim)
         dim = find(dims>1,1,'first'); % default dim
     else % validate input
-        assert(isnumeric(dim) | isempty(dim),'DIM must be an integer or empty');
-        assert(isint(dim) | isempty(dim),'DIM must be an integer or empty');
-        assert(dim>0,'DIM must be greater than 0')
+        assert(isnumeric(dim) | isempty(dim), 'iosr:quantile:invalidDim', 'DIM must be an integer or empty');
+        assert(isint(dim) | isempty(dim), 'iosr:quantile:invalidDim', 'DIM must be an integer or empty');
+        assert(dim>0, 'iosr:quantile:invalidDim', 'DIM must be greater than 0')
     end
 
     if nargin<4
@@ -76,14 +76,14 @@ function [q,N] = quantile(X,p,dim,method,weights)
         if isempty(method)
             method = 'r-8'; % default method
         else
-            assert(ischar(method),'METHOD must be a character array')
+            assert(ischar(method), 'iosr:quantile:invalidMethod', 'METHOD must be a character array')
         end
     end
     
     if nargin<5
         weights = [];
     else
-        assert(isequal(size(X),size(weights)) || isempty(weights),'WEIGHTS must be the same size as X');
+        assert(isequal(size(X),size(weights)) || isempty(weights), 'iosr:quantile:invalidWeights', 'WEIGHTS must be the same size as X');
     end
 
     %% choose method
@@ -137,7 +137,7 @@ function [q,N] = quantile(X,p,dim,method,weights)
             h = @(N,p)(((N+.25)*p)+(3/8));
             Qp = @(x,h)(x(floor(h)) + ((h-floor(h))*(x(floor(h)+1)-x(floor(h)))));
         otherwise
-            error(['Method ''' method ''' does not exist'])
+            error('iosr:quantile:unknownMethod',['Method ''' method ''' does not exist'])
     end
 
     %% calculate quartiles

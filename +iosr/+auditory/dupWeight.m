@@ -21,10 +21,10 @@ function [w_itd,w_ild] = dupWeight(f)
 
     %% Check input
 
-    assert(all(f(:)>=0),'f should be greater than or equal to zero!')
+    assert(all(f(:)>=0), 'iosr:functionalBoxPlot:invalidF', 'f should be greater than or equal to zero!')
 
     if any(f(:)>20000)
-        warning('Humans cannot generally hear above 20 kHz. Weighting coefficients will be set to zero.')
+        warning('iosr:dupWeight:frequencyRange','Humans cannot generally hear above 20 kHz. Weighting coefficients will be set to zero.')
     end
 
     %% Calculate original weights using Ben's numbers

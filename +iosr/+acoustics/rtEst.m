@@ -11,14 +11,14 @@ function rt = rtEst(abs_coeff,room,formula)
 
 %   Copyright 2016 University of Surrey.
 
-    assert(isnumeric(abs_coeff),'abs_coeff should be numeric')
-    assert(isnumeric(room) & numel(room)==3 & isvector(room),'room should be a 3-element numeric vector')
+    assert(isnumeric(abs_coeff), 'iosr:rtEst:invalidCoeff', 'abs_coeff should be numeric')
+    assert(isnumeric(room) & numel(room)==3 & isvector(room), 'iosr:rtEst:invalidRoom', 'room should be a 3-element numeric vector')
 
     if nargin<3
         formula = 'sabine';
     end
 
-    assert(ischar(formula),'formula should be a character array (string)')
+    assert(ischar(formula), 'iosr:rtEst:invalidFormula', 'formula should be a character array (string)')
 
     l = room(1);
     w = room(2);
@@ -33,7 +33,7 @@ function rt = rtEst(abs_coeff,room,formula)
         case 'eyring'
             rt = (0.161*vol)./(-surf_area.*log(1-abs_coeff));
         otherwise
-            error('Unknown formula')
+            error('iosr:rtEst:unknownFormula','Unknown formula')
     end
 
 end

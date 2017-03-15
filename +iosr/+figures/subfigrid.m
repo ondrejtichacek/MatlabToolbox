@@ -86,16 +86,16 @@ function pos = subfigrid(nrows,ncols,offset,scale)
         scale = [];
     end
 
-    assert(isscalar(nrows) & round(nrows)==nrows,'nrows must be a whole number scalar')
-    assert(isscalar(ncols) & round(ncols)==ncols,'ncols must be a whole number scalar')
-    assert(nrows>=1 & ncols>=1,'nrows and ncols must be greater than, or equal to, 1.')
+    assert(isscalar(nrows) & round(nrows)==nrows, 'iosr:subfigrid:invalidInput', 'nrows must be a whole number scalar')
+    assert(isscalar(ncols) & round(ncols)==ncols, 'iosr:subfigrid:invalidInput', 'ncols must be a whole number scalar')
+    assert(nrows>=1 & ncols>=1, 'iosr:subfigrid:invalidInput', 'nrows and ncols must be greater than, or equal to, 1.')
 
     if isempty(offset)
         offset = zeros(1,4);
     elseif ~(isnumeric(offset) && numel(offset)==4)
-        error('offset should be a four-element numeric vector')
+        error('iosr:subgigrid:offsetInvalid','offset should be a four-element numeric vector')
     elseif any(offset<0)
-        error('offset should not contain any negative values')
+        error('iosr:subgigrid:offsetInvalid','offset should not contain any negative values')
     else
         offset = offset(:)';
     end
@@ -103,9 +103,9 @@ function pos = subfigrid(nrows,ncols,offset,scale)
     if isempty(scale)
         scale = [1 1];
     elseif ~(isnumeric(scale) && numel(scale)==2)
-        error('scale should be a two-element numeric vector')
+        error('iosr:subgigrid:scaleInvalid','scale should be a two-element numeric vector')
     elseif any(scale>1) || any(scale<0)
-        error('scale values should be in the range [0,1]')
+        error('iosr:subgigrid:scaleInvalid','scale values should be in the range [0,1]')
     else
         scale = scale(:)';
     end
@@ -115,11 +115,11 @@ function pos = subfigrid(nrows,ncols,offset,scale)
     % ignore scale values for dimensions where there is one unit.
     if ncols==1 && scale(1)<1
         scale(1) = 1;
-        disp('subfigrid: Since there is only one column, scale(1) has no effect (and is consequently set to 1).')
+        warning('iosr:subgigrid:scaleUse','Since there is only one column, scale(1) has no effect (and is consequently set to 1).')
     end
     if nrows==1 && scale(2)<1
         scale(2) = 1;
-        disp('subfigrid: Since there is only one row, scale(2) has no effect (and is consequently set to 1).')
+        warning('iosr:subgigrid:scaleUse','Since there is only one row, scale(2) has no effect (and is consequently set to 1).')
     end
 
     % calculate array of left positions

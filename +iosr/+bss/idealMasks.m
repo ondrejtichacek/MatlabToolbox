@@ -26,20 +26,20 @@ function [irm,ibm] = idealMasks(st,si,q,a)
 
     %% check input
     
-    assert(isequal(size(st),size(si)),'ST and SI must be the same size')
+    assert(isequal(size(st),size(si)), 'iosr:idealMasks:invalidInputs', 'ST and SI must be the same size')
     
     % check sigmoid
     if nargin<3
         q = 1;
     else
-        assert(isscalar(a),'Q must be an scalar')
+        assert(isscalar(a), 'iosr:idealMasks:invalidQ', 'Q must be an scalar')
     end
     
     % check threshold
     if nargin<4
         a = 1;
     else
-        assert(isscalar(a),'A must be an scalar')
+        assert(isscalar(a), 'iosr:idealMasks:invalidA', 'A must be an scalar')
     end
     
     %% calculate masks

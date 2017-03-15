@@ -22,13 +22,13 @@ function ild = calcIld(L,R,method)
 
 %   Copyright 2016 University of Surrey.
 
-    assert(isvector(L) & isvector(R),'L and R must be vectors')
-    assert(all(size(L)==size(R)),'L and R must be the same size')
+    assert(isvector(L) & isvector(R), 'iosr:calcIld:invalidInput', 'L and R must be vectors')
+    assert(all(size(L)==size(R)), 'iosr:calcIld:invalidInput', 'L and R must be the same size')
 
     if nargin<3
         method='overall';
     else
-        assert(ischar(method),'METHOD must be a string.')
+        assert(ischar(method), 'iosr:calcIld:invalidMethod', 'METHOD must be a string.')
     end
 
     switch lower(method)
@@ -41,7 +41,7 @@ function ild = calcIld(L,R,method)
             p_L = sum(L.^2);
             p_R = sum(R.^2);
         otherwise
-            error(['Unknown method ''' method '''.'])
+            error('iosr:calcIld:unknownMethod',['Unknown method ''' method '''.'])
     end
     ild = (p_L-p_R)./(p_L+p_R);
     ild = sign(ild).*(ild.^2);

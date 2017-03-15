@@ -35,14 +35,14 @@ function [c,lags] = xcorrLindemann(L,R,fs,maxlag,dim)
 %   Copyright 2016 University of Surrey.
 
     %% check input
-    assert(isequal(size(L),size(R)),'L and R must be the same size');
-    assert(isscalar(fs) & isnumeric(fs),'FS must be a scalar');
+    assert(isequal(size(L),size(R)), 'iosr:xcorrLindemann:invalidSignals', 'L and R must be the same size');
+    assert(isscalar(fs) & isnumeric(fs), 'iosr:xcorrLindemann:invalidFs', 'FS must be a scalar');
     
     % check for maxlag
     if nargin<4
         maxlag = 0.001*fs;
     else
-        assert(isscalar(maxlag) & isnumeric(maxlag),'MAXLAG must be a scalar');
+        assert('iosr:xcorrLindemann:invalidMaxlag', isscalar(maxlag) & isnumeric(maxlag),'MAXLAG must be a scalar');
     end
     
     % check for dim
@@ -50,12 +50,12 @@ function [c,lags] = xcorrLindemann(L,R,fs,maxlag,dim)
     if nargin<5
         dim = find(dims>1,1,'first');
     else
-        assert(isscalar(dim) && round(dim)==dim,'DIM must be an integer scalar')
+        assert(isscalar(dim) && round(dim)==dim, 'iosr:xcorrLindemann:invalidDim', 'DIM must be an integer scalar')
     end
 
     % check L and R have a valid range
     if any(L(:)<0) || any(R(:)<0) || any(L(:)>1) || any(R(:)>1)
-        error('L and/or R contain values outside of the range [0,1]. This is not allowed. Use LINDEMANN_INH to pre-process the L and R inputs.')
+        error('iosr:xcorrLindemann:inputOutOfRange','L and/or R contain values outside of the range [0,1]. This is not allowed. Use LINDEMANN_INH to pre-process the L and R inputs.')
     end
 
     % check C function is compiled

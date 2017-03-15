@@ -56,7 +56,7 @@ function [s,f] = ltas(x,fs,varargin)
     %% parse input
     
     if nargin < 2
-        error('Not enough input arguments')
+        error('iosr:ltas:nargin''Not enough input arguments')
     end
     
     options = struct(...
@@ -75,7 +75,7 @@ function [s,f] = ltas(x,fs,varargin)
         % count arguments
         nArgs = length(varargin);
         if round(nArgs/2)~=nArgs/2
-           error('LTAS needs propertyName/propertyValue pairs')
+           error('iosr:ltas:nameValuePair','LTAS needs propertyName/propertyValue pairs')
         end
         % overwrite defults
         for pair = reshape(varargin,2,[]) % pair is {propName;propValue}
@@ -84,7 +84,7 @@ function [s,f] = ltas(x,fs,varargin)
               % do the overwrite
               options.(optionNames{IX}) = pair{2};
            else
-              error('%s is not a recognized parameter name',pair{1})
+              error('iosr:ltas:unknownOption','%s is not a recognized parameter name',pair{1})
            end
         end
     end
@@ -92,10 +92,10 @@ function [s,f] = ltas(x,fs,varargin)
     %% check and assign input
     
     % required inputs
-    assert(isnumeric(x),'X must be numeric.');
-    assert(isscalar(fs),'FS must be a scalar.');
-    assert(fs>0,'FS must be greater than 0.');
-    assert(isint(fs),'FS must be an integer.');
+    assert(isnumeric(x), 'iosr:ltas:invalidX', 'X must be numeric.');
+    assert(isscalar(fs), 'iosr:ltas:invalidFs', 'FS must be a scalar.');
+    assert(fs>0, 'iosr:ltas:invalidFs', 'FS must be greater than 0.');
+    assert(isint(fs), 'iosr:ltas:invalidFs', 'FS must be an integer.');
     
     % determine fft parameters
     if numel(options.win)>1 && isvector(options.win)
@@ -105,9 +105,9 @@ function [s,f] = ltas(x,fs,varargin)
         NFFT = options.win;
         win = NFFT;
     else
-        error('''WIN'' must be a vector or a scalar');
+        error('iosr:ltas:invalidWin','''WIN'' must be a vector or a scalar');
     end
-    assert(isint(NFFT) && NFFT>0,'''WIN'' must be a positive integer');
+    assert(isint(NFFT) && NFFT>0, 'iosr:ltas:invalidNfft', '''WIN'' must be a positive integer');
     
     % determine hop
     hop = options.hop;
@@ -124,9 +124,9 @@ function [s,f] = ltas(x,fs,varargin)
     if isempty(dim)
         dim = find(dims>1,1,'first');
     else
-        assert(isnumeric(dim),'DIM must be an integer');
-        assert(isint(dim),'DIM must be an integer or empty');
-        assert(dim>0,'DIM must be greater than 0')
+        assert(isnumeric(dim),'iosr:ltas:invalidDim', 'DIM must be an integer');
+        assert(isint(dim), 'iosr:ltas:invalidDim', 'DIM must be an integer or empty');
+        assert(dim>0, 'iosr:ltas:invalidDim', 'DIM must be greater than 0')
     end
     
     %% permute and rehape x to operate down columns
@@ -160,7 +160,7 @@ function [s,f] = ltas(x,fs,varargin)
             labelY = 'Power spectral density';
             yscale = 'log';
         otherwise
-            error('Unknown units option ''%s''',options.units);
+            error('iosr:ltas:unknownUnits','Unknown units option ''%s''',options.units);
     end
     
     % do calculations
@@ -182,12 +182,12 @@ function [s,f] = ltas(x,fs,varargin)
         case 'none'
             % do nothing
         otherwise
-            error('Unknown scaling option ''%s''',options.scaling);
+            error('iosr:matchEQ:unknownScaling','Unknown scaling option ''%s''',options.scaling);
     end
     
     %% plot
     
-    assert(islogical(options.graph) && numel(options.graph)==1,'''graph'' option must be logical.')
+    assert(islogical(options.graph) && numel(options.graph)==1, 'iosr:ltas:invalidGraph', '''graph'' option must be logical.')
     if options.graph
         semilogx(f,rearrange(s,order,[dims_out_shift(1) prod(dims_out_shift(2:end))]));
         xlabel('Frequency [Hz]');

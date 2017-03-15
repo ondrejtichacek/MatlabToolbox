@@ -88,7 +88,8 @@ classdef (Abstract, CaseInsensitiveProperties = true) functionalPlot < ...
     methods
         
         function set.showOutliers(obj, val)
-            assert(numel(val)==1 && islogical(val), '''SHOWOUTLIERS'' must be true or false.')
+            assert(numel(val)==1 && islogical(val), 'iosr:functionalPlot:invalidShowOutliers', ...
+                '''SHOWOUTLIERS'' must be true or false.')
             obj.showOutliers = val;
             obj.draw();
         end
@@ -165,7 +166,8 @@ classdef (Abstract, CaseInsensitiveProperties = true) functionalPlot < ...
         % set spread alpha
         
         function set.spreadAlpha(obj,val)
-            assert(isnumeric(val) && isscalar(val),'''SPREADALPHA'' must be a numeric scalar')
+            assert(isnumeric(val) && isscalar(val), 'iosr:functionalPlot:invalidSpreadAlpha', ...
+                '''SPREADALPHA'' must be a numeric scalar')
             obj.spreadAlpha = val;
             obj.draw();
         end
@@ -184,7 +186,8 @@ classdef (Abstract, CaseInsensitiveProperties = true) functionalPlot < ...
         % set spread border line width
         
         function set.spreadBorderLineWidth(obj,val)
-            assert(isnumeric(val) && isscalar(val),'''SPREADBORDERLINEWIDTH'' must be a numeric scalar')
+            assert(isnumeric(val) && isscalar(val), 'iosr:functionalPlot:invalidspreadBorderLineWidth', ...
+                '''SPREADBORDERLINEWIDTH'' must be a numeric scalar')
             obj.spreadBorderLineWidth = val;
             obj.draw();
         end
@@ -203,7 +206,8 @@ classdef (Abstract, CaseInsensitiveProperties = true) functionalPlot < ...
         % whisker
         
         function set.whiskers(obj,val)
-            assert(islogical(val) && isscalar(val), '''whisker'' must be a scalar and logical');
+            assert(islogical(val) && isscalar(val), 'iosr:functionalPlot:invalidWhiskers', ...
+                '''whisker'' must be a scalar and logical');
             obj.whiskers = val;
             obj.draw();
         end
@@ -346,7 +350,7 @@ classdef (Abstract, CaseInsensitiveProperties = true) functionalPlot < ...
             val = cell(nLines, 1);
             if isnumeric(inColor)
                 if size(inColor, 2) ~= 3
-                    error('Color must be an N-by-3 array, where N is any positive integer.')
+                    error('iosr:functionalPlot:colorInvalid','Color must be an N-by-3 array, where N is any positive integer.')
                 end
                 for n = 1:nLines
                     val(n,:) = {inColor(mod(n, size(inColor, 1)) + 1, :)};
@@ -373,7 +377,7 @@ classdef (Abstract, CaseInsensitiveProperties = true) functionalPlot < ...
                     val(n,:) = inColor(mod(n, numel(inColor)) + 1);
                 end
             else
-                error('Unknown color format specified.')
+                error('iosr:functionalPlot:invalidColorFormat','Invalid color format specified.')
             end
             
         end

@@ -54,7 +54,7 @@ function output = resynthesise(x,fs,cfs,m,varargin)
     %% parse input
 
     if nargin<4
-        error('Not enough input arguments')
+        error('iosr:resynthesise:tooFewInputArgs','Not enough input arguments')
     end
 
     numchans = size(m,2);
@@ -73,7 +73,7 @@ function output = resynthesise(x,fs,cfs,m,varargin)
         % count arguments
         nArgs = length(varargin);
         if round(nArgs/2)~=nArgs/2
-           error('RESYNTHESISE needs propertyName/propertyValue pairs')
+           error('iosr:resynthesise:nameValuePairs','RESYNTHESISE needs propertyName/propertyValue pairs')
         end
         % overwrite defults
         for pair = reshape(varargin,2,[]) % pair is {propName;propValue}
@@ -82,7 +82,7 @@ function output = resynthesise(x,fs,cfs,m,varargin)
               % do the overwrite
               options.(optionNames{IX}) = pair{2};
            else
-              error('%s is not a recognized parameter name',pair{1})
+              error('iosr:resynthesise:unknownParameter','%s is not a recognized parameter name',pair{1})
            end
         end
     end
@@ -94,13 +94,13 @@ function output = resynthesise(x,fs,cfs,m,varargin)
     order = options.order;
 
     % validate
-    assert(isvector(x) && isnumeric(x),'x must be a vector.');
-    assert(all(round(delay)==delay),'Values in ''delay'' must be integers.');
-    assert(length(delay)==numchans && isnumeric(delay),'The ''delay'' parameter must be a numeric vector the same length as the number of columns in m.');
-    assert(ischar(outfilter),'The ''filter'' option must be a char array (string).');
-    assert(round(frame_d)==frame_d && isscalar(frame_d),'''frame_length'' must be a integer scalar.');
-    assert(isnumeric(kernel),'''kernel'' must be numeric.');
-    assert(isvector(cfs) && length(cfs)==numchans && isnumeric(cfs),'cfs must be a vector with the same number of elements as there are columns of m.')
+    assert(isvector(x) && isnumeric(x), 'iosr:resynthesise:invalidX', 'x must be a vector.');
+    assert(all(round(delay)==delay), 'iosr:resynthesise:invalidDelay', 'Values in ''delay'' must be integers.');
+    assert(length(delay)==numchans && isnumeric(delay), 'iosr:resynthesise:invalidDelay', 'The ''delay'' parameter must be a numeric vector the same length as the number of columns in m.');
+    assert(ischar(outfilter), 'iosr:resynthesise:invalidFilter', 'The ''filter'' option must be a char array (string).');
+    assert(round(frame_d)==frame_d && isscalar(frame_d), 'iosr:resynthesise:invalidFrame', '''frame_length'' must be a integer scalar.');
+    assert(isnumeric(kernel), 'iosr:resynthesise:invalidKernel', '''kernel'' must be numeric.');
+    assert(isvector(cfs) && length(cfs)==numchans && isnumeric(cfs), 'iosr:resynthesise:invalidCfs', 'cfs must be a vector with the same number of elements as there are columns of m.')
 
     %% get sample-by-sample masks
 

@@ -124,6 +124,7 @@ classdef (CaseInsensitiveProperties = true) functionalBoxPlot < ...
             
             % check input is valid size
             assert(ndims(obj.y) <= 3 && ndims(obj.y) >= 2, ...
+                'iosr:functionalBoxPlot:invalidY', ...
                 'Y must be a two- or three-dimensional array.');
             
             % set the properties of the plot
@@ -275,7 +276,7 @@ classdef (CaseInsensitiveProperties = true) functionalBoxPlot < ...
                 case 'mbd'
                     depth = obj.MBD();
                 otherwise
-                    error(['Unknown mode ''' obj.method ''''])
+                    error('iosr:functionalBoxPlot:unknownMethod',['Unknown mode ''' obj.method ''''])
             end
 
         end

@@ -11,12 +11,12 @@ function w = lapwin(L,b)
 
 %   Copyright 2016 University of Surrey.
 
-    assert(isscalar(L) && round(L)==L,'L must be a scalar and whole number.')
+    assert(isscalar(L) && round(L)==L, 'iosr:lapwin:invalidL', 'L must be a scalar and whole number.')
     
     if nargin<2
         b = 2;
     else
-        assert(isscalar(b),'b must be a scalar.')
+        assert(isscalar(b), 'iosr:lapwin:invalidB', 'b must be a scalar.')
     end
     
     w = zeros(L,1);

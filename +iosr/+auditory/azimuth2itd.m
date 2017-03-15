@@ -15,8 +15,9 @@ function itd = azimuth2itd(azimuth,f)
 
 %   Copyright 2016 University of Surrey.
 
-    assert(isnumeric(azimuth),'AZIMUTH must be numeric')
+    assert(isnumeric(azimuth), 'iosr:azimuth2itd:invalidInput', 'AZIMUTH must be numeric')
     assert((isscalar(f) | isscalar(azimuth)) | numel(f)==numel(azimuth),...
+        'iosr:azimuth2itd:invalidInput', ...
         'F or ITD must be a scalar, or F and AZIMUTH must be the same size')
 
     czero = 344;

@@ -15,12 +15,14 @@ function azimuth = itd2azimuth(itd,f)
 
 %   Copyright 2016 University of Surrey.
 
-    assert(isnumeric(itd),'ITD must be numeric')
+    assert(isnumeric(itd), 'iosr:itd2azimuth:invalidItd', 'ITD must be numeric')
     assert((isscalar(f) | isscalar(itd)) | numel(f)==numel(itd),...
+        'iosr:itd2azimuth:invalidInputs', ...
         'F or ITD must be a scalar, or F and ITD must be the same size')
 
     % Check sanity of ITDs
     assert(all(itd<iosr.auditory.azimuth2itd(90,f)),...
+        'iosr:itd2azimuth:invalidItd', ...
         'ITDs greater than maximum ITD [=iosr.auditory.azimuth2itd(90,f)] have been specified.')
 
     czero = 344;

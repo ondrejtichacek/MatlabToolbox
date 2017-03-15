@@ -29,21 +29,21 @@ function y = sincFilter(x,Wn,N,dim)
 
     %% test input
 
-    assert(nargin>=2,'Not enough input arguments')
-    assert((numel(Wn)==1 || numel(Wn)==2) & isnumeric(Wn),'Wn must be a scalar or two-element vector.')
-    assert(isnumeric(x),'x must be a numeric array.')
-    assert(all(Wn<=1) & all(Wn>=0),'Wn must be 0.0 < Wn < 1.0, with 1.0 corresponding to half the sample rate.')
+    assert(nargin>=2, 'iosr:sincFilter:nargin', 'Not enough input arguments')
+    assert((numel(Wn)==1 || numel(Wn)==2) & isnumeric(Wn), 'iosr:sincFilter:invalidWn', 'Wn must be a scalar or two-element vector.')
+    assert(isnumeric(x), 'iosr:sincFilter:invalidX', 'x must be a numeric array.')
+    assert(all(Wn<=1) & all(Wn>=0), 'iosr:sincFilter:invalidWn', 'Wn must be 0.0 < Wn < 1.0, with 1.0 corresponding to half the sample rate.')
     dims = size(x);
     if nargin<4
         dim = [];
     else
-        assert(isint(dim) & numel(dim)==1,'dim must be an integer')
-        assert(dim<=length(dims),'dim must be less than or equal to the number of dimensions in x')
+        assert(isint(dim) & numel(dim)==1, 'iosr:sincFilter:invalidDim', 'dim must be an integer')
+        assert(dim<=length(dims), 'iosr:sincFilter:invalidDim', 'dim must be less than or equal to the number of dimensions in x')
     end
     if nargin<3
         N = [];
     elseif ~isempty(N)
-        assert(isscalar(N) & isint(N),'N must be an integer scalar.')
+        assert(isscalar(N) & isint(N), 'iosr:sincFilter:invalidN', 'N must be an integer scalar.')
     end
 
     %% assign defaults

@@ -30,28 +30,28 @@ function [x,t] = istft(s,nfft,hop,fs)
 
     %% check input
     
-    assert(ismatrix(s),'S must be a matrix')
+    assert(ismatrix(s), 'iosr:istft:invalidS', 'S must be a matrix')
     
     % check nfft
     if nargin<2
         nfft = 1024;
     else
-        assert(isscalar(nfft) && round(nfft)==nfft && nfft>0,'NFFT must be a positive scalar integer')
+        assert(isscalar(nfft) && round(nfft)==nfft && nfft>0, 'iosr:istft:invalidNfft', 'NFFT must be a positive scalar integer')
     end
     
     % determine hop size
     if nargin<3
         hop = fix(nfft/2);
     else
-        assert(isscalar(hop) & round(hop)==hop,'hop must be an integer')
-        assert(hop<=nfft && hop>0,'hop must be less than or equal to nfft, and greater than 0')
+        assert(isscalar(hop) & round(hop)==hop, 'iosr:istft:invalidHop', 'hop must be an integer')
+        assert(hop<=nfft && hop>0, 'iosr:istft:invalidHop', 'hop must be less than or equal to nfft, and greater than 0')
     end
     
     % determine fs
     if nargin<4
         fs = 1;
     else
-        assert(isscalar(fs),'FS must be an scalar')
+        assert(isscalar(fs), 'iosr:istft:invalidFs', 'FS must be an scalar')
     end
     
     %% calculate outputs
@@ -70,7 +70,7 @@ function [x,t] = istft(s,nfft,hop,fs)
     end
     
     % check FFT size
-    assert(size(s,1)==Nout,sprintf('SIZE(S,1) is not correct for an FFT-length of %d',nfft))
+    assert(size(s,1)==Nout, 'iosr:istft:invalidS', sprintf('SIZE(S,1) is not correct for an FFT-length of %d',nfft))
     
     % calculate ISTFTs
     x = zeros(M,1);

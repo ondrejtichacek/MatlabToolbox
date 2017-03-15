@@ -55,7 +55,7 @@ function h = qqPlot(varargin)
 
     switch sum(IXn)
         case 0
-            error('No input data specified')
+            error('iosr:qqPlot:noData','No input data specified')
         case 1
             % compare to normal distrbution
             Y = get_input_sample(varargin,IXn);
@@ -67,11 +67,11 @@ function h = qqPlot(varargin)
             % compare to input data distribution
             Y = get_input_sample(varargin,find(IXn,1,'last'));
             X = get_input_sample(varargin,find(IXn,1,'first'));
-            assert(isequal(size(X),size(Y)),'Input data must be the same size')
+            assert(isequal(size(X),size(Y)), 'iosr:quantile:invalidInput', 'Input data must be the same size')
             x_label = 'X quantiles';
             y_label = 'Y quantiles';
         otherwise
-            error('Unknown input specified')
+            error('iosr:qqPlot:unkonwnInput','Unknown input specified')
     end
 
     %% determine mode and method
@@ -89,7 +89,7 @@ function h = qqPlot(varargin)
             mode = varargin{find(IXc,1,'first')};
             method = varargin{find(IXc,1,'last')};
         otherwise
-            error('Unknown string specified')
+            error('iosr:qqPlot:unknownString','Unknown string specified')
     end
 
     % defaults
@@ -142,7 +142,7 @@ function h = qqPlot(varargin)
         case 'both'
             linestyle = 'xk';
         otherwise
-            error('Unknown mode specified')
+            error('iosr:qqPlot:unknownMode','Unknown mode specified')
     end
 
     H = plot(X,Y,linestyle,X_fit,Y_fit,'--k');

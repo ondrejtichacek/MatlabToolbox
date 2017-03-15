@@ -35,8 +35,8 @@ function [z_irm,z_ibm,t] = applyIdealMasks(xt,xi,nfft,hop,fs)
     %% check input
     
     % check signals
-    assert(isvector(xt) && numel(xt)>1,'XT must be a vector')
-    assert(isvector(xi) && numel(xi)>1,'XI must be a vector')
+    assert(isvector(xt) && numel(xt)>1, 'iosr:applyIdealMasks:invalidXt', 'XT must be a vector')
+    assert(isvector(xi) && numel(xi)>1, 'iosr:applyIdealMasks:invalidXi', 'XI must be a vector')
     
     % make equal length
     maxlength = max([length(xi) length(xt)]);
@@ -51,30 +51,30 @@ function [z_irm,z_ibm,t] = applyIdealMasks(xt,xi,nfft,hop,fs)
     % determine window
     if numel(nfft)>1
         win = nfft;
-        assert(isvector(win),'WINDOW must be a vector')
+        assert(isvector(win), 'iosr:applyIdealMasks:invalidWin', 'WINDOW must be a vector')
         nfft = length(win);
     else
-        assert(round(nfft)==nfft && nfft>0,'NFFT must be a positive integer')
+        assert(round(nfft)==nfft && nfft>0, 'iosr:applyIdealMasks:invalidNfft', 'NFFT must be a positive integer')
         win = hamming(nfft);
     end
     
     % check x length
-    assert(length(xt)>=nfft,'XT must have at least NFFT samples')
-    assert(length(xi)>=nfft,'XI must have at least NFFT samples')
+    assert(length(xt)>=nfft, 'iosr:applyIdealMasks:invalidXt', 'XT must have at least NFFT samples')
+    assert(length(xi)>=nfft, 'iosr:applyIdealMasks:invalidXi', 'XI must have at least NFFT samples')
     
     % determine hop
     if nargin<4
         hop = fix(nfft/2);
     else
-        assert(isscalar(hop) & round(hop)==hop,'HOP must be an integer')
-        assert(hop<=nfft && hop>0,'HOP must be less than or equal to NFFT, and greater than 0')
+        assert(isscalar(hop) & round(hop)==hop, 'iosr:applyIdealMasks:invalidHop', 'HOP must be an integer')
+        assert(hop<=nfft && hop>0, 'iosr:applyIdealMasks:invalidHop', 'HOP must be less than or equal to NFFT, and greater than 0')
     end
     
     % determine fs
     if nargin<5
         fs = 1;
     else
-        assert(isscalar(fs),'FS must be an scalar')
+        assert(isscalar(fs), 'iosr:applyIdealMasks:invalidFs', 'FS must be an scalar')
     end
     
     %% calculate outputs

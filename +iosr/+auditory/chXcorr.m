@@ -111,10 +111,10 @@ function [ccg,ic] = chXcorr(hc_L,hc_R,fs,varargin)
 
 %   Copyright 2016 University of Surrey.
 
-    assert(nargin>=3,'Number of input arguments must be greater than or equal to three.')
+    assert(nargin>=3, 'iosr:chXcorr:nargin', 'Number of input arguments must be greater than or equal to three.')
 
     if isparameter(varargin,'inhib_mode') && ~isparameter(varargin,'inhib')
-        warning('''inhib_mode'' specified, but no inhibition array ''inhib''.');
+        warning('iosr:instIld:inhibMode','''inhib_mode'' specified, but no inhibition array ''inhib''.');
     end
 
     % Check source file is compiled
@@ -137,7 +137,7 @@ function [ccg,ic] = chXcorr(hc_L,hc_R,fs,varargin)
         % count arguments
         nArgs = length(varargin);
         if round(nArgs/2)~=nArgs/2
-           error('CHXCORR needs propertyName/propertyValue pairs')
+           error('iosr:chXcorr:nameValuePair','CHXCORR needs propertyName/propertyValue pairs')
         end
         % overwrite defults
         for pair = reshape(varargin,2,[]) % pair is {propName;propValue}
@@ -146,7 +146,7 @@ function [ccg,ic] = chXcorr(hc_L,hc_R,fs,varargin)
               % do the overwrite
               options.(optionNames{IX}) = pair{2};
            else
-              error('%s is not a recognized parameter name',pair{1})
+              error('iosr:chXcorr:unknownOption','%s is not a recognized parameter name',pair{1})
            end
         end
     end
@@ -162,14 +162,17 @@ function [ccg,ic] = chXcorr(hc_L,hc_R,fs,varargin)
     inhib = options.inhib;
 
     % check inputs
-    assert(all(size(hc_L)==size(hc_R)),'''hc_L'' and ''hc_R'' must be the same size')
-    assert(round(frame_length)==frame_length && isscalar(frame_length) && frame_length>0,'''frame_length'' must be an integer greater than zero')
-    assert(round(noverlap)==noverlap && isscalar(noverlap) && noverlap>0,'''noverlap'' must be an integer greater than zero')
-    assert(round(maxlag)==maxlag && isscalar(maxlag) && maxlag>0,'''maxlag'' must be an integer greater than zero')
-    assert(isscalar(tau) && tau>=1,'''tau'' must be a scalar greater than or equal to one')
-    assert(isscalar(norm_flag),'''norm_flag'' must be a scalar')
-    assert(isscalar(ic_t) && ic_t>=0 && ic_t<=1,'''ic_t'' must be a scalar in the range [0,1]')
-    assert(ischar(inhib_mode),'''inhib_mode'' must be a char array (string)')
+    assert(all(size(hc_L)==size(hc_R)), 'iosr:chXcorr:invalidInput', '''hc_L'' and ''hc_R'' must be the same size')
+    assert(round(frame_length)==frame_length && isscalar(frame_length) && frame_length>0, 'iosr:chXcorr:invalidFrame', ...
+        '''frame_length'' must be an integer greater than zero')
+    assert(round(noverlap)==noverlap && isscalar(noverlap) && noverlap>0, 'iosr:chXcorr:invalidNoverlap', ...
+        '''noverlap'' must be an integer greater than zero')
+    assert(round(maxlag)==maxlag && isscalar(maxlag) && maxlag>0, 'iosr:chXcorr:invalidMaxlag', ...
+        '''maxlag'' must be an integer greater than zero')
+    assert(isscalar(tau) && tau>=1, 'iosr:chXcorr:invalidTau', '''tau'' must be a scalar greater than or equal to one')
+    assert(isscalar(norm_flag), 'iosr:chXcorr:invalidNorm', '''norm_flag'' must be a scalar')
+    assert(isscalar(ic_t) && ic_t>=0 && ic_t<=1, 'iosr:chXcorr:invalidIct', '''ic_t'' must be a scalar in the range [0,1]')
+    assert(ischar(inhib_mode), 'iosr:chXcorr:invalidInhibMode', '''inhib_mode'' must be a char array (string)')
 
     % Calculate frame count
     frame_count = floor(max(size(hc_L))/(frame_length));
@@ -204,7 +207,7 @@ function [ccg,ic] = chXcorr(hc_L,hc_R,fs,varargin)
                 inhib = zeros(size(hc_L));
             end
         otherwise
-            error('''inhib_mode'' must be set to ''multiply'' or ''subtract''')
+            error('iosr:chXcorr:unknownInhibMode','''inhib_mode'' must be set to ''multiply'' or ''subtract''')
     end
 
     inhib = check_input(inhib,2,numchans);
@@ -214,7 +217,7 @@ function [ccg,ic] = chXcorr(hc_L,hc_R,fs,varargin)
     hc_R = [hc_R; zeros(maxlag+1,numchans)];
     inhib = [inhib; zeros(maxlag+1,numchans)];
 
-    assert(all(size(inhib)==size(hc_L)),'''inhib'' must be a matrix the same size as ''hc_L'' or ''hc_R''')
+    assert(all(size(inhib)==size(hc_L)), 'iosr:chXcorr:invalidInhib', '''inhib'' must be a matrix the same size as ''hc_L'' or ''hc_R''')
 
     % Calculate cross-correlograms
     [ccg,ic] = iosr.auditory.chXcorr_c(hc_L,hc_R,frame_count,frame_length,noverlap,maxlag,tau,inhib,ic_t,norm_flag,inhib_mode_ID);
@@ -232,7 +235,7 @@ function output = check_input(input,dim,target)
 
     if size(input,dim)~=target
         output = input';
-        assert(size(output,dim)==target,'Input invalid')
+        assert(size(output,dim)==target, 'iosr:chXcorr:invalidInputs', 'Input invalid')
     else
         output = input;
     end
