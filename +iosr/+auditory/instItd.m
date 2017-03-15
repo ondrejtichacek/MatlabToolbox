@@ -15,8 +15,8 @@ function itd = instItd(l,r,fs)
 
 %   Copyright 2016 University of Surrey.
 
-    assert(isvector(l) & isvector(r),'l and r must be vectors')
-    assert(isscalar(fs),'fs must be a scalar')
+    assert(isvector(l) & isvector(r), 'iosr:instItd:invalidInputs', 'l and r must be vectors')
+    assert(isscalar(fs), 'iosr:instItd:invalidInputs', 'fs must be a scalar')
 
     % instantaneous phase, frequency, and time
     [pl,fl] = inst_pf(l,fs);
@@ -69,20 +69,20 @@ function dx = derivative(x,N,dim)
            dim = 1; %default to computing along the columns, unless input is a row vector
        end
     else
-        assert(isscalar(dim) & ismember(dim,[1 2]),'dim must be 1 or 2!')
+        assert(isscalar(dim) & ismember(dim,[1 2]), 'iosr:instItd:invalidDim', 'dim must be 1 or 2!')
     end
 
     %set N
     if nargin<2 || isempty(N) %allows for letting N = [] as placeholder
         N = 1; %default to first derivative    
     else
-        assert(isscalar(N) & N==round(N),'N must be a scalar integer!')
+        assert(isscalar(N) & N==round(N), 'iosr:instItd:invalidN', 'N must be a scalar integer!')
     end
 
     if size(x,dim)<=1 && N
-        error('X cannot be singleton along dimension DIM')
+        error('iosr:instItd:singleton','X cannot be singleton along dimension DIM')
     elseif N>=size(x,dim)
-        warning('Computing derivative of order longer than or equal to size(x,dim). Results may not be valid...') %#ok<WNTAG>
+        warning('iosr:instIld:excessiveOrder','Computing derivative of order longer than or equal to size(x,dim). Results may not be valid...') %#ok<WNTAG>
     end
 
     dx = x; %'Zeroth' derivative

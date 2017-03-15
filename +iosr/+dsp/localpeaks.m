@@ -13,7 +13,7 @@ function peaks = localpeaks(x,mode)
 
 %   Copyright 2016 University of Surrey.
 
-    assert(isvector(x),'Input must be a vector')
+    assert(isvector(x), 'iosr:localpeaks:invalidX', 'Input must be a vector')
 
     if nargin < 2
         mode = 'peaks';
@@ -28,7 +28,7 @@ function peaks = localpeaks(x,mode)
         case 'both'
             peaks = find_peaks(x) | find_peaks(-x);
         otherwise
-            error('Unknown localpeak mode. Please specify ''peaks'', ''troughs'' or ''both''');
+            error('iosr:localpeaks:unknownMode','Unknown localpeak mode. Please specify ''peaks'', ''troughs'' or ''both''');
     end
 
 end

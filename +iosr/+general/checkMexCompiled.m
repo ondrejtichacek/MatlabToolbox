@@ -25,10 +25,10 @@ function checkMexCompiled(varargin)
     source_file = varargin{end};
 
     % Check input filename
-    assert(ischar(source_file),'source_file must be a string')
+    assert(ischar(source_file), 'iosr:checkMexCompiled:invalidFile', 'source_file must be a string')
 
     % Check extension is specified
-    assert(~isempty(strfind(source_file,'.')),'source_file: no file extension specified')
+    assert(~isempty(strfind(source_file,'.')), 'iosr:checkMexCompiled:invalidFile', 'source_file: no file extension specified')
 
     % Locate source file
     [pathstr,name,ext] = fileparts(which(source_file));
@@ -37,7 +37,7 @@ function checkMexCompiled(varargin)
     mexfilename = [pathstr filesep name '.' mexext]; % Deduce mex file name based on current platform
 
     if strcmp(pathstr,'') % source file not found
-        error([source_file ': not found'])
+        error('iosr:checkMexCompiled:fileNotFound',[source_file ': not found'])
     elseif exist(mexfilename,'file')~=3 || get_mod_date(mexfilename)<get_mod_date(filename)
          % if source file does not exist or it was modified after the mex file
         disp(['Compiling "' name ext '".'])

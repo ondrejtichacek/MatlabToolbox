@@ -98,27 +98,27 @@ function mixtures = generateMixtures(targets,interferers,varargin)
     end
     
     % check IVs
-    assert(isa(targets,'iosr.bss.source'),'''TARGETS'' must be of type iosr.bss.source')
-    assert(isa(interferers,'iosr.bss.source'),'''INTERFERERS'' must be of type iosr.bss.source')
-    assert(isnumeric(IVs.azimuths),'''AZIMUTHS'' must be numeric')
-    assert(size(IVs.azimuths,2)==size(interferers,2)+1,'''AZIMUTHS'' should have one more column than INTERFERERS')
-    assert(isnumeric(IVs.elevations),'''ELEVATIONS'' must be numeric')
-    assert(size(IVs.elevations,2)==size(interferers,2)+1,'''ELEVATIONS'' should have one more column than INTERFERERS')
+    assert(isa(targets,'iosr.bss.source'), 'iosr:generateMixtures:invalidTargets', '''TARGETS'' must be of type iosr.bss.source')
+    assert(isa(interferers,'iosr.bss.source'), 'iosr:generateMixtures:invalidInterferers', '''INTERFERERS'' must be of type iosr.bss.source')
+    assert(isnumeric(IVs.azimuths), 'iosr:generateMixtures:invalidAzimuths', '''AZIMUTHS'' must be numeric')
+    assert(size(IVs.azimuths,2)==size(interferers,2)+1, 'iosr:generateMixtures:invalidAzimuths', '''AZIMUTHS'' should have one more column than INTERFERERS')
+    assert(isnumeric(IVs.elevations), 'iosr:generateMixtures:invalidElevations', '''ELEVATIONS'' must be numeric')
+    assert(size(IVs.elevations,2)==size(interferers,2)+1, 'iosr:generateMixtures:invalidElevations', '''ELEVATIONS'' should have one more column than INTERFERERS')
     if ~isempty(IVs.sofa_paths)
         if ischar(IVs.sofa_paths)
             IVs.sofa_paths = cellstr(IVs.sofa_paths);
         elseif ~iscellstr(IVs.sofa_paths)
-            error('sofa_paths should be a char array or cell array of strings')
+            error('iosr:generateMixtures:pathInvalid','sofa_paths should be a char array or cell array of strings')
         end
     end
     
     % check settings
-    assert(islogical(settings.cache),'''CACHE'' must be logical')
-    assert(ischar(settings.folder),'''FOLDER'' must be a char array')
+    assert(islogical(settings.cache), 'iosr:generateMixtures:invalidCache', '''CACHE'' must be logical')
+    assert(ischar(settings.folder), 'iosr:generateMixtures:invalidFolder', '''FOLDER'' must be a char array')
     if ~isempty(settings.combine)
-        assert(ischar(settings.combine),'''COMBINE'' must be a char array')
+        assert(ischar(settings.combine), 'iosr:generateMixtures:invalidCombine', '''COMBINE'' must be a char array')
     end
-    assert(isnumeric(settings.fs) && isscalar(settings.fs),'''FS'' must be a numeric scalar')
+    assert(isnumeric(settings.fs) && isscalar(settings.fs), 'iosr:generateMixtures:invalidFs', '''FS'' must be a numeric scalar')
     
     % ensure column vectors
     IVs.sofa_paths = IVs.sofa_paths(:);
@@ -157,9 +157,9 @@ function mixtures = generateMixtures(targets,interferers,varargin)
                 max(size(IVs.azimuths,1),1),...
                 max(size(IVs.elevations,1),1)];
         case 'rows'
-            assert(equal,'Properties must have an equal number of rows if specifying ''COMBINE'' mode ''ROWS''')
+            assert(equal, 'iosr:generateMixtures:rowsInvalidInput', 'Properties must have an equal number of rows if specifying ''COMBINE'' mode ''ROWS''')
         otherwise
-            error('Unknown ''COMBINE'' property')
+            error('iosr:generateMixtures:unknownCombine','Unknown ''COMBINE'' property')
     end
     
     % create the mixtures
@@ -242,7 +242,7 @@ function opts = overwrite(opts,validOptions,vgin)
     % count arguments
     nArgs = length(vgin);
     if round(nArgs/2)~=nArgs/2
-       error('generate_mixtures needs propertyName/propertyValue pairs')
+       error('iosr:generateMixtures:nameValuePair','generateMixtures needs propertyName/propertyValue pairs')
     end
     optionNames = fieldnames(opts);
     % overwrite defults
@@ -253,7 +253,7 @@ function opts = overwrite(opts,validOptions,vgin)
           opts.(optionNames{IX}) = pair{2};
        else
            if ~any(strcmpi(pair{1},validOptions))
-                error(['''' pair{1} ''' is not a valid option'])
+                error('iosr:generateMixtures:unknownOption',['''' pair{1} ''' is not a valid option'])
            end
        end
     end

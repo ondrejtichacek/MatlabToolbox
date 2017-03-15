@@ -33,12 +33,12 @@ classdef (Abstract, CaseInsensitiveProperties = true) statsPlot < ...
         % these are all deprecated and the handles moved to the obj.handles struct
     
         function val = get.axes(obj)
-            warning('''obj.axes'' is deprecated. Use ''obj.handles.axes'' instead.');
+            warning('iosr:statsPlot:deprecatedProp','''obj.axes'' is deprecated. Use ''obj.handles.axes'' instead.');
             val = obj.handles.axes;
         end
         
         function val = get.fig(obj)
-            warning('''obj.fig'' is deprecated. Use ''obj.handles.fig'' instead.');
+            warning('iosr:statsPlot:deprecatedProp','''obj.fig'' is deprecated. Use ''obj.handles.fig'' instead.');
             val = obj.handles.fig;
         end
         
@@ -53,7 +53,7 @@ classdef (Abstract, CaseInsensitiveProperties = true) statsPlot < ...
             if start < ngin % if parameters are specified
                 nArgs = length(vgin)-start+1;
                 if round(nArgs/2)~=nArgs/2
-                   error('Properties must be propertyName/propertyValue pairs')
+                   error('iosr:statsPlot:nameValuePairs','Properties must be propertyName/propertyValue pairs')
                 end
                 % overwrite defults
                 for pair = reshape(vgin(start:end),2,[]) % pair is {propName;propValue}
@@ -82,7 +82,7 @@ classdef (Abstract, CaseInsensitiveProperties = true) statsPlot < ...
                         axes(obj.handles.axes); %#ok<CPROPLC>
                         obj.handles.fig = ancestor(obj.handles.axes, 'figure');
                     else
-                        error('Axes handle is invalid.')
+                        error('iosr:statsPlot:axisInvalid','Axes handle is invalid.')
                     end
                 else
                     obj.handles.axes = newplot;
@@ -126,13 +126,13 @@ classdef (Abstract, CaseInsensitiveProperties = true) statsPlot < ...
             end
             
             if size(obj.y,1)==1
-                error('Data are plotted for each column. Each column in the input has only one data point.')
+                error('iosr:statsPlot:invalidInput','Data are plotted for each column. Each column in the input has only one data point.')
             end
             
             % check x/y data
-            assert(isvector(obj.x),'x must be a vector');
-            assert(isnumeric(obj.y),'y must be a numeric column vector or matrix');
-            assert(numel(obj.x)==size(obj.y,2),'x must have the same number of elements as y has columns')
+            assert(isvector(obj.x), 'iosr:statsPlot:invalidX', 'x must be a vector');
+            assert(isnumeric(obj.y), 'iosr:statsPlot:invalidY', 'y must be a numeric column vector or matrix');
+            assert(numel(obj.x)==size(obj.y,2), 'iosr:statsPlot:invalidInput', 'x must have the same number of elements as y has columns')
             
             % size of input
             obj.ydims = size(obj.y);
@@ -151,7 +151,7 @@ classdef (Abstract, CaseInsensitiveProperties = true) statsPlot < ...
             if isempty(obj.weights)
                 obj.weights = ones(size(obj.y));
             else
-                assert(isequal(size(obj.y),size(obj.weights)),'weights must be the same size as y')
+                assert(isequal(size(obj.y),size(obj.weights)), 'iosr:statsPlot:invalidWeights', 'weights must be the same size as y')
             end
             
         end
@@ -218,7 +218,7 @@ classdef (Abstract, CaseInsensitiveProperties = true) statsPlot < ...
                             upper_limit = Inf;
                             lower_limit = -Inf;
                         otherwise
-                            error('Unknown ''limit'': ''%s''',obj.limit)
+                            error('iosr:statsPlot:unknownLimit','Unknown ''limit'': ''%s''',obj.limit)
                     end
                 end
                 obj.statistics.outliers_IX(subidxAll{:}) = obj.y(subidxAll{:})>upper_limit | obj.y(subidxAll{:})<lower_limit;

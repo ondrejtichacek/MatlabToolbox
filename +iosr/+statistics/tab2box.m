@@ -61,11 +61,11 @@ function [y,x,g] = tab2box(Xin,Yin,Gin)
     if ischar(Xin)
         Xin = cellstr(Xin);
     end
-    assert(isvector(Xin),'Xin must be a vector')
+    assert(isvector(Xin), 'iosr:tab2box:invalidInput', 'Xin must be a vector')
 
     % validate Yin
-    assert(isvector(Yin),'Yin must be a vector')
-    assert(isnumeric(Yin),'Yin must be numeric')
+    assert(isvector(Yin), 'iosr:tab2box:invalidInput', 'Yin must be a vector')
+    assert(isnumeric(Yin), 'iosr:tab2box:invalidInput', 'Yin must be numeric')
 
     % validate Gin
     if nargin<3
@@ -74,7 +74,7 @@ function [y,x,g] = tab2box(Xin,Yin,Gin)
         if ischar(Gin)
             Gin = cellstr(Gin);
         end
-        assert(isvector(Gin) || size(Gin,1)==numel(Yin),'Gin must be a vector or a matrix with as many rows as Y has elements.')
+        assert(isvector(Gin) || size(Gin,1)==numel(Yin), 'iosr:tab2box:invalidInput', 'Gin must be a vector or a matrix with as many rows as Y has elements.')
         if isvector(Gin)
             Gin = Gin(:);
         end

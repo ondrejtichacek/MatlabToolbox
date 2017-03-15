@@ -9,13 +9,13 @@ function snr = calcSnr(output,target)
 
     % check input
     if ~isvector(output)
-        error('''output'' must be a vector')
+        error('iosr:calcSnr:invalidOutput','''output'' must be a vector')
     end
     if ~isvector(target)
-        error('''target'' must be a vector')
+        error('iosr:calcSnr:invalidTarget','''target'' must be a vector')
     end
     if numel(output)~=numel(target)
-        error('inputs must be the same length')
+        error('iosr:calcSnr:inputLengths','inputs must be the same length')
     end
     if size(output,1)==1
         output = output';

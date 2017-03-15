@@ -52,13 +52,13 @@ function x_oct = smoothSpectrum(X,f,Noct)
 
     %% Input checking
 
-    assert(isvector(X),'X must be a vector.');
-    assert(isvector(f),'F must be a vector.');
-    assert(isscalar(Noct),'NOCT must be a scalar.');
-    assert(isreal(X),'X must be real.');
-    assert(all(f>=0),'F must contain positive values.');
-    assert(Noct>=0,'NOCT must be greater than or equal to 0.');
-    assert(isequal(size(X),size(f)),'X and F must be the same size.');
+    assert(isvector(X), 'iosr:smoothSpectrum:invalidX', 'X must be a vector.');
+    assert(isvector(f), 'iosr:smoothSpectrum:invalidF', 'F must be a vector.');
+    assert(isscalar(Noct), 'iosr:smoothSpectrum:invalidNoct', 'NOCT must be a scalar.');
+    assert(isreal(X), 'iosr:smoothSpectrum:invalidX', 'X must be real.');
+    assert(all(f>=0), 'iosr:smoothSpectrum:invalidF', 'F must contain positive values.');
+    assert(Noct>=0, 'iosr:smoothSpectrum:invalidNoct', 'NOCT must be greater than or equal to 0.');
+    assert(isequal(size(X),size(f)), 'iosr:smoothSpectrum:invalidInput', 'X and F must be the same size.');
 
     %% Smoothing
     

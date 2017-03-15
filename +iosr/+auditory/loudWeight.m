@@ -30,7 +30,7 @@ function g = loudWeight(f,phon)
 
     %% Check input
 
-    assert(all(f(:)>=0),'f should be greater than or equal to zero!')
+    assert(all(f(:)>=0), 'iosr:loudWeight:invalidF', 'f should be greater than or equal to zero!')
 
     if nargin<2
         phon = 65;
@@ -43,9 +43,9 @@ function g = loudWeight(f,phon)
         end
     elseif isnumeric(phon)
         method = 'iso-226';
-        assert(isscalar(phon),'phon must be a scalar.')
+        assert(isscalar(phon), 'iosr:loudWeight:invalidPhon', 'phon must be a scalar.')
     else
-        error('Second argument should be a scalar or char array.')
+        error('iosr:loudWeight:invalidArg','Second argument should be a scalar or char array.')
     end
 
     %% Calculate weighting coefficients
@@ -70,7 +70,7 @@ function g = loudWeight(f,phon)
             g = min(spl(:))-spl;
             g = 10.^(g./20);
         otherwise
-            error('Unknown method.')
+            error('iosr:loudWeight:unknownMethod','Unknown method.')
     end
 
 end

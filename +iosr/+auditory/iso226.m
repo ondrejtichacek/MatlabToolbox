@@ -49,17 +49,17 @@ function [spl,f] = iso226(phon,fq,sq)
     %% Check input
 
     if phon>=80
-        warning('SPL values may not be accurate for loudness levels above 80 phon.')
+        warning('iosr:iso226:phonRange','SPL values may not be accurate for loudness levels above 80 phon.')
     elseif phon<20
-        warning('SPL values may not be accurate for loudness levels below 20 phon.')
+        warning('iosr:iso226:phonRange','SPL values may not be accurate for loudness levels below 20 phon.')
     end
 
     if nargin>1
         if ~isempty(fq)
             if any(fq(:)>12500)
-                warning('ISO 226:2003 defines loudness levels up to 12.5 kHz. SPL values for frequencies above 12.5 kHz may be inaccurate.')
+                warning('iosr:iso226:frequencyRange','ISO 226:2003 defines loudness levels up to 12.5 kHz. SPL values for frequencies above 12.5 kHz may be inaccurate.')
             end
-            assert(all(fq(:)>=0),'Frequencies must be greater than or equal to 0 Hz.')
+            assert(all(fq(:)>=0), 'iosr:iso226:invalidFrequencies', 'Frequencies must be greater than or equal to 0 Hz.')
         end
     else
         fq = [];
@@ -68,7 +68,7 @@ function [spl,f] = iso226(phon,fq,sq)
     if nargin<3
         sq = false;
     else
-        assert(islogical(sq),'sq must be logical.')
+        assert(islogical(sq), 'iosr:iso226:invalidSq', 'sq must be logical.')
     end
 
     %% References

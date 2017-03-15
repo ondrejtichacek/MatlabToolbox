@@ -50,7 +50,7 @@ function [s,f,t] = stft(x,nfft,hop,fs)
 
     %% check input
     
-    assert(isvector(x) && numel(x)>1,'X must be a vector')
+    assert(isvector(x) && numel(x)>1, 'iosr:stft:invalidX', 'X must be a vector')
     
     % check nfft
     if nargin<2
@@ -60,22 +60,22 @@ function [s,f,t] = stft(x,nfft,hop,fs)
     % determine window
     if numel(nfft)>1
         win = nfft;
-        assert(isvector(win),'WINDOW must be a vector')
+        assert(isvector(win), 'iosr:stft:invalidNfft', 'WINDOW must be a vector')
         nfft = length(win);
     else
-        assert(round(nfft)==nfft && nfft>0,'NFFT must be a positive integer')
+        assert(round(nfft)==nfft && nfft>0, 'iosr:stft:invalidNfft', 'NFFT must be a positive integer')
         win = hamming(nfft);
     end
     
     % check x length
-    assert(length(x)>=nfft,'X must have at least NFFT samples')
+    assert(length(x)>=nfft, 'iosr:stft:invalidInput', 'X must have at least NFFT samples')
     
     % determine hop
     if nargin<3
         hop = fix(nfft/2);
     else
-        assert(isscalar(hop) & round(hop)==hop,'HOP must be an integer')
-        assert(hop<=nfft && hop>0,'HOP must be less than or equal to NFFT, and greater than 0')
+        assert(isscalar(hop) & round(hop)==hop, 'iosr:stft:invalidHop', 'HOP must be an integer')
+        assert(hop<=nfft && hop>0, 'iosr:stft:invalidHop', 'HOP must be less than or equal to NFFT, and greater than 0')
     end
     
     % normalise window
@@ -85,7 +85,7 @@ function [s,f,t] = stft(x,nfft,hop,fs)
     if nargin<4
         fs = 1;
     else
-        assert(isscalar(fs),'FS must be an scalar')
+        assert(isscalar(fs), 'iosr:stft:invaldFs', 'FS must be an scalar')
     end
     
     %% calculate outputs

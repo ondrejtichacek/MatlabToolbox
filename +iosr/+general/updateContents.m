@@ -30,8 +30,8 @@ function updateContents(folder)
     end
 
     % check input is valid
-    assert(ischar(folder),'''directory'' should be a charater array (string)')
-    assert(exist(folder,'dir')==7,[folder ' does not exist'])
+    assert(ischar(folder), 'iosr:updateContents:invalidPath', '''directory'' should be a charater array (string)')
+    assert(exist(folder,'dir')==7, 'iosr:updateContents:invalidPath', [folder ' does not exist'])
 
     % check last character in path is not filesep (e.g. '/')
     if strcmp(folder(end),filesep)

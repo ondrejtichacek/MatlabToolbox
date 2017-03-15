@@ -93,11 +93,11 @@ function [rt,drr,cte,cfs,edt] = irStats(filename,varargin)
     % check dependency
     if exist('octdsgn','file')~=2
         web('http://uk.mathworks.com/matlabcentral/fileexchange/69-octave','-new','-browser')
-        error('Please download and install the OCTAVE toolbox from: http://uk.mathworks.com/matlabcentral/fileexchange/69-octave')
+        error('iosr:irStats:OctaveToolbox','Please download and install the OCTAVE toolbox from: http://uk.mathworks.com/matlabcentral/fileexchange/69-octave')
     end
 
     % check file exists
-    assert(exist(filename,'file')==2,['iosr.acoustics.irStats: ' filename ' does not exist'])
+    assert(exist(filename,'file')==2, 'iosr:irStats:invalidFile', ['iosr.acoustics.irStats: ' filename ' does not exist'])
 
     % set defaults
     options = struct(...
@@ -114,7 +114,7 @@ function [rt,drr,cte,cfs,edt] = irStats(filename,varargin)
         % count arguments
         nArgs = length(varargin);
         if round(nArgs/2)~=nArgs/2
-           error('IRSTATS needs propertyName/propertyValue pairs')
+           error('iosr:irStats:nameValuePair','IRSTATS needs propertyName/propertyValue pairs')
         end
         % overwrite defults
         for pair = reshape(varargin,2,[]) % pair is {propName;propValue}
@@ -123,34 +123,34 @@ function [rt,drr,cte,cfs,edt] = irStats(filename,varargin)
               % do the overwrite
               options.(optionNames{IX}) = pair{2};
            else
-              error('%s is not a recognized parameter name',pair{1})
+              error('iosr:irStats:unknownOption','%s is not a recognized parameter name',pair{1})
            end
         end
     end
     
     % check options size and type
-    assert(isvector(options.y_fit) && numel(options.y_fit)==2,'''y_fit'' must be a two-element vector.')
-    assert(isscalar(options.correction),'''correction'' must be a scalar.')
-    assert(isscalar(options.te),'''te'' must be a scalar.')
-    assert(ischar(options.spec),'''spec'' must be a char array.')
-    assert(islogical(options.graph) && numel(options.graph)==1,'''graph'' must be logical.')
+    assert(isvector(options.y_fit) && numel(options.y_fit)==2, 'iosr:irStats:invalidYfit', '''y_fit'' must be a two-element vector.')
+    assert(isscalar(options.correction), 'iosr:irStats:invalidCorrection', '''correction'' must be a scalar.')
+    assert(isscalar(options.te), 'iosr:irStats:invalidTe', '''te'' must be a scalar.')
+    assert(ischar(options.spec), 'iosr:irStats:invalidSpec', '''spec'' must be a char array.')
+    assert(islogical(options.graph) && numel(options.graph)==1, 'iosr:irStats:invalidGraph', '''graph'' must be logical.')
     
     % check for reasonable values
-    assert(all(options.y_fit<=0),'''y_fit'' values must be less than or equal to 0.')
-    assert(options.te>=0,'''te'' must be greater than or equal to 0.')
-    assert(options.correction>=0,'''correction'' must be greater than or equal to 0.')
+    assert(all(options.y_fit<=0), 'iosr:irStats:invalidYfit', '''y_fit'' values must be less than or equal to 0.')
+    assert(options.te>=0, 'iosr:irStats:invalidTe', '''te'' must be greater than or equal to 0.')
+    assert(options.correction>=0, 'iosr:irStats:invalidCorrection', '''correction'' must be greater than or equal to 0.')
     
     %% read in audio file
 
     % read in impulse
     [x,fs] = audioread(filename);
-    assert(fs>=5000,'Sampling frequency is too low. FS must be at least 5000 Hz.')
+    assert(fs>=5000, 'iosr:irStats:invalidFs', 'Sampling frequency is too low. FS must be at least 5000 Hz.')
 
     % set te in samples
     te = round(options.te*fs);
 
     % Check sanity of te
-    assert(te<length(x),'The specified early time limit te is longer than the duration of the impulse!')
+    assert(te<length(x), 'iosr:irStats:invalidTe', 'The specified early time limit te is longer than the duration of the impulse!')
 
     % get number of channels
     numchans = size(x,2);
@@ -191,7 +191,7 @@ function [rt,drr,cte,cfs,edt] = irStats(filename,varargin)
         % find direct impulse
         peak = find(x(:,n).^2==max(x(:,n).^2));
         if numel(peak)>1
-            warning('More than one peak found. Choosing first peak. Are you sure this is an impulse response?')
+            warning('iosr:irStats:multiplePeaks','More than one peak found. Choosing first peak. Are you sure this is an impulse response?')
         end
         t0(n) = peak(1);
         % draw figure
@@ -268,7 +268,7 @@ function [rt,drr,cte,cfs,edt] = irStats(filename,varargin)
         % Cte
         if nargout>=3
             if t0(n)+te+1>size(x,1)
-                warning(['Early time limit (te) out of range in channel ' num2str(n) '. Try lowering te.'])
+                warning('iosr:irStats:teOutOfRange',['Early time limit (te) out of range in channel ' num2str(n) '. Try lowering te.'])
                 cte(n) = NaN;
             else
                 cte(n) = 10.*log10(...
@@ -288,7 +288,7 @@ function [rt,drr,cte,cfs,edt] = irStats(filename,varargin)
             rt = mean(rt_temp(cfs==500 | cfs==1000,:)); % overall RT
             edt = mean(edt(cfs==500 | cfs==1000,:)); % overall EDT
         otherwise
-            error('Unknown ''spec'': must be ''full'' or ''mean''.')
+            error('iosr:irStats:unknownSpec','Unknown ''spec'': must be ''full'' or ''mean''.')
     end
 
 end
@@ -331,9 +331,9 @@ function IX = findDB(E,dB,default,f)
     IX = find(E<=dB,1,'first');
     if isempty(IX)
         if isempty(default)
-            error('Impulse response has insufficient dynamic range at %i Hz to evaluate at %i dB.',f,dB)
+            error('iosr:irStats:dynamicRange','Impulse response has insufficient dynamic range at %i Hz to evaluate at %i dB.',f,dB)
         else
-            warning('Impulse response has insufficient dynamic range at %i Hz to evaluate at %i dB. Evaluating at %.1f dB instead.',f,dB,E(default))
+            warning('iosr:irStats:dynamicRange''Impulse response has insufficient dynamic range at %i Hz to evaluate at %i dB. Evaluating at %.1f dB instead.',f,dB,E(default))
             IX = default;
         end
     end

@@ -130,7 +130,7 @@ classdef source < iosr.dsp.audio
                 obj.filename = filename;
             end
             
-            assert(~isempty(obj.filename),'SOURCE.FILENAME is empty.')
+            assert(~isempty(obj.filename), 'iosr:source:invalidFile', 'SOURCE.FILENAME is empty.')
         
             % ensure path exists
             obj.ensure_path(obj.filename)
@@ -145,28 +145,28 @@ classdef source < iosr.dsp.audio
         
         % validate azimuth
         function set.azimuth(obj,val)
-            assert(isscalar(val),'AZIMUTH must be a scalar')            
+            assert(isscalar(val), 'iosr:source:invalidAzimuth', 'AZIMUTH must be a scalar')            
             obj.azimuth = val;
             obj.property_changed('azimuth',val);
         end
         
         % validate elevation
         function set.elevation(obj,val)
-            assert(isscalar(val),'ELEVATION must be a scalar')
+            assert(isscalar(val), 'iosr:source:invalidElevation', 'ELEVATION must be a scalar')
             obj.elevation = val;
             obj.property_changed('elevation',val);
         end
         
         % validate numchans
         function set.numchans(obj,val)
-            assert(isscalar(val),'NUMCHANS must be a scalar')
+            assert(isscalar(val), 'iosr:source:invalidNumchans', 'NUMCHANS must be a scalar')
             obj.numchans = val;
             obj.property_changed('numchans',val);
         end
         
         % validate precomposed
         function set.precomposed(obj,val)
-            assert(islogical(val) && numel(val)==1,'PRECOMPOSED property must be true or false') 
+            assert(islogical(val) && numel(val)==1, 'iosr:source:invalidPrecomposed', 'PRECOMPOSED property must be true or false') 
             obj.precomposed = val;
             obj.property_changed('precomposed',val);
         end

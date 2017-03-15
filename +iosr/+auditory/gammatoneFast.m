@@ -46,10 +46,10 @@ function [bm,env,delay] = gammatoneFast(x,cfs,fs,align)
     end
 
     % check inputs
-    assert(isvector(x) & isnumeric(x),'x must be a vector')
-    assert(isvector(cfs) & isnumeric(cfs),'cfs must be a vector')
-    assert(isscalar(fs),'fs must be a scalar')
-    assert(islogical(align) & numel(align)==1,'align must be logical')
+    assert(isvector(x) & isnumeric(x), 'iosr:gammatoneFast:invalidX', 'x must be a vector')
+    assert(isvector(cfs) & isnumeric(cfs), 'iosr:gammatoneFast:invalidCfs', 'cfs must be a vector')
+    assert(isscalar(fs), 'iosr:gammatoneFast:invalidFs', 'fs must be a scalar')
+    assert(islogical(align) & numel(align)==1, 'iosr:gammatoneFast:invalidAlign', 'align must be logical')
 
     % number of frequency channels
     numchans = length(cfs);

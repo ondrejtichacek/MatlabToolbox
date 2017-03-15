@@ -82,7 +82,7 @@ function varargout = multiwaveplot(varargin)
             X = [];
             Y = [];
         case 2
-            error('Wrong number of input arguments.')
+            error('iosr:multiwaveplot:nargin','Wrong number of input arguments.')
         otherwise
             X = varargin{1};
             X = reshape(X,1,length(X));
@@ -97,10 +97,10 @@ function varargout = multiwaveplot(varargin)
     
     % derive data
     if isvector(Z)
-        assert(~isempty(X),'If Z is a vector, you must specify X and Y.')
-        assert(~isempty(Y),'If Z is a vector, you must specify X and Y.')
+        assert(~isempty(X), 'iosr:multiwaveplot:invalidX', 'If Z is a vector, you must specify X and Y.')
+        assert(~isempty(Y), 'iosr:multiwaveplot:invalidY', 'If Z is a vector, you must specify X and Y.')
         % if vector, make matrix
-        assert(length(X)==length(Z) && length(Y)==length(Z),'If Z is a vector, X and Y must be vectors of the same length.')
+        assert(length(X)==length(Z) && length(Y)==length(Z), 'iosr:multiwaveplot:invalidInputs', 'If Z is a vector, X and Y must be vectors of the same length.')
         x = unique(X)';
         y = unique(Y)';
         wave = NaN(length(y),length(x));
@@ -119,11 +119,11 @@ function varargout = multiwaveplot(varargin)
         if isempty(Y)
             Y = 1:size(Z,1);
         end
-        assert(ismatrix(Z),'Z must be a 2-D matrix')
+        assert(ismatrix(Z), 'iosr:multiwaveplot:invalidZ', 'Z must be a 2-D matrix')
         wave = Z;
         [r,c] = size(wave);
-        assert(c==length(X),'X must be the same length as Z has columns.')
-        assert(r==length(Y),'Y must be the same length as Z has rows.')
+        assert(c==length(X), 'iosr:multiwaveplot:invalidX', 'X must be the same length as Z has columns.')
+        assert(r==length(Y), 'iosr:multiwaveplot:invalidY', 'Y must be the same length as Z has rows.')
         if isempty(X)
             x = 1:r;
         else
@@ -152,7 +152,7 @@ function varargout = multiwaveplot(varargin)
         % count arguments
         nArgs = length(overrides);
         if round(nArgs/2)~=nArgs/2
-           error('MULTIWAVEPLOT needs propertyName/propertyValue pairs')
+           error('iosr:multiwaveplot:nameValuePair','MULTIWAVEPLOT needs propertyName/propertyValue pairs')
         end
         % overwrite defults
         for pair = reshape(overrides,2,[]) % pair is {propName;propValue}
@@ -161,7 +161,7 @@ function varargout = multiwaveplot(varargin)
               % do the overwrite
               options.(optionNames{IX}) = pair{2};
            else
-              error('%s is not a recognized parameter name',pair{1})
+              error('iosr:multiwaveplot:unknownOption','%s is not a recognized parameter name',pair{1})
            end
         end
     end
@@ -175,16 +175,16 @@ function varargout = multiwaveplot(varargin)
         end
     end
     
-    assert(all(diff(x)>=0),'X must be increasing')
-    assert(all(diff(y)>=0),'Y must be increasing')
+    assert(all(diff(x)>=0), 'iosr:multiwaveplot:invalidX', 'X must be increasing')
+    assert(all(diff(y)>=0), 'iosr:multiwaveplot:invalidY', 'Y must be increasing')
     
     %% Plot
 
     % horizon
-    assert(isscalar(options.horizonWidth),'''horizonWidth'' must be a scalar.')
-    assert(isscalar(options.horizonOffset),'''horizonOffset'' must be a scalar.')
-    assert(options.horizonWidth>=0,'''horizonWidth'' must be greater than or equal to 0.')
-    assert(options.horizonOffset>=-1 && options.horizonOffset<=1,'''horizonOffset'' must be in the range [-1,1].')
+    assert(isscalar(options.horizonWidth), 'iosr:multiwaveplot:invalidHorizonWidth', '''horizonWidth'' must be a scalar.')
+    assert(isscalar(options.horizonOffset), 'iosr:multiwaveplot:invalidHorizonOffset', '''horizonOffset'' must be a scalar.')
+    assert(options.horizonWidth>=0, 'iosr:multiwaveplot:invalidHorizonWidth', '''horizonWidth'' must be greater than or equal to 0.')
+    assert(options.horizonOffset>=-1 && options.horizonOffset<=1, 'iosr:multiwaveplot:invalidHorizonOffset', '''horizonOffset'' must be in the range [-1,1].')
     if options.reverseY % correct horizon when axis reversed
         options.horizonWidth = 1/options.horizonWidth;
     end
@@ -258,7 +258,7 @@ function varargout = multiwaveplot(varargin)
                 IX = ~(isnan(xa) | isnan(ya));
                 h(n) = fill(xa(IX),ya(IX),'w');
             otherwise
-                error('Unknown MODE specified: must be ''fill'' or ''plot''')
+                error('iosr:multiwaveplot:unknownMode','Unknown MODE specified: must be ''fill'' or ''plot''')
         end
     end
 

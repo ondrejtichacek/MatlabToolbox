@@ -7,8 +7,8 @@ function w = rcoswin(N)
 
 %   Copyright 2016 University of Surrey.
 
-    assert(isscalar(N) && round(N)==N,'N must be a scalar and whole number.')
-    assert(N > 0,'N must be greater than 0.')
+    assert(isscalar(N) && round(N)==N, 'iosr:rcoswin:invalidN', 'N must be a scalar and whole number.')
+    assert(N > 0, 'iosr:rcoswin:invalidN', 'N must be greater than 0.')
     
     switch N
         case 1

@@ -66,15 +66,15 @@ classdef (Abstract) audio < matlab.mixin.Copyable
         
         % validate filename
         function set.filename(obj,val)
-            assert(ischar(val) || isempty(val),'FILENAME must be a char array or an empty array')
+            assert(ischar(val) || isempty(val), 'iosr:audio:invalidFile', 'FILENAME must be a char array or an empty array')
             obj.filename = val;
             obj.property_changed('filename',val);
         end
         
         % validate fs
         function set.fs(obj,val)
-            assert(isscalar(val),'FS must be a scalar')
-            assert(val > 0,'FS must be greater than 0')
+            assert(isscalar(val), 'iosr:audio:invalidFs', 'FS must be a scalar')
+            assert(val > 0, 'iosr:audio:invalidFs', 'FS must be greater than 0')
             obj.fs = val;
             obj.property_changed('fs',val);
         end
@@ -107,7 +107,7 @@ classdef (Abstract) audio < matlab.mixin.Copyable
             % count arguments
             nArgs = length(vgin);
             if round(nArgs/2)~=nArgs/2
-               error([class(obj) ' needs propertyName/propertyValue pairs'])
+               error('iosr:audio:nameValuePair',[class(obj) ' needs propertyName/propertyValue pairs'])
             end
             % overwrite defults
             for pair = reshape(vgin,2,[]) % pair is {propName;propValue}
@@ -116,7 +116,7 @@ classdef (Abstract) audio < matlab.mixin.Copyable
                   % do the overwrite
                   obj.(propNames{IX}) = pair{2};
                else
-                  error('%s is not a recognized parameter name',pair{1})
+                  error('iosr:audio:unknownOption','%s is not a recognized parameter name',pair{1})
                end
             end
 
@@ -162,7 +162,7 @@ classdef (Abstract) audio < matlab.mixin.Copyable
         %   the spatialisation. If the SOFA data are not at the sampling
         %   rate FS, the data are resampled.
             
-            assert(size(x,1)>1,'X should be a column vector. Matrices will be downmixed to a column vector');
+            assert(size(x,1)>1, 'iosr:audio:invalidX', 'X should be a column vector. Matrices will be downmixed to a column vector');
         
             if size(x,2)>1 % mix to mono
                 x = audio.up_down_mix(x,1);

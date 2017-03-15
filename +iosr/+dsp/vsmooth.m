@@ -46,7 +46,7 @@ function y = vsmooth(x,frame,mode)
 
     %% Gather inputs
 
-    assert(isvector(x),'''x'' must be a vector')
+    assert(isvector(x), 'iosr:vsmooth:vectorInput', '''x'' must be a vector')
 
     if isscalar(frame)
         frame_length = frame;
@@ -55,7 +55,7 @@ function y = vsmooth(x,frame,mode)
         window = frame;
         frame_length = length(frame);
     else
-        error('''frame'' must be a vector or a scalar')
+        error('iosr:vsmooth:frameInvalid','''frame'' must be a vector or a scalar')
     end
 
     if nargin<3
@@ -84,7 +84,7 @@ function y = vsmooth(x,frame,mode)
         case 'mean'
             y = mean((window2.*x2(index)));
         otherwise
-            error('Unknown ''mode'' specified')
+            error('iosr:vsmooth:unknownMode','Unknown ''mode'' specified')
     end
 
     % transpose if necessary

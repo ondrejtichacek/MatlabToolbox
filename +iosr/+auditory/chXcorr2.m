@@ -37,7 +37,7 @@ function [ccg,ic] = chXcorr2(hc_L,hc_R,fs,varargin)
 
 %   Copyright 2016 University of Surrey.
 
-    assert(nargin>=3,'Number of input arguments must be greater than or equal to three.')
+    assert(nargin>=3, 'iosr:chXcorr2:nargin', 'Number of input arguments must be greater than or equal to three.')
 
     % Check source file is compiled
     iosr.general.checkMexCompiled('-largeArrayDims',fullfile(fileparts(mfilename('fullpath')),'chXcorr2_c.c'))
@@ -55,7 +55,7 @@ function [ccg,ic] = chXcorr2(hc_L,hc_R,fs,varargin)
         % count arguments
         nArgs = length(varargin);
         if round(nArgs/2)~=nArgs/2
-           error('CHXCORR2 needs propertyName/propertyValue pairs')
+           error('iosr:chXcorr2:nameValuePair','CHXCORR2 needs propertyName/propertyValue pairs')
         end
         % overwrite defults
         for pair = reshape(varargin,2,[]) % pair is {propName;propValue}
@@ -64,7 +64,7 @@ function [ccg,ic] = chXcorr2(hc_L,hc_R,fs,varargin)
               % do the overwrite
               options.(optionNames{IX}) = pair{2};
            else
-              error('%s is not a recognized parameter name',pair{1})
+              error('iosr:chXcorr2:unknownOption','%s is not a recognized parameter name',pair{1})
            end
         end
     end
@@ -80,10 +80,12 @@ function [ccg,ic] = chXcorr2(hc_L,hc_R,fs,varargin)
     end
 
     % check inputs
-    assert(all(size(hc_L)==size(hc_R)),'''hc_L'' and ''hc_R'' must be the same size')
-    assert(round(frame_length)==frame_length && isscalar(frame_length) && frame_length>0,'''frame_length'' must be an integer greater than zero')
-    assert(round(maxlag)==maxlag && isscalar(maxlag) && maxlag>0,'''maxlag'' must be an integer greater than zero')
-    assert(isscalar(norm_flag),'''norm_flag'' must be a scalar')
+    assert(all(size(hc_L)==size(hc_R)), 'iosr:chXcorr2:invalidInput', '''hc_L'' and ''hc_R'' must be the same size')
+    assert(round(frame_length)==frame_length && isscalar(frame_length) && frame_length>0, ...
+        'iosr:chXcorr2:invalidFrame', '''frame_length'' must be an integer greater than zero')
+    assert(round(maxlag)==maxlag && isscalar(maxlag) && maxlag>0, 'iosr:chXcorr2:invalidMaxlag', ...
+        '''maxlag'' must be an integer greater than zero')
+    assert(isscalar(norm_flag), 'iosr:chXcorr2:invalidNorm', '''norm_flag'' must be a scalar')
 
     % Calculate frame count
     frame_count = fix((max(size(hc_L))-(frame_length-hop))/hop);
@@ -118,7 +120,7 @@ function output = check_input(input,dim,target)
 
     if size(input,dim)~=target
         output = input';
-        assert(size(output,dim)==target,'Input invalid')
+        assert(size(output,dim)==target, 'iosr:chXcorr2:invalidInput', 'Input invalid')
     else
         output = input;
     end

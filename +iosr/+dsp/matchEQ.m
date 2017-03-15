@@ -69,7 +69,7 @@ function [y,b] = matchEQ(x,fs,mag,f,varargin)
     %% parse input
     
     if nargin < 4
-        error('Not enough input arguments')
+        error('iosr:matchEQ:nargin','Not enough input arguments')
     end
     
     options = struct(...
@@ -90,7 +90,7 @@ function [y,b] = matchEQ(x,fs,mag,f,varargin)
         % count arguments
         nArgs = length(varargin);
         if round(nArgs/2)~=nArgs/2
-           error('MATCHEQ needs propertyName/propertyValue pairs')
+           error('iosr:matchEQ:nameValuePair','MATCHEQ needs propertyName/propertyValue pairs')
         end
         % overwrite defults
         for pair = reshape(varargin,2,[]) % pair is {propName;propValue}
@@ -99,7 +99,7 @@ function [y,b] = matchEQ(x,fs,mag,f,varargin)
               % do the overwrite
               options.(optionNames{IX}) = pair{2};
            else
-              error('%s is not a recognized parameter name',pair{1})
+              error('iosr:matchEQ:unknownOption','%s is not a recognized parameter name',pair{1})
            end
         end
     end
@@ -107,15 +107,15 @@ function [y,b] = matchEQ(x,fs,mag,f,varargin)
     %% check and assign input
     
     % required inputs
-    assert(isnumeric(x),'X must be numeric.');
-    assert(isscalar(fs),'FS must be a scalar.');
-    assert(fs>0,'FS must be greater than 0.');
-    assert(isint(fs),'FS must be an integer.');
-    assert(isnumeric(mag) && isvector(mag),'MAG must be a numeric vector.')
-    assert(isnumeric(f) && isvector(f),'F must be a numeric vector.')
-    assert(isequal(size(mag),size(f)),'F and MAG must be the same size.')
-    assert(all(f>=0),'Frequencies in F must be greater than or equal to 0.')
-    assert(all(mag>=0),'Magnitudes in MAG must be greater than or equal to 0.')
+    assert(isnumeric(x), 'iosr:matchEQ:invalidX', 'X must be numeric.');
+    assert(isscalar(fs), 'iosr:matchEQ:invalidFs', 'FS must be a scalar.');
+    assert(fs>0, 'iosr:matchEQ:invalidFs', 'FS must be greater than 0.');
+    assert(isint(fs), 'iosr:matchEQ:invalidFs', 'FS must be an integer.');
+    assert(isnumeric(mag) && isvector(mag), 'iosr:matchEQ:invalidMag', 'MAG must be a numeric vector.')
+    assert(isnumeric(f) && isvector(f), 'iosr:matchEQ:invalidF', 'F must be a numeric vector.')
+    assert(isequal(size(mag),size(f)), 'iosr:matchEQ:invalidInputs', 'F and MAG must be the same size.')
+    assert(all(f>=0), 'iosr:matchEQ:invalidF', 'Frequencies in F must be greater than or equal to 0.')
+    assert(all(mag>=0), 'iosr:matchEQ:invalidMag', 'Magnitudes in MAG must be greater than or equal to 0.')
     
     % dimension to operate along
     dim = options.dim;
@@ -123,9 +123,9 @@ function [y,b] = matchEQ(x,fs,mag,f,varargin)
     if isempty(dim)
         dim = find(dims>1,1,'first');
     else
-        assert(isnumeric(dim),'DIM must be an integer');
-        assert(isint(dim),'DIM must be an integer or empty');
-        assert(dim>0,'DIM must be greater than 0')
+        assert(isnumeric(dim), 'iosr:matchEQ:invalidDim', 'DIM must be an integer');
+        assert(isint(dim), 'iosr:matchEQ:invalidDim', 'DIM must be an integer or empty');
+        assert(dim>0, 'iosr:matchEQ:invalidDim', 'DIM must be greater than 0')
     end
     
     f = f(:);
@@ -133,7 +133,7 @@ function [y,b] = matchEQ(x,fs,mag,f,varargin)
     
     %% Determine ratios
     
-    assert(options.ratio>=0 && isscalar(options.ratio),'Ratio must be a positive scalar.')
+    assert(options.ratio>=0 && isscalar(options.ratio), 'iosr:matchEQ:invalidRatio', 'Ratio must be a positive scalar.')
     
     if isempty(options.boostRatio)
         boostRatio = options.ratio;
@@ -147,8 +147,8 @@ function [y,b] = matchEQ(x,fs,mag,f,varargin)
         cutRatio = options.cutRatio;
     end
     
-    assert(boostRatio>=0 && isscalar(boostRatio),'BoostRatio must be a positive scalar.')
-    assert(cutRatio>=0 && isscalar(cutRatio),'CutRatio must be a positive scalar.')
+    assert(boostRatio>=0 && isscalar(boostRatio), 'iosr:matchEQ:invalidBoostRatio', 'BoostRatio must be a positive scalar.')
+    assert(cutRatio>=0 && isscalar(cutRatio), 'iosr:matchEQ:invalidCutRatio', 'CutRatio must be a positive scalar.')
     
     %% Determine normalisation
     
@@ -160,7 +160,7 @@ function [y,b] = matchEQ(x,fs,mag,f,varargin)
         case 'peak'
             fltas = @(x) x./max(x);
         otherwise
-            error('Unknown normalisation mode ''%s''',options.ltasNorm)
+            error('iosr:matchEQ:unknownNorm','Unknown normalisation mode ''%s''',options.ltasNorm)
     end
     
     %% permute and rehape x to operate down columns
@@ -175,6 +175,7 @@ function [y,b] = matchEQ(x,fs,mag,f,varargin)
     %% EQ
     
     assert(isscalar(options.order) && options.order>0 && isint(options.order),...
+        'iosr:matchEQ:invalidOrder', ...
         'ORDER must be a positive scalar integer.')
     
     % do calculations

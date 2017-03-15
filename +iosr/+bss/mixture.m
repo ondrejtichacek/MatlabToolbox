@@ -200,7 +200,7 @@ classdef mixture < iosr.dsp.audio
             
             if nargin > 0
                 
-                assert(nargin>1,'Not enough input arguments')
+                assert(nargin>1, 'iosr:mixture:nargin', 'Not enough input arguments')
         
                 propNames = {'filename','fs','sofa_path','tir','decomposition','stft','gammatone'};
 
@@ -340,7 +340,7 @@ classdef mixture < iosr.dsp.audio
             else
                 % check filename is valid
                 obj.filename = fn;
-                assert(ischar(obj.filename) && ~isempty(obj.filename),'FILENAME must be a non-empty char array. Set filename as MIXTURE.FILENAME or MIXTURE.WRITE(FILENAME).')
+                assert(ischar(obj.filename) && ~isempty(obj.filename),'iosr:mixture:invalidFilename','FILENAME must be a non-empty char array. Set filename as MIXTURE.FILENAME or MIXTURE.WRITE(FILENAME).')
 
                 % normalize
                 M = obj.signal;
@@ -370,23 +370,23 @@ classdef mixture < iosr.dsp.audio
         
         % set decomposition
         function set.decomposition(obj,val)
-            assert(any(strcmpi(val,{'stft','gammatone'})), '''decomposition'' must be ''stft'' or ''gammatone''');
+            assert(any(strcmpi(val,{'stft','gammatone'})), 'iosr:mixture:invalidDecomposition', '''decomposition'' must be ''stft'' or ''gammatone''');
             obj.updateCachedFalse();
             obj.decomposition = val;
         end
         
         % set gammatone settings
         function set.gammatone(obj,val)
-            assert(isstruct(val),'''gammatone'' must be a struct')
-            assert(all(ismember(fieldnames(val)',{'cfs','frame'})),'gammatone structure must contain fields ''cfs'' and ''frame''')
+            assert(isstruct(val), 'iosr:mixture:invalidGammatoneStruct', '''gammatone'' must be a struct')
+            assert(all(ismember(fieldnames(val)',{'cfs','frame'})), 'iosr:mixture:invalidGammatoneFields', 'gammatone structure must contain fields ''cfs'' and ''frame''')
             obj.updateCachedFalse;
             obj.gammatone = val;
         end
         
         % set stft settings
         function set.stft(obj,val)
-            assert(isstruct(val),'''stft'' must be a struct')
-            assert(all(ismember(fieldnames(val)',{'win','hop'})),'stft structure must contain fields ''win'' and ''hop''')
+            assert(isstruct(val), 'iosr:mixture:invalidStftStruct', '''stft'' must be a struct')
+            assert(all(ismember(fieldnames(val)',{'win','hop'})), 'iosr:mixture:invalidStftFields', 'stft structure must contain fields ''win'' and ''hop''')
             obj.updateCachedFalse;
             obj.stft = val;
         end
@@ -399,9 +399,9 @@ classdef mixture < iosr.dsp.audio
         
         % validate sofa_path
         function set.sofa_path(obj,val)
-            assert(ischar(val) || isempty(val),'sofa_path must be a char array or an empty array')
+            assert(ischar(val) || isempty(val), 'iosr:mixture:invalidSofaPath', 'sofa_path must be a char array or an empty array')
             if ~isempty(val)
-                assert(exist(val,'file')==2,'SOFA file does not exist')
+                assert(exist(val,'file')==2, 'iosr:mixture:invalidSofaPath', 'SOFA file does not exist')
             end
             obj.sofa_path = val;
             obj.property_changed('sofa_path',val);
@@ -409,14 +409,14 @@ classdef mixture < iosr.dsp.audio
         
         % validate interferers
         function set.interferers(obj,val)
-            assert(isa(val,'iosr.bss.source'),'INTERFERERS must be of type source')
+            assert(isa(val,'iosr.bss.source'), 'iosr:mixture:invalidInterferers', 'INTERFERERS must be of type source')
             obj.interferers = val;
             obj.property_changed('interferers',val);
         end
         
         % validate target
         function set.target(obj,val)
-            assert(isa(val,'iosr.bss.source') && numel(val)==1,'TARGET must be a scalar of type source')
+            assert(isa(val,'iosr.bss.source') && numel(val)==1, 'iosr:mixture:invalidTarget', 'TARGET must be a scalar of type source')
             obj.target = val;
             obj.property_changed('target',val);
         end
@@ -657,20 +657,20 @@ classdef mixture < iosr.dsp.audio
         %   time-related spectral centroid (in Hz) Ct and the
         %   frequency-related spectral centroid (in seconds) Cf.
             
-            assert(ischar(decomposition),'''decomposition'' must be a char array')
+            assert(ischar(decomposition), 'iosr:mixture:invalidDecomposition', '''decomposition'' must be a char array')
         
             numchans = size(m,3);
             frame_frequency = fs/hop;
             switch lower(decomposition)
                 case 'stft'
-                    assert(isscalar(nfft),'''nfft'' must be a scalar')
+                    assert(isscalar(nfft), 'iosr:mixture:invalidNfft', '''nfft'' must be a scalar')
                     quefrency = fs/nfft;
                 case 'gammatone'
-                    assert(isvector(nfft),'''cfs'' must be a scalar')
+                    assert(isvector(nfft), 'iosr:mixture:invalidNfft', '''cfs'' must be a scalar')
                     cfs = nfft;
                     quefrency = fs/min(diff(iosr.auditory.erbRate2hz(cfs)));
                 otherwise
-                    error('Unknown decomposition.')
+                    error('iosr:mixture:unknownDecomp','Unknown decomposition.')
             end
             
             f_dct = repmat((((0:size(m,1)-1)./size(m,1)).*frame_frequency)',1,size(m,2));
@@ -907,7 +907,7 @@ classdef mixture < iosr.dsp.audio
         function frame_count = get_frame_count(obj, signal_length)
         %GET_FRAME_COUNT Calculate number of T-F frames.
 
-            assert(isscalar(signal_length),'SIGNAL_LENGTH must be a scalar.')
+            assert(isscalar(signal_length), 'iosr:mixture:invalidSignalLength', 'SIGNAL_LENGTH must be a scalar.')
 
             switch lower(obj.decomposition)
                 case 'gammatone'
