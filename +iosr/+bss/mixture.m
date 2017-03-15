@@ -46,6 +46,12 @@ classdef mixture < iosr.dsp.audio
 %                             'win'     : the STFT window
 %                         See iosr.dsp.stft for more information
 %       target          - The target source of type iosr.bss.source
+%       tfPower         - The (frame-based) time-frequency power (mixture)
+%                         (read-only)
+%       tfPower_i       - The (frame-based) time-frequency power
+%                         (interferer) (read-only)
+%       tfPower_t       - The (frame-based) time-frequency power (target)
+%                         (read-only)
 %       tir             - The target-to-interferer ratio (target or
 %                         interferers are attenuated in order that their
 %                         RMS amplitudes have this ratio)
@@ -108,9 +114,27 @@ classdef mixture < iosr.dsp.audio
         numchans    % Number of audio channels in the mixture (read-only)
         signal_t    % Return target (read-only)
         signal_i    % Return interferer (read-only)
+        tfPower     % The time-frequency power (mixture) (read-only)
+        tfPower_i   % The time-frequency power (interferer) (read-only)
+        tfPower_t   % The time-frequency power (target) (read-only)
         wdo         % Return the w-disjoint orthogonality metric (read-only)
         wdo_lw      % Return the loudness-weighted w-disjoint orthogonality metric (read-only)
         wdo_stokes  % Return the w-disjoint orthogonality metric using Stokes's method (read-only)
+    end
+    
+    properties (Access = private)
+        cached_decomp               % the cached mixture decomposition
+        decomp_cached = false       % whether the mixture decomposition is cached
+        cached_decomp_i             % the cached interferer decomposition
+        decomp_i_cached = false     % whether the interferer decomposition is cached
+        cached_decomp_t             % the cached target decomposition
+        decomp_t_cached = false     % whether the target decomposition is cached
+        cached_tfPower              % the cached mixture TF power
+        tfPower_cached = false      % whether the mixture TF power is cached
+        cached_tfPower_i            % the cached interferer TF power
+        tfPower_i_cached = false    % whether the interferer TF power is cached
+        cached_tfPower_t            % the cached target TF power
+        tfPower_t_cached = false    % whether the target TF power is cached
     end
     
     methods
@@ -347,6 +371,7 @@ classdef mixture < iosr.dsp.audio
         % set decomposition
         function set.decomposition(obj,val)
             assert(any(strcmpi(val,{'stft','gammatone'})), '''decomposition'' must be ''stft'' or ''gammatone''');
+            obj.updateCachedFalse();
             obj.decomposition = val;
         end
         
@@ -354,6 +379,7 @@ classdef mixture < iosr.dsp.audio
         function set.gammatone(obj,val)
             assert(isstruct(val),'''gammatone'' must be a struct')
             assert(all(ismember(fieldnames(val)',{'cfs','frame'})),'gammatone structure must contain fields ''cfs'' and ''frame''')
+            obj.updateCachedFalse;
             obj.gammatone = val;
         end
         
@@ -361,6 +387,7 @@ classdef mixture < iosr.dsp.audio
         function set.stft(obj,val)
             assert(isstruct(val),'''stft'' must be a struct')
             assert(all(ismember(fieldnames(val)',{'win','hop'})),'stft structure must contain fields ''win'' and ''hop''')
+            obj.updateCachedFalse;
             obj.stft = val;
         end
         
@@ -398,17 +425,35 @@ classdef mixture < iosr.dsp.audio
         
         % get decomposition result (mixture)
         function s = get.decomp(obj)
-            s = obj.decompose(obj.signal);
+            if obj.decomp_cached
+                s = obj.cached_decomp;
+            else
+                s = obj.decompose(obj.signal);
+                obj.cached_decomp = s;
+                obj.decomp_cached = true;
+            end
         end
         
         % get decomposition result (interferer)
         function s = get.decomp_i(obj)
-            s = obj.decompose(obj.signal_i);
+            if obj.decomp_i_cached
+                s = obj.cached_decomp_i;
+            else
+                s = obj.decompose(obj.signal_i);
+                obj.cached_decomp_i = s;
+                obj.decomp_i_cached = true;
+            end
         end
         
         % get decomposition result (target)
         function s = get.decomp_t(obj)
-            s = obj.decompose(obj.signal_t);
+            if obj.decomp_t_cached
+                s = obj.cached_decomp_t;
+            else
+                s = obj.decompose(obj.signal_t);
+                obj.cached_decomp_t = s;
+                obj.decomp_t_cached = true;
+            end
         end
         
         % get azimuthal separation
@@ -442,8 +487,8 @@ classdef mixture < iosr.dsp.audio
                         ); %#ok<AGROW>
                     end
                 case 'gammatone'
-                    T = obj.tf_power(obj.decomp_t);
-                    I = obj.tf_power(obj.decomp_i);
+                    T = obj.tfPower_t;
+                    I = obj.tfPower_i;
                     m = +(T>I);
             end
         end
@@ -459,8 +504,8 @@ classdef mixture < iosr.dsp.audio
                         ); %#ok<AGROW>
                     end
                 case 'gammatone'
-                    T = obj.tf_power(obj.decomp_t);
-                    I = obj.tf_power(obj.decomp_i);
+                    T = obj.tfPower_t;
+                    I = obj.tfPower_i;
                     m = T./(T+I);
             end
             m(isnan(m) | isinf(m)) = 0;
@@ -542,6 +587,39 @@ classdef mixture < iosr.dsp.audio
                 % mix, ensuring equal length
                 maxlength = max([length(T) length(I)]);
                 signal = obj.setlength(T,maxlength) + obj.setlength(I,maxlength);
+            end
+        end
+        
+        % return time-frequency power (mixture)
+        function val = get.tfPower(obj)
+            if obj.tfPower_cached
+                val = obj.cached_tfPower;
+            else
+                val = obj.tf_power(obj.decomp);
+                obj.cached_tfPower = val;
+                obj.tfPower_cached = true;
+            end
+        end
+        
+        % return time-frequency power (interferer)
+        function val = get.tfPower_i(obj)
+            if obj.tfPower_i_cached
+                val = obj.cached_tfPower_i;
+            else
+                val = obj.tf_power(obj.decomp_i);
+                obj.cached_tfPower_i = val;
+                obj.tfPower_i_cached = true;
+            end
+        end
+        
+        % return time-frequency power (target)
+        function val = get.tfPower_t(obj)
+            if obj.tfPower_t_cached
+                val = obj.cached_tfPower_t;
+            else
+                val = obj.tf_power(obj.decomp_t);
+                obj.cached_tfPower_t = val;
+                obj.tfPower_t_cached = true;
             end
         end
         
@@ -850,6 +928,15 @@ classdef mixture < iosr.dsp.audio
             end
         end
         
+        function updateCachedFalse(obj)
+            obj.decomp_cached = false;
+            obj.decomp_i_cached = false;
+            obj.decomp_t_cached = false;
+            obj.tfPower_cached = false;
+            obj.tfPower_i_cached = false;
+            obj.tfPower_t_cached = false;
+        end
+        
     end
     
     methods(Access = protected)
@@ -858,6 +945,7 @@ classdef mixture < iosr.dsp.audio
         %PROPERTY_CHANGED handle property changes
         
             obj.rendered = false;
+            obj.updateCachedFalse();
             
             switch lower(name)
                 case 'fs'
