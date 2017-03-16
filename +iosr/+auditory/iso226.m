@@ -48,7 +48,7 @@ function [spl,f] = iso226(phon,fq,sq)
 
     %% Check input
 
-    if phon>=80
+    if phon>80
         warning('iosr:iso226:phonRange','SPL values may not be accurate for loudness levels above 80 phon.')
     elseif phon<20
         warning('iosr:iso226:phonRange','SPL values may not be accurate for loudness levels below 20 phon.')
