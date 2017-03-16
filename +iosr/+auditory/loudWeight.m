@@ -15,10 +15,11 @@ function g = loudWeight(f,phon)
 %   size as f, with coefficients calculated for each element.
 % 
 %   G = IOSR.AUDITORY.LOUDWEIGHT(F,METHOD) returns loudness weighting
-%   coefficients for a variety of methods. Specifying METHOD as 'A', 'B',
-%   'C', and 'D' corresponds to frequency weighting curves defined in IEC
-%   61672:2003; 'ISO-226' applies loudness weighting derived from ISO
-%   226:2003 at 65 phons.
+%   coefficients for a variety of methods. Specifying METHOD as 'A', 'C',
+%   or 'Z' selects frequency weighting curves defined in IEC 61672-1:2013;
+%   'ISO-226' selects a loudness weighting curve derived from ISO 226:2003
+%   at 65 phons; 'B' selects a frequency weighting curve defined in IEC
+%   60651:1979; 'D' selects a weighting curve defined in IEC 537:1976.
 % 
 %   NB: since ISO 226:2003 only reports values up to 12.5 kHz, frequencies
 %   are limited to 12.5 kHz for the purposes of calculating weighting
@@ -47,6 +48,20 @@ function g = loudWeight(f,phon)
     else
         error('iosr:loudWeight:invalidArg','Second argument should be a scalar or char array.')
     end
+    
+    %% coefficients
+    
+    fr = 1000;
+    fL = 10^1.5;
+    fH = 10^3.9;
+    fA = 10^2.45;
+    D = sqrt(0.5);
+    b = (1/(1-D)) * ((fr^2) + (((fL^2)*(fH^2))/(fr^2)) - (D*((fL^2)+(fH^2))));
+    c = (fL^2)*(fH^2);
+    f1 = sqrt((-b - sqrt((b^2) - (4*c))) / (2));
+    f4 = sqrt((-b + sqrt((b^2) - (4*c))) / (2));
+    f2 = ((3 - sqrt(5)) / 2) * fA;
+    f3 = ((3 + sqrt(5)) / 2) * fA;
 
     %% Calculate weighting coefficients
     
@@ -59,6 +74,8 @@ function g = loudWeight(f,phon)
             g = c_weighting(f);
         case 'd'
             g = d_weighting(f);
+        case 'z'
+            g = z_weighting(f);
         case 'iso-226'
             % return equal loudness contours
             % limit SPL values for f > 12.5 kHz
@@ -72,31 +89,41 @@ function g = loudWeight(f,phon)
         otherwise
             error('iosr:loudWeight:unknownMethod','Unknown method.')
     end
+    
+    function w = a_weighting(f)
+    %A_WEIGHTING return A-weighting magnitude coefficients
+        function w = calculate(f)
+            w = ((f4^2).*(f.^4))./...
+                ( ((f.^2)+(f1^2)) .* sqrt((f.^2)+(f2^2)) .* sqrt((f.^2)+(f3^2)) .* ((f.^2)+(f4^2)) );
+        end
+        w = calculate(f)./calculate(1000);
+    end
+
+    function w = b_weighting(f)
+    %B_WEIGHTING return B-weighting magnitude coefficients
+        w = ((12200^2).*(f.^3))./...
+            (((f.^2)+(20.6^2)).*sqrt((f.^2)+(158.5^2)).*((f.^2)+(12200^2)));
+    end
+
+    function w = c_weighting(f)
+    %C_WEIGHTING return C-weighting magnitude coefficients
+        function w = calculate(f)
+            w = ((f4^2).*(f.^2)) ./...
+                ( ((f.^2)+(f1^2)) .* ((f.^2)+(f4^2)) );
+        end
+        w = calculate(f)./calculate(1000);
+    end
+
+    function w = d_weighting(f)
+    %D_WEIGHTING return D-weighting magnitude coefficients
+        hf = (((1037918.48-(f.^2)).^2)+(1080768.16.*(f.^2)))./...
+            (((9837328-(f.^2)).^2)+(11723776.*(f.^2)));
+        w = (f./(6.8966888496476*(10^(-5)))).*sqrt(hf./(((f.^2)+79919.29).*((f.^2)+1345600)));
+    end
+
+    function w = z_weighting(f)
+    %Z_WEIGHTING return Z-weighting magnitude coefficients
+        w = ones(size(f));
+    end
 
 end
-
-function w = a_weighting(f)
-%A_WEIGHTING return A-weighting magnitude coefficients
-    w = ((12200^2).*(f.^4))./...
-        (((f.^2)+(20.6^2)).*((((f.^2)+(107.7^2)).*((f.^2)+(737.9^2))).^0.5).*((f.^2)+(12200^2)));
-end
-
-function w = b_weighting(f)
-%B_WEIGHTING return B-weighting magnitude coefficients
-    w = ((12200^2).*(f.^3))./...
-        (((f.^2)+(20.6^2)).*sqrt((f.^2)+(158.5^2)).*((f.^2)+(12200^2)));
-end
-
-function w = c_weighting(f)
-%C_WEIGHTING return C-weighting magnitude coefficients
-    w = ((12200^2).*(f.^2))./...
-        (((f.^2)+(20.6^2)).*((f.^2)+(12200^2)));
-end
-
-function w = d_weighting(f)
-%D_WEIGHTING return D-weighting magnitude coefficients
-    hf = (((1037918.48-(f.^2)).^2)+(1080768.16.*(f.^2)))./...
-        (((9837328-(f.^2)).^2)+(11723776.*(f.^2)));
-    w = (f./(6.8966888496476*(10^(-5)))).*sqrt(hf./(((f.^2)+79919.29).*((f.^2)+1345600)));
-end
-
