@@ -1,4 +1,4 @@
-function [spl,f] = iso226(phon,fq,sq)
+function [spl, f, params] = iso226(phon,fq,sq)
 %ISO226 ISO 226:2003 Normal equal-loudness-level contours
 %   
 %   [SPL,F] = IOSR.AUDITORY.ISO226(PHON) returns the sound pressure level
@@ -27,6 +27,15 @@ function [spl,f] = iso226(phon,fq,sq)
 % 
 %   ... = IOSR.AUDITORY.ISO226(PHON,[],SQ) uses the standard reference
 %   frequencies for SPL calculations.
+% 
+%   [SPL,F,PARAMS] = IOSR.AUDITORY.ISO226(...) returns the reference
+%   parameters used to calculate the normal equal-loudness-level contours.
+%   PARAMAS is a structure with the following fields:
+%       'f'         : the reference frequencies,
+%       'alpha_f'   : the exponent of loudness perception,
+%       'L_U'       : magnitude of the linear transfer function normalized
+%                     at 1000 Hz, and
+%       'T_f'       : the threshold of hearing.
 % 
 %   Example
 % 
@@ -80,23 +89,23 @@ function [spl,f] = iso226(phon,fq,sq)
     %% References
 
     % reference frequencies
-    f_r = [20 25 31.5 40 50 63 80 100 125 160 200 250 315 400 ...
+    params.f = [20 25 31.5 40 50 63 80 100 125 160 200 250 315 400 ...
         500 630 800 1000 1250 1600 2000 2500 3150 4000 5000 ...
         6300 8000 10000 12500];
 
     % exponent of loudness perception
-    alpha_f_r = [0.532 0.506 0.480 0.455 0.432 0.409 0.387 ...
+    params.alpha_f = [0.532 0.506 0.480 0.455 0.432 0.409 0.387 ...
         0.367 0.349 0.330 0.315 0.301 0.288 0.276 0.267 0.259...
         0.253 0.250 0.246 0.244 0.243 0.243 0.243 0.242 0.242...
         0.245 0.254 0.271 0.301];
 
     % magnitude of linear transfer function normalized at 1 kHz
-    L_U_r = [-31.6 -27.2 -23.0 -19.1 -15.9 -13.0 -10.3 -8.1 ...
+    params.L_U = [-31.6 -27.2 -23.0 -19.1 -15.9 -13.0 -10.3 -8.1 ...
         -6.2 -4.5 -3.1 -2.0 -1.1 -0.4 0.0 0.3 0.5 0.0 -2.7 ...
         -4.1 -1.0 1.7 2.5 1.2 -2.1 -7.1 -11.2 -10.7 -3.1];
 
     % threshold of hearing
-    T_f_r = [78.5 68.7 59.5 51.1 44.0 37.5 31.5 26.5 22.1 17.9...
+    params.T_f = [78.5 68.7 59.5 51.1 44.0 37.5 31.5 26.5 22.1 17.9...
         14.4 11.4 8.6 6.2 4.4 3.0 2.2 2.4 3.5 1.7 -1.3 -4.2...
         -6.0 -5.4 -1.5 6.0 12.6 13.9 12.3];
 
@@ -104,7 +113,7 @@ function [spl,f] = iso226(phon,fq,sq)
 
     % determine frequency range
     if isempty(fq)
-        f = f_r;
+        f = params.f;
     else
         f = fq;
     end
@@ -124,24 +133,24 @@ function [spl,f] = iso226(phon,fq,sq)
         if nargin>1
             if any(f_squeeze(:,p) > 12500)
                 % extrapolate - mirror 20Hz behaviour at 20kHz
-                f_r_extrap = [f_r 20000];
-                alpha_f_r_extrap = [alpha_f_r alpha_f_r(1)];
-                L_U_r_extrap = [L_U_r L_U_r(1)];
-                T_f_r_extrap = [T_f_r T_f_r(1)];
+                f_r_extrap = [params.f 20000];
+                alpha_f_r_extrap = [params.alpha_f params.alpha_f(1)];
+                L_U_r_extrap = [params.L_U params.L_U(1)];
+                T_f_r_extrap = [params.T_f params.T_f(1)];
             else
-                f_r_extrap = f_r;
-                alpha_f_r_extrap = alpha_f_r;
-                L_U_r_extrap = L_U_r;
-                T_f_r_extrap = T_f_r;
+                f_r_extrap = params.f;
+                alpha_f_r_extrap = params.alpha_f;
+                L_U_r_extrap = params.L_U;
+                T_f_r_extrap = params.T_f;
             end
             % interpolate parameters
             alpha_f = interp1(f_r_extrap, alpha_f_r_extrap, f_squeeze(:,p)', 'spline', 'extrap');
             L_U = interp1(f_r_extrap, L_U_r_extrap, f_squeeze(:,p)', 'spline', 'extrap');
             T_f = interp1(f_r_extrap, T_f_r_extrap, f_squeeze(:,p)', 'spline', 'extrap');
         else
-            alpha_f = alpha_f_r;
-            L_U = L_U_r;
-            T_f = T_f_r;
+            alpha_f = params.alpha_f;
+            L_U = params.L_U;
+            T_f = params.T_f;
         end
         % calculate SPL
         A_f = 0.00447 * ((10^(0.025*phon(p)))-1.15) + ...
