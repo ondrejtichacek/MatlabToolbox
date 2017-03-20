@@ -12,9 +12,11 @@ function [spl,f] = iso226(phon,fq,sq)
 %   [1,29,M,N,P,...] where M,N,P,... are the dimensions of PHON.
 %
 %   [SPL,F] = IOSR.AUDITORY.ISO226(PHON,FQ) returns the SPL of the pure
-%   tone frequencies in FQ at the specified loudness level(s). According to
-%   the standard, FQ is only valid below 12.5 kHz (although the function
-%   will extrapolate SPL values outside of this range).
+%   tone frequencies in FQ at the specified loudness level(s). For
+%   non-standard frequencies, the SPL is calculated by interpolating the
+%   parameters used in its calculation. According to the standard, FQ is
+%   only valid between 20 Hz and 12.5 kHz; the function will extrapolate
+%   SPL values above 12.5 kHz by mirroring 20 Hz values at 20 kHz.
 % 
 %   FQ may be an array of any size; SPL and F will be of size
 %   [Q,R,S,...,M,N,P,...] where Q,R,S,... are the dimensions of FQ.
@@ -48,15 +50,19 @@ function [spl,f] = iso226(phon,fq,sq)
 
     %% Check input
 
-    if phon>80
+    if any(phon>80)
         warning('iosr:iso226:phonRange','SPL values may not be accurate for loudness levels above 80 phon.')
-    elseif phon<20
+    elseif any(phon<20)
         warning('iosr:iso226:phonRange','SPL values may not be accurate for loudness levels below 20 phon.')
     end
 
     if nargin>1
         if ~isempty(fq)
-            if any(fq(:)>12500)
+            if any(fq(:) < 20 | fq(:) > 4000) && any(phon > 90)
+                warning('iosr:iso226:frequencyRange','ISO 226:2003 is valid for 20?4000 Hz only up to 90 phon. SPL values may be inaccurate.')
+            elseif any(fq(:) < 5000 | fq(:) > 12500) && any(phon > 80)
+                warning('iosr:iso226:frequencyRange','ISO 226:2003 is valid for 5000?12500 Hz only up to 80 phon. SPL values may be inaccurate.')
+            elseif any(fq(:)>12500)
                 warning('iosr:iso226:frequencyRange','ISO 226:2003 defines loudness levels up to 12.5 kHz. SPL values for frequencies above 12.5 kHz may be inaccurate.')
             end
             assert(all(fq(:)>=0), 'iosr:iso226:invalidFrequencies', 'Frequencies must be greater than or equal to 0 Hz.')
@@ -79,18 +85,18 @@ function [spl,f] = iso226(phon,fq,sq)
         6300 8000 10000 12500];
 
     % exponent of loudness perception
-    alpha_f = [0.532 0.506 0.480 0.455 0.432 0.409 0.387 ...
+    alpha_f_r = [0.532 0.506 0.480 0.455 0.432 0.409 0.387 ...
         0.367 0.349 0.330 0.315 0.301 0.288 0.276 0.267 0.259...
         0.253 0.250 0.246 0.244 0.243 0.243 0.243 0.242 0.242...
         0.245 0.254 0.271 0.301];
 
     % magnitude of linear transfer function normalized at 1 kHz
-    L_U = [-31.6 -27.2 -23.0 -19.1 -15.9 -13.0 -10.3 -8.1 ...
+    L_U_r = [-31.6 -27.2 -23.0 -19.1 -15.9 -13.0 -10.3 -8.1 ...
         -6.2 -4.5 -3.1 -2.0 -1.1 -0.4 0.0 0.3 0.5 0.0 -2.7 ...
         -4.1 -1.0 1.7 2.5 1.2 -2.1 -7.1 -11.2 -10.7 -3.1];
 
     % threshold of hearing
-    T_f = [78.5 68.7 59.5 51.1 44.0 37.5 31.5 26.5 22.1 17.9...
+    T_f_r = [78.5 68.7 59.5 51.1 44.0 37.5 31.5 26.5 22.1 17.9...
         14.4 11.4 8.6 6.2 4.4 3.0 2.2 2.4 3.5 1.7 -1.3 -4.2...
         -6.0 -5.4 -1.5 6.0 12.6 13.9 12.3];
 
@@ -112,17 +118,35 @@ function [spl,f] = iso226(phon,fq,sq)
 
     % iterate through phons
     for p = 1:numel(phon)
-        % calculate reference SPLs
-        A_f = 0.00447*((10^(0.025*phon(p)))-1.15)+((0.4*(10.^(((T_f+L_U)./10)-9))).^alpha_f);
-        spl_r = ((10./alpha_f).*log10(A_f)) - L_U + 94;
         % frequencies for phon level
         f_squeeze(:,p) = f(:);
-        % calculate SPL
+        % interpolate reference parameters
         if nargin>1
-            spl_squeeze(:,p) = interp1(f_r,spl_r,f_squeeze(:,p),'spline','extrap');
+            if any(f_squeeze(:,p) > 12500)
+                % extrapolate - mirror 20Hz behaviour at 20kHz
+                f_r_extrap = [f_r 20000];
+                alpha_f_r_extrap = [alpha_f_r alpha_f_r(1)];
+                L_U_r_extrap = [L_U_r L_U_r(1)];
+                T_f_r_extrap = [T_f_r T_f_r(1)];
+            else
+                f_r_extrap = f_r;
+                alpha_f_r_extrap = alpha_f_r;
+                L_U_r_extrap = L_U_r;
+                T_f_r_extrap = T_f_r;
+            end
+            % interpolate parameters
+            alpha_f = interp1(f_r_extrap, alpha_f_r_extrap, f_squeeze(:,p)', 'spline', 'extrap');
+            L_U = interp1(f_r_extrap, L_U_r_extrap, f_squeeze(:,p)', 'spline', 'extrap');
+            T_f = interp1(f_r_extrap, T_f_r_extrap, f_squeeze(:,p)', 'spline', 'extrap');
         else
-            spl_squeeze(:,p) = spl_r';
+            alpha_f = alpha_f_r;
+            L_U = L_U_r;
+            T_f = T_f_r;
         end
+        % calculate SPL
+        A_f = 0.00447 * ((10^(0.025*phon(p)))-1.15) + ...
+            ((0.4*(10.^(((T_f+L_U)./10)-9))).^alpha_f);
+        spl_squeeze(:,p) = ((10./alpha_f).*log10(A_f)) - L_U + 94;
     end
 
     % reshape outputs

@@ -145,6 +145,7 @@ function [rt,drr,cte,cfs,edt] = irStats(filename,varargin)
     % read in impulse
     [x,fs] = audioread(filename);
     assert(fs>=5000, 'iosr:irStats:invalidFs', 'Sampling frequency is too low. FS must be at least 5000 Hz.')
+    assert(sum(abs(x(:)))>0, 'iosr:irStats:silence', 'The signal appears to be silent.')
 
     % set te in samples
     te = round(options.te*fs);

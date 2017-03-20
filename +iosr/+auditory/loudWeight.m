@@ -1,15 +1,16 @@
 function g = loudWeight(f,phon)
 %LOUDWEIGHT Calculate loudness weighting coefficients based on ISO 226
 % 
-%   G = IOSR.AUDITORY.LOUDWEIGHT(F) returns loudness weighting coefficients
-%   for frequencies F (Hz). The function is based on the loudness at 65
-%   phons defined in ISO 226:2003.
+%   G = IOSR.AUDITORY.LOUDWEIGHT(F) returns loudness-weighting linear-
+%   magnitude coefficients for frequencies F (Hz). The function is based on
+%   the loudness at 65 phons defined in ISO 226:2003. The coefficients are
+%   scaled such that the G = 1 when F = 1000.
 % 
 %   G = IOSR.AUDITORY.LOUDWEIGHT(F,PHON) returns loudness weighting
 %   coefficients at the loudness level PHON. PHON should be a scalar and,
 %   according to the standard, is only valid at all frequencies such that
-%   20<=PHON<80 (although the function will return SPL values outside of
-%   this range).
+%   20<=PHON<80 (although the function will return extrapolated
+%   coefficients outside of this range).
 % 
 %   The input f may be an array of any size. The outputs will be the same
 %   size as f, with coefficients calculated for each element.
@@ -20,10 +21,6 @@ function g = loudWeight(f,phon)
 %   'ISO-226' selects a loudness weighting curve derived from ISO 226:2003
 %   at 65 phons; 'B' selects a frequency weighting curve defined in IEC
 %   60651:1979; 'D' selects a weighting curve defined in IEC 537:1976.
-% 
-%   NB: since ISO 226:2003 only reports values up to 12.5 kHz, frequencies
-%   are limited to 12.5 kHz for the purposes of calculating weighting
-%   coefficients.
 % 
 %   See also IOSR.AUDITORY.ISO226, IOSR.AUDITORY.DUPWEIGHT.
 
@@ -77,15 +74,10 @@ function g = loudWeight(f,phon)
         case 'z'
             g = z_weighting(f);
         case 'iso-226'
-            % return equal loudness contours
-            % limit SPL values for f > 12.5 kHz
-            IX = f>12500;
-            f2 = f;
-            f2(IX) = 12500;
-            spl = squeeze(iosr.auditory.iso226(phon,f2));
             % calculate weighting coefficients
-            g = min(spl(:))-spl;
-            g = 10.^(g./20);
+            gdB = iosr.auditory.iso226(phon, 1000) - ...
+                squeeze(iosr.auditory.iso226(phon, f));
+            g = 10.^(gdB./20);
         otherwise
             error('iosr:loudWeight:unknownMethod','Unknown method.')
     end
