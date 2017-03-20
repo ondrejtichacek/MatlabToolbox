@@ -4,7 +4,7 @@ function g = loudWeight(f,phon)
 %   G = IOSR.AUDITORY.LOUDWEIGHT(F) returns loudness-weighting linear-
 %   magnitude coefficients for frequencies F (Hz). The function is based on
 %   the loudness at 65 phons defined in ISO 226:2003. The coefficients are
-%   scaled such that the G = 1 when F = 3150.
+%   scaled such that the G = 1 when F = 1000.
 % 
 %   G = IOSR.AUDITORY.LOUDWEIGHT(F,PHON) returns loudness weighting
 %   coefficients at the loudness level PHON. PHON should be a scalar and,
@@ -75,7 +75,7 @@ function g = loudWeight(f,phon)
             g = z_weighting(f);
         case 'iso-226'
             % calculate weighting coefficients
-            gdB = iosr.auditory.iso226(phon,3150) - ...
+            gdB = iosr.auditory.iso226(phon, 1000) - ...
                 squeeze(iosr.auditory.iso226(phon, f));
             g = 10.^(gdB./20);
         otherwise
