@@ -7,6 +7,7 @@ function [spl, f, params] = iso226(phon,fq,sq)
 %   reference frequencies specified in the standard. According to the
 %   standard, PHON is only valid at all frequencies if 20<=PHON<80
 %   (although the function will return SPL values outside of this range).
+%   If PHON is 0, the threshold of hearing is returned.
 % 
 %   PHON may be an array of any size; SPL and F will be of size
 %   [1,29,M,N,P,...] where M,N,P,... are the dimensions of PHON.
@@ -59,9 +60,9 @@ function [spl, f, params] = iso226(phon,fq,sq)
 
     %% Check input
 
-    if any(phon>80)
+    if any(phon > 80)
         warning('iosr:iso226:phonRange','SPL values may not be accurate for loudness levels above 80 phon.')
-    elseif any(phon<20)
+    elseif any(phon(phon~=0) < 20)
         warning('iosr:iso226:phonRange','SPL values may not be accurate for loudness levels below 20 phon.')
     end
 
@@ -155,7 +156,11 @@ function [spl, f, params] = iso226(phon,fq,sq)
         % calculate SPL
         A_f = 0.00447 * ((10^(0.025*phon(p)))-1.15) + ...
             ((0.4*(10.^(((T_f+L_U)./10)-9))).^alpha_f);
-        spl_squeeze(:,p) = ((10./alpha_f).*log10(A_f)) - L_U + 94;
+        if phon(p) > 0
+            spl_squeeze(:,p) = ((10./alpha_f).*log10(A_f)) - L_U + 94;
+        else
+            spl_squeeze(:,p) = T_f;
+        end
     end
 
     % reshape outputs
