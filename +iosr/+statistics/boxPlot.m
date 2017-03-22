@@ -599,19 +599,7 @@ classdef (CaseInsensitiveProperties = true) boxPlot < iosr.statistics.statsPlot
             %% draw
             
             % set handles
-            [ax, axValid, axSet] = obj.parseAxesHandle(varargin{:});
-            if axSet
-                if axValid
-                    obj.handles.axes = ax;
-                    axes(obj.handles.axes);
-                    obj.handles.fig = ancestor(obj.handles.axes, 'figure');
-                else
-                    error('Axes handle is invalid.')
-                end
-            else
-                obj.handles.axes = newplot;
-                obj.handles.fig = gcf;
-            end
+            obj.parseAxesHandle(varargin{:});
             
             % draw the box plot
             obj.draw('all');
