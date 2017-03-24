@@ -20,9 +20,9 @@ function mypath = install
         % download and install
         sofa_filename = 'sofa-api.zip';
         try % Sourceforge location changes from time to time
-            websave(sofa_filename,'http://vorboss.dl.sourceforge.net/project/sofacoustics/sofa-api-mo-1.0.1.zip');
+            websave(sofa_filename,'http://vorboss.dl.sourceforge.net/project/sofacoustics/sofa-api-mo-1.0.2.zip');
         catch % Fall back to development release on GitHub
-            display('Warning: Failed to download SOFA v1.0.1 from Sourceforge, downloading development release...')
+            display('Warning: Failed to download SOFA v1.0.2 from Sourceforge, downloading development release...')
             websave(sofa_filename,'https://github.com/sofacoustics/API_MO/archive/master.zip');
         end
         unzip(sofa_filename,sofa_folder);
