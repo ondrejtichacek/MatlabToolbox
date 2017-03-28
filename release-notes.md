@@ -1,3 +1,14 @@
+# v2.7 - 28th March 2017
+
+- Added true functional boxplot.
+- Added alternative perceptual centroid function.
+- Added caching of various dependent properties to iosr.bss.mixture class.
+- Added identifiers to all warnings and errors.
+- Updated loudness weighting calculations for A and C to better match IEC 61672. Added normalisation ISO 226 curve at 1kHz to bring it in to line with other weighting functions.
+- Improved extrapolation of ISO 226 function. Added params output to return reference values.
+- Updated SOFA API version in installer.
+- Bug fixes and documentation improvements.
+
 # v2.6 - 6th March 2017
 
 Added a number of properties and methods to the iosr.bss.mixture class. Added whiskers property to iosr.statistics.functionalSpreadPlot. Other minor bug fixes and documentation improvements.
