@@ -554,59 +554,63 @@ classdef (CaseInsensitiveProperties = true) boxPlot < iosr.statistics.statsPlot
         %       figure
         %       h = iosr.statistics.boxPlot(x,y,'weights',weights_boxed);
             
-            %% check for deprecated properties
-            
-            % check for scatter option
-            scatterIX = strcmpi('scatter',varargin);
-            if any(scatterIX)
-                warning('The ''scatter'' property is deprecated. Use ''showScatter'' instead.');
-                varargin{scatterIX} = 'showScatter';
+            if nargin > 0
+        
+                %% check for deprecated properties
+
+                % check for scatter option
+                scatterIX = strcmpi('scatter',varargin);
+                if any(scatterIX)
+                    warning('The ''scatter'' property is deprecated. Use ''showScatter'' instead.');
+                    varargin{scatterIX} = 'showScatter';
+                end
+
+                % check for mean option
+                meanIX = strcmpi('mean',varargin);
+                if any(meanIX)
+                    warning('The ''mean'' property is deprecated. Use ''showMean'' instead.');
+                    varargin{meanIX} = 'showMean';
+                end
+
+                %% set x, y, and dims
+
+                % check for input data
+                start = obj.getXY(varargin{:});
+                obj.groupDims = obj.ydims(3:end);
+
+                % create initial theme
+                obj.createTheme();
+
+                % check weights
+                obj.checkWeights();
+
+                % set properties from varargin
+                obj.setProperties(start,nargin,varargin);
+
+                % remove NaN columns
+                obj.removeNaN();
+
+                % set x axis properties and labels
+                obj.setXprops();
+
+                %% statistics
+
+                % calculate statistics
+                obj.calculateStats();
+
+                %% draw
+
+                % set handles
+                obj.parseAxesHandle(varargin{:});
+
+                % draw the box plot
+                obj.draw('all');
+
+                % add listener to ylim so that some properties can be redrawn
+                addlistener(handle(obj.handles.axes),'YLim','PostSet',...
+                    @(hProp,eventData) obj.eventHandler(hProp,eventData));
+                
             end
-            
-            % check for mean option
-            meanIX = strcmpi('mean',varargin);
-            if any(meanIX)
-                warning('The ''mean'' property is deprecated. Use ''showMean'' instead.');
-                varargin{meanIX} = 'showMean';
-            end
-            
-            %% set x, y, and dims
-            
-            % check for input data
-            start = obj.getXY(varargin{:});
-            obj.groupDims = obj.ydims(3:end);
-            
-            % create initial theme
-            obj.createTheme();
-            
-            % check weights
-            obj.checkWeights();
-            
-            % set properties from varargin
-            obj.setProperties(start,nargin,varargin);
-            
-            % remove NaN columns
-            obj.removeNaN();
-            
-            % set x axis properties and labels
-            obj.setXprops();
-            
-            %% statistics
-            
-            % calculate statistics
-            obj.calculateStats();
-            
-            %% draw
-            
-            % set handles
-            obj.parseAxesHandle(varargin{:});
-            
-            % draw the box plot
-            obj.draw('all');
-            
-            % add listener to ylim so that some properties can be redrawn
-            addlistener(handle(obj.handles.axes),'YLim','PostSet',...
-                @(hProp,eventData) obj.eventHandler(hProp,eventData));
             
         end
         
