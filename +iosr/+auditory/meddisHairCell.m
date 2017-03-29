@@ -41,7 +41,7 @@ ydt = y*dt;
 ldt = l*dt;
 rdt = r*dt;
 xdt = x*dt;
-[numChannels dataLength] = size(data);
+[numChannels, dataLength] = size(data);
 
 % Initial values 
 kt = g*A/(A+B);
@@ -74,5 +74,3 @@ y = h .* y;
 if (subtractSpont > 0)
  y=max(0,y-spont);
 end
-
-% [EOF]
