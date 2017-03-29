@@ -104,23 +104,14 @@ classdef (Abstract, CaseInsensitiveProperties = true) statsPlot < ...
                 if isnumeric(varargin{2+skip})
                     obj.x = varargin{1+skip};
                     obj.y = varargin{2+skip};
-                    if isvector(obj.y) % ensure y is column vector
-                        obj.y = obj.y(:);
-                    end
                     start = 3+skip;
                 else
                     obj.y = varargin{1+skip};
-                    if isvector(obj.y) % ensure y is column vector
-                        obj.y = obj.y(:);
-                    end
                     obj.x = 1:size(obj.y,2);
                     start = 2+skip;
                 end
             else
                 obj.y = varargin{1};
-                if isvector(obj.y) % ensure y is column vector
-                    obj.y = obj.y(:);
-                end
                 obj.x = 1:size(obj.y,2);
                 start = 1;
             end
