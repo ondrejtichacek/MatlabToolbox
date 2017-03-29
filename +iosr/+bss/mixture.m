@@ -61,6 +61,8 @@ classdef mixture < iosr.dsp.audio
 % 
 %   IOSR.BSS.MIXTURE methods:
 %       mixture         - Create the mixture
+%       clearCache      - Clears the internally cached data, reducing
+%                         file size.
 %       copy            - Create an independent copy of the mixture, its
 %                         sources, and any rendered files
 %       applyMask       - Apply a time-frequency mask
@@ -192,6 +194,11 @@ classdef mixture < iosr.dsp.audio
         %
         %   OBJ = IOSR.BSS.MIXTURE creates an empty mixture object with
         %   empty target and interferer sources.
+        %         
+        %   To speed up time-frequency operations, the  IOSR.BSS.MIXTURE
+        %   class caches time-frequency data internally, which can lead to
+        %   large file sizes if the object is saved. Use the CLEARCACHE()
+        %   method to empty the internal cache.
         %
         %   Note that this is a handle class, as is IOSR.BSS.SOURCE. Target
         %   and interferer(s) are hence passed by reference. Use the COPY()
@@ -364,7 +371,19 @@ classdef mixture < iosr.dsp.audio
                 
             end
             
-        end        
+        end
+        
+        function clearCache(obj)
+        %CLEARCACHE Clear the internal cache
+            
+            obj.updateCachedFalse();
+            obj.cached_decomp = [];
+            obj.cached_decomp_i = [];
+            obj.cached_decomp_t = [];
+            obj.cached_tfPower = [];
+            obj.cached_tfPower_i = [];
+            obj.cached_tfPower_t = [];
+        end
 
         % set/validate properties
         
@@ -524,7 +543,7 @@ classdef mixture < iosr.dsp.audio
         
         % number of audio channels
         function n = get.numchans(obj)
-            if obj.hrtf_is_set
+            if obj.hrtf_is_set()
                 s = SOFAload(obj.sofa_path);
                 n = size(s.Data.IR,2);
             else
