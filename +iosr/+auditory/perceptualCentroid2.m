@@ -201,7 +201,7 @@ function pc = perceptualCentroid2(x,fs,varargin)
 
     for c = 1:size(x2,2) % across the dim in input
         % caluclate spectrogram
-        [X,f] = iosr.dsp.ltas(x2(:,c),fs,'win',window,'hop',hop,'noct',noct);
+        [X,f] = iosr.dsp.ltas(x2(:,c),fs,'win',window,'hop',hop,'noct',noct,'units','none');
         % ignore frequencies greater than Nyquist
         IX = f<=fs/2;
         f = f(IX);

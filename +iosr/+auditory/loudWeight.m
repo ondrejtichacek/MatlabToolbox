@@ -1,5 +1,5 @@
 function g = loudWeight(f,phon)
-%LOUDWEIGHT Calculate loudness weighting coefficients based on ISO 226
+%LOUDWEIGHT Calculate loudness weighting coefficients
 % 
 %   G = IOSR.AUDITORY.LOUDWEIGHT(F) returns loudness-weighting linear-
 %   magnitude coefficients for frequencies F (Hz). The function is based on

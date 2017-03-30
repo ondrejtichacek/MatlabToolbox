@@ -42,7 +42,7 @@ function [c,lags] = xcorrLindemann(L,R,fs,maxlag,dim)
     if nargin<4
         maxlag = 0.001*fs;
     else
-        assert('iosr:xcorrLindemann:invalidMaxlag', isscalar(maxlag) & isnumeric(maxlag),'MAXLAG must be a scalar');
+        assert(isscalar(maxlag) & isnumeric(maxlag), 'iosr:xcorrLindemann:invalidMaxlag', 'MAXLAG must be a scalar');
     end
     
     % check for dim
@@ -75,7 +75,7 @@ function [c,lags] = xcorrLindemann(L,R,fs,maxlag,dim)
     t_int = 5; % ms
     t_inh = 10; % ms
     
-    xcorr_length = (2*maxlag)+1; % length of cross-correlation
+    xcorr_length = round(2*maxlag)+1; % length of cross-correlation
     c = zeros(xcorr_length,size(L,2)); % pre-allocate
     for n = 1:size(L,2)
         c(:,n) = iosr.auditory.xcorrLindemann_c(L(:,n),R(:,n),fs,maxlag,t_inh,t_int);
