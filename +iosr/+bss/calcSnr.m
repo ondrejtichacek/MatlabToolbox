@@ -39,9 +39,11 @@ function snr = calcSnr(output,target)
     end
 
     % account for arbitrary gain
-    G = output\target;
-    output = output.*G;
-
+    if sum(abs(output(:))) > 0
+        G = output\target;
+        output = output.*G;
+    end
+    
     snr = 10*log10(sum(target.^2)/sum((output-target).^2));
 
 end
