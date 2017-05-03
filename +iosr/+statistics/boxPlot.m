@@ -268,7 +268,8 @@ classdef (CaseInsensitiveProperties = true) boxPlot < iosr.statistics.statsPlot
 %       x                   - The x data.
 %       y                   - The y data.
 %       weights             - Array giving the weights for the data in y.
-%                             The array must be the same size as y.
+%                             The array must be the same size as y. This
+%                             option may be specified in the constructor.
 %       statistics          - Structure containing the statistics used
 %                             for the box plot. With the exception of
 %                             'outliers', 'outliers_IX', 'addPrctiles', and
