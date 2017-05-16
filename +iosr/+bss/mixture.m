@@ -66,6 +66,7 @@ classdef mixture < iosr.dsp.audio
 %       copy            - Create an independent copy of the mixture, its
 %                         sources, and any rendered files
 %       applyMask       - Apply a time-frequency mask
+%       deleteFiles     - Delete the mixture audio files
 %       sound_t         - Replay the target
 %       sound_i         - Replay the interferer
 %       write           - Save the mixture, target, and interferers to audio files
@@ -336,7 +337,7 @@ classdef mixture < iosr.dsp.audio
                 fn = obj.filename;
             end
         
-            if obj.rendered
+            if obj.rendered && exist(fn, 'file') == 2
                 if strcmp(obj.filename,fn)
                     % nothing to do
                 else
@@ -370,6 +371,22 @@ classdef mixture < iosr.dsp.audio
                 obj.rendered = true;
                 
             end
+            
+        end
+        
+        function deleteFiles(obj)
+        %DELETEFILES Delete the mixture audio files
+        
+            if exist(obj.filename, 'file') == 2
+                delete(obj.filename);
+            end
+            if exist(obj.filename_t, 'file') == 2
+                delete(obj.filename_t);
+            end
+            if exist(obj.filename_i, 'file') == 2
+                delete(obj.filename_i);
+            end
+            obj.rendered = false;
             
         end
         
