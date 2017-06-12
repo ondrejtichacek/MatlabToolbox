@@ -90,8 +90,8 @@ classdef (CaseInsensitiveProperties = true) boxPlot < iosr.statistics.statsPlot
 %       lineStyle           - Style of the whisker line. The default is
 %                             '-'.
 %       lineWidth           - Width, in points, of the box outline, whisker
-%                             lines, notch line, and outlier marker edges.
-%                             The default is 1.
+%                             lines, notch line, violin, and outlier marker
+%                             edges. The default is 1.
 %       meanColor           - Color of the mean marker when showMean=true.
 %                             The default is 'auto' (see boxColor).
 %       meanMarker          - Marker used for the mean when showMean=true.
@@ -172,6 +172,11 @@ classdef (CaseInsensitiveProperties = true) boxPlot < iosr.statistics.statsPlot
 %                             random x-axis offset with respect to the box
 %                             centre. Data that are outliers are not
 %                             included. The default is false.
+%       showViolin          - If true, a 'violin' [1] density trace of the
+%                             data underlying each box will be plotted. The
+%                             outline is calculated using the
+%                             IOSR.STATISTICS.DENSITYTRACE function. The
+%                             default is false.
 %       style               - Determine whether to show additional x-axis 
 %                             labels for the data. If set to 'hierarchy',
 %                             additional hierarchical x-axis labels will be
@@ -205,6 +210,17 @@ classdef (CaseInsensitiveProperties = true) boxPlot < iosr.statistics.statsPlot
 %                                 'grayboxes'   : grayscale boxes, black
 %                                                 lines and markers, gray
 %                                                 scatter markers
+%       violinBins          - If 'showViolin' is true, this specifes the
+%                             bins used to calculate the density
+%                             trace. See IOSR.STATISTICS.DENSITYTRACE. The
+%                             default is 100 points equally spaced between
+%                             the minimum and maximum of the data
+%                             underlying each box.
+%       violinBinWidth      - If 'showViolin' is true, this specifes the
+%                             bin width used to calculate the density
+%                             trace. See IOSR.STATISTICS.DENSITYTRACE. The
+%                             default is 15% of the spread of the data
+%                             underlying each box.
 %       xSeparator          - Logical value that when true adds a separator
 %                             line between x groups. The default is false.
 %       xSpacing            - Determine the x-axis spacing of boxes. By
@@ -344,7 +360,13 @@ classdef (CaseInsensitiveProperties = true) boxPlot < iosr.statistics.statsPlot
 % 
 %   See also IOSR.STATISTICS.TAB2BOX, IOSR.STATISTICS.QUANTILE, COLORMAP,
 %       IOSR.STATISTICS.FUNCTIONALSPREADPLOT,
-%       IOSR.STATISTICS.FUNCTIONALBOXPLOT.
+%       IOSR.STATISTICS.FUNCTIONALBOXPLOT, IOSR.STATISTICS.DENSITYTRACE.
+% 
+%   References
+%   
+%   [1] Hintze, Jerry L.; Nelson, Ray D. (1998). "Violin Plots: A Box
+%       Plot-Density Trace Synergism". The American Statistician. 52 (2):
+%       181?4.
 
 %   Copyright 2016 University of Surrey.
     
@@ -390,10 +412,14 @@ classdef (CaseInsensitiveProperties = true) boxPlot < iosr.statistics.statsPlot
        showMean = false             % Display the mean of the data for each box.
        showOutliers = true          % Display outliers.
        showScatter = false          % Display a scatter plot of the underlying data for each box.
+       showViolin = false           % Display a violin (density trace) plot for the underlying data.
        style = 'normal'             % Determine whether to show additional x-axis labels for the data.
        symbolColor = 'auto'         % Outlier marker color.
        symbolMarker = 'o'           % Marker used to denote outliers.
        theme = 'default'            % Control a range of display properties.
+       violinBins = 'auto'          % The bins used to calculate the violins.
+       violinBinWidth = 'auto'      % The width of the bins used to calculate the violins.
+       violinWidth = 'auto'         % The width of the violins.
        xSeparator = false           % Add a separator line between x groups.
        xSpacing = 'x'               % Determine the x-axis spacing of boxes.
     end
@@ -553,6 +579,14 @@ classdef (CaseInsensitiveProperties = true) boxPlot < iosr.statistics.statsPlot
         %       % plot
         %       figure
         %       h = iosr.statistics.boxPlot(x,y,'weights',weights_boxed);
+        %
+        %     Example 7: Draw a violin plot
+        %       figure('color','w');
+        %       h2 = iosr.statistics.boxPlot(x,y, 'showViolin', true, 'boxWidth', 0.025, 'showOutliers', false);
+        %       % delete the whisker tips
+        %       delete(h2.handles.upperWhiskerTips)
+        %       delete(h2.handles.lowerWhiskerTips)
+        %       box on
             
             if nargin > 0
         
@@ -1150,6 +1184,14 @@ classdef (CaseInsensitiveProperties = true) boxPlot < iosr.statistics.statsPlot
             obj.draw();
         end
         
+        % violin
+        
+        function set.showViolin(obj,val)
+            assert(islogical(val) && isscalar(val),'''VIOLIN'' must be logical.')
+            obj.showViolin = val;
+            obj.draw();
+        end
+        
         % set style
         
         function set.style(obj,val)
@@ -1192,6 +1234,26 @@ classdef (CaseInsensitiveProperties = true) boxPlot < iosr.statistics.statsPlot
             obj.draw('legend');
         end
         
+        % set violin props
+        
+        function set.violinBins(obj,val)
+            assert(isnumeric(val) || strcmpi(val,'auto'),'''VIOLINBINS'' must be numeric or ''auto''.')
+            obj.violinBins = val;
+            obj.draw('violin');
+        end
+        
+        function set.violinBinWidth(obj,val)
+            assert((isnumeric(val) && isscalar(val)) || strcmpi(val,'auto'),'''VIOLINBINWIDTH'' must be a numeric scalar or ''auto''.')
+            obj.violinBinWidth = val;
+            obj.draw('violin');
+        end
+        
+        function set.violinWidth(obj,val)
+            assert((isnumeric(val) && isscalar(val)) || strcmpi(val,'auto'),'''VIOLINWIDTH'' must be a numeric scalar or ''auto''.')
+            obj.violinWidth = val;
+            obj.draw('violin');
+        end
+        
         % set x separator option
         
         function set.xSeparator(obj,val)
@@ -1230,6 +1292,9 @@ classdef (CaseInsensitiveProperties = true) boxPlot < iosr.statistics.statsPlot
                     obj.groupXticks(subidx{:}) = obj.xticks(subidx{2})+obj.getOffset(subidx);
                     
                     % plot individual components
+                    if any(strcmpi('violin',varargin)) || any(strcmpi('all',varargin))
+                        obj.drawViolin(subidx,subidxAll);
+                    end
                     if any(strcmpi('boxes',varargin)) || any(strcmpi('all',varargin))
                         obj.drawBox(subidx,subidxAll);
                     end
@@ -1281,6 +1346,36 @@ classdef (CaseInsensitiveProperties = true) boxPlot < iosr.statistics.statsPlot
                 end
                 hold off;
             end
+        end
+        
+        function drawViolin(obj,subidx,subidxAll)
+        %DRAWVIOLIN Draw the violin
+            
+            if obj.showViolin
+                try % to delete the handles first
+                    delete(obj.handles.violin(subidx{:}));
+                catch
+                end
+                
+                vBinWidth = obj.replaceAuto(...
+                    obj.violinBinWidth, ...
+                    0.15 * (max(obj.y(subidxAll{:})) - min(obj.y(subidxAll{:}))), ...
+                    'Unknown ''VIOLINBINWIDTH'' parameter.');
+                
+                vBins = obj.replaceAuto(...
+                    obj.violinBins, ...
+                    100, ...
+                    'Unknown ''VIOLINBINS'' parameter.');
+
+                [d, xd] = iosr.statistics.densityTrace(obj.y(subidxAll{:}), vBins, vBinWidth);
+                halfviolinwidth = obj.calcHalfViolinWidth(subidx);
+                d = halfviolinwidth .* (d ./ max(d));
+                obj.handles.violin(subidx{:}) = patch(...
+                    [d; -flipud(d)] + obj.xticks(subidx{2}) + obj.getOffset(subidx), ...
+                    [xd; flipud(xd)],'w','Parent',obj.handles.axes);
+                
+            end
+            
         end
         
         function drawBox(obj,subidx,subidxAll)
@@ -1448,6 +1543,9 @@ classdef (CaseInsensitiveProperties = true) boxPlot < iosr.statistics.statsPlot
                 
                 % calculate x offsets
                 [~,halfboxwidth] = calcBoxWidths(obj,subidx);
+                if obj.showViolin
+                    halfboxwidth = max(halfboxwidth, obj.calcHalfViolinWidth(subidx));
+                end
                 xScatter = X + (0.8.*halfboxwidth.*obj.xOffset(Y));
                 % plot
                 yScatter = Y(~isnan(Y));
@@ -1505,7 +1603,7 @@ classdef (CaseInsensitiveProperties = true) boxPlot < iosr.statistics.statsPlot
         
         function drawGroupGraphics(obj,subidx,gidx)
         %DRAWGROUPGRAPHICS set graphics options for each group
-            
+        
             % box colors
             set(obj.handles.box(subidx{:}),...
                 'FaceColor',obj.boxColor{gidx{:}},...
@@ -1562,6 +1660,9 @@ classdef (CaseInsensitiveProperties = true) boxPlot < iosr.statistics.statsPlot
         
         function drawGlobalGraphics(obj)
         %DRAWGLOBALGRAPHICS set global graphics options
+        
+            % violin
+            set(obj.handles.violin, 'LineWidth',obj.lineWidth);
             
             % box colors
             set(obj.handles.box,...
@@ -2056,6 +2157,26 @@ classdef (CaseInsensitiveProperties = true) boxPlot < iosr.statistics.statsPlot
             
         end
         
+        function halfviolinwidth = calcHalfViolinWidth(obj,subidx)
+        %HALFVIOLINWIDTH calculate the violin width
+            
+            % size of boxes
+            if ischar(obj.violinWidth)
+                halfviolinwidth =  0.75*(obj.groupRange/prod(obj.groupDims));
+            else
+                halfviolinwidth = obj.violinWidth;
+            end
+            
+            if obj.scaleWidth
+                % scale box width according to sample size
+                maxN = max(obj.statistics.N(:));
+                halfviolinwidth = 0.5 * (sqrt(obj.statistics.N(subidx{:})/maxN)*halfviolinwidth);
+            else
+                halfviolinwidth = halfviolinwidth / 2;
+            end
+            
+        end
+        
         function labelheight = calcLabelHeight(obj)
         %CALCLABELHEIGHT calculate the label height for the axes
 
@@ -2200,6 +2321,17 @@ classdef (CaseInsensitiveProperties = true) boxPlot < iosr.statistics.statsPlot
                 assert(isequal(size(fHandle(N)),[N 3]),['The color function ''' char(fHandle) ''' does not appear to return a color array of the correct size.'])
                 cOutput = fHandle(N);
                 assert(all(cOutput(:)>=0) && all(cOutput(:)<=1),['The color ''' char(fHandle) ''' function does not appear to return RGB values in the interval [0,1].'])
+            end
+        end
+        
+        function option = replaceAuto(option, default, errorMsg)
+        %REPLACEAUTO check for and replace auto parameters
+            if ischar(option)
+                if strcmpi(option, 'auto')
+                    option = default;
+                else
+                    error(errorMsg)
+                end
             end
         end
         
