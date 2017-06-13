@@ -24,6 +24,7 @@ function [d, xd, bw] = kernelDensity(x, bins, h, kernel)
 %   kernel function specified by KERNEL to calculate the density. The
 %   kernel may be:
 %       - 'normal' (default),
+%       - 'uniform',
 %       - 'triangular',
 %       - 'epanechnikov',
 %       - 'quartic',
