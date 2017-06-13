@@ -172,11 +172,11 @@ classdef (CaseInsensitiveProperties = true) boxPlot < iosr.statistics.statsPlot
 %                             random x-axis offset with respect to the box
 %                             centre. Data that are outliers are not
 %                             included. The default is false.
-%       showViolin          - If true, a 'violin' [1] density trace of the
-%                             data underlying each box will be plotted. The
-%                             outline is calculated using the
-%                             IOSR.STATISTICS.DENSITYTRACE function. The
-%                             default is false.
+%       showViolin          - If true, a 'violin' [1] kernel density
+%                             outline of the data underlying each box will
+%                             be plotted. The outline is calculated using
+%                             the IOSR.STATISTICS.KERNELDENSITY function.
+%                             The default is false.
 %       style               - Determine whether to show additional x-axis 
 %                             labels for the data. If set to 'hierarchy',
 %                             additional hierarchical x-axis labels will be
@@ -211,16 +211,14 @@ classdef (CaseInsensitiveProperties = true) boxPlot < iosr.statistics.statsPlot
 %                                                 lines and markers, gray
 %                                                 scatter markers
 %       violinBins          - If 'showViolin' is true, this specifes the
-%                             bins used to calculate the density
-%                             trace. See IOSR.STATISTICS.DENSITYTRACE. The
-%                             default is 100 points equally spaced between
-%                             the minimum and maximum of the data
-%                             underlying each box.
+%                             bins used to calculate the kernel density.
+%                             See IOSR.STATISTICS.KERNELDENSITY.
 %       violinBinWidth      - If 'showViolin' is true, this specifes the
-%                             bin width used to calculate the density
-%                             trace. See IOSR.STATISTICS.DENSITYTRACE. The
-%                             default is 15% of the spread of the data
-%                             underlying each box.
+%                             bin width used to calculate the kernel
+%                             density. See IOSR.STATISTICS.KERNELDENSITY.
+%       violinKernel        - If 'showViolin' is true, this specifes the
+%                             kernel used to calculate the kernel density.
+%                             See IOSR.STATISTICS.KERNELDENSITY.
 %       xSeparator          - Logical value that when true adds a separator
 %                             line between x groups. The default is false.
 %       xSpacing            - Determine the x-axis spacing of boxes. By
@@ -360,7 +358,7 @@ classdef (CaseInsensitiveProperties = true) boxPlot < iosr.statistics.statsPlot
 % 
 %   See also IOSR.STATISTICS.TAB2BOX, IOSR.STATISTICS.QUANTILE, COLORMAP,
 %       IOSR.STATISTICS.FUNCTIONALSPREADPLOT,
-%       IOSR.STATISTICS.FUNCTIONALBOXPLOT, IOSR.STATISTICS.DENSITYTRACE.
+%       IOSR.STATISTICS.FUNCTIONALBOXPLOT, IOSR.STATISTICS.KERNELDENSITY.
 % 
 %   References
 %   
@@ -412,7 +410,7 @@ classdef (CaseInsensitiveProperties = true) boxPlot < iosr.statistics.statsPlot
        showMean = false             % Display the mean of the data for each box.
        showOutliers = true          % Display outliers.
        showScatter = false          % Display a scatter plot of the underlying data for each box.
-       showViolin = false           % Display a violin (density trace) plot for the underlying data.
+       showViolin = false           % Display a violin (kernel density) plot for the underlying data.
        style = 'normal'             % Determine whether to show additional x-axis labels for the data.
        symbolColor = 'auto'         % Outlier marker color.
        symbolMarker = 'o'           % Marker used to denote outliers.
@@ -420,6 +418,7 @@ classdef (CaseInsensitiveProperties = true) boxPlot < iosr.statistics.statsPlot
        violinBins = 'auto'          % The bins used to calculate the violins.
        violinBinWidth = 'auto'      % The width of the bins used to calculate the violins.
        violinWidth = 'auto'         % The width of the violins.
+       violinKernel = 'normal'      % The violin kernel used to calculate the kernel density.
        xSeparator = false           % Add a separator line between x groups.
        xSpacing = 'x'               % Determine the x-axis spacing of boxes.
     end
@@ -581,11 +580,11 @@ classdef (CaseInsensitiveProperties = true) boxPlot < iosr.statistics.statsPlot
         %       h = iosr.statistics.boxPlot(x,y,'weights',weights_boxed);
         %
         %     Example 7: Draw a violin plot
+        %       y = randn(50,3,3);
+        %       x = [1 2 3.5];
+        %       y(1:25) = NaN;
         %       figure('color','w');
         %       h2 = iosr.statistics.boxPlot(x,y, 'showViolin', true, 'boxWidth', 0.025, 'showOutliers', false);
-        %       % delete the whisker tips
-        %       delete(h2.handles.upperWhiskerTips)
-        %       delete(h2.handles.lowerWhiskerTips)
         %       box on
             
             if nargin > 0
@@ -653,87 +652,87 @@ classdef (CaseInsensitiveProperties = true) boxPlot < iosr.statistics.statsPlot
         % these are all deprecated and the handles moved to the obj.handles struct
         
         function val = get.addPrctilesHandle(obj)
-            warning('''obj.addPrctilesHandle'' is deprecated. Use ''obj.handles.addPrctiles'' instead.');
+            warning('iosr:boxPlot:deprecatedProp','''obj.addPrctilesHandle'' is deprecated. Use ''obj.handles.addPrctiles'' instead.');
             val = obj.handles.addPrctiles;
         end
         
         function val = get.addPrctilesTxtHandle(obj)
-            warning('''obj.addPrctilesTxtHandle'' is deprecated. Use ''obj.handles.addPrctilesTxt'' instead.');
+            warning('iosr:boxPlot:deprecatedProp','''obj.addPrctilesTxtHandle'' is deprecated. Use ''obj.handles.addPrctilesTxt'' instead.');
             val = obj.handles.addPrctilesTxt;
         end
         
         function val = get.boxHandles(obj)
-            warning('''obj.boxHandles'' is deprecated. Use ''obj.handles.box'' instead.');
+            warning('iosr:boxPlot:deprecatedProp','''obj.boxHandles'' is deprecated. Use ''obj.handles.box'' instead.');
             val = obj.handles.box;
         end
         
         function val = get.mLineHandles(obj)
-            warning('''obj.mLineHandles'' is deprecated. Use ''obj.handles.medianLines'' instead.');
+            warning('iosr:boxPlot:deprecatedProp','''obj.mLineHandles'' is deprecated. Use ''obj.handles.medianLines'' instead.');
             val = obj.handles.medianLines;
         end
         
         function val = get.meanHandles(obj)
-            warning('''obj.meanHandles'' is deprecated. Use ''obj.handles.means'' instead.');
+            warning('iosr:boxPlot:deprecatedProp','''obj.meanHandles'' is deprecated. Use ''obj.handles.means'' instead.');
             val = obj.handles.means;
         end
         
         function val = get.notchLowerLineHandles(obj)
-            warning('''obj.notchLowerLineHandles'' is deprecated. Use ''obj.handles.notchLowerLines'' instead.');
+            warning('iosr:boxPlot:deprecatedProp','''obj.notchLowerLineHandles'' is deprecated. Use ''obj.handles.notchLowerLines'' instead.');
             val = obj.handles.notchLowerLines;
         end
         
         function val = get.notchUpperLineHandles(obj)
-            warning('''obj.notchUpperLineHandles'' is deprecated. Use ''obj.handles.notchUpperLines'' instead.');
+            warning('iosr:boxPlot:deprecatedProp','''obj.notchUpperLineHandles'' is deprecated. Use ''obj.handles.notchUpperLines'' instead.');
             val = obj.handles.notchUpperLines;
         end
         
         function val = get.upperWhiskerHandles(obj)
-            warning('''obj.upperWhiskerHandles'' is deprecated. Use ''obj.handles.upperWhiskers'' instead.');
+            warning('iosr:boxPlot:deprecatedProp','''obj.upperWhiskerHandles'' is deprecated. Use ''obj.handles.upperWhiskers'' instead.');
             val = obj.handles.upperWhiskers;
         end
         
         function val = get.lowerWhiskerHandles(obj)
-            warning('''obj.lowerWhiskerHandles'' is deprecated. Use ''obj.handles.lowerWhiskers'' instead.');
+            warning('iosr:boxPlot:deprecatedProp','''obj.lowerWhiskerHandles'' is deprecated. Use ''obj.handles.lowerWhiskers'' instead.');
             val = obj.handles.lowerWhiskers;
         end
         
         function val = get.upperWhiskerTipHandles(obj)
-            warning('''obj.upperWhiskerTipHandles'' is deprecated. Use ''obj.handles.upperWhiskerTips'' instead.');
+            warning('iosr:boxPlot:deprecatedProp','''obj.upperWhiskerTipHandles'' is deprecated. Use ''obj.handles.upperWhiskerTips'' instead.');
             val = obj.handles.upperWhiskerTips;
         end
         
         function val = get.lowerWhiskerTipHandles(obj)
-            warning('''obj.lowerWhiskerTipHandles'' is deprecated. Use ''obj.handles.lowerWhiskerTips'' instead.');
+            warning('iosr:boxPlot:deprecatedProp','''obj.lowerWhiskerTipHandles'' is deprecated. Use ''obj.handles.lowerWhiskerTips'' instead.');
             val = obj.handles.lowerWhiskerTips;
         end
         
         function val = get.outliersHandles(obj)
-            warning('''obj.outliersHandles'' is deprecated. Use ''obj.handles.outliers'' instead.');
+            warning('iosr:boxPlot:deprecatedProp','''obj.outliersHandles'' is deprecated. Use ''obj.handles.outliers'' instead.');
             val = obj.handles.outliers;
         end
         
         function val = get.scatterHandles(obj)
-            warning('''obj.scatterHandles'' is deprecated. Use ''obj.handles.scatters'' instead.');
+            warning('iosr:boxPlot:deprecatedProp','''obj.scatterHandles'' is deprecated. Use ''obj.handles.scatters'' instead.');
             val = obj.handles.scatters;
         end
         
         function val = get.sampleTxtHandes(obj)
-            warning('''obj.sampleTxtHandes'' is deprecated. Use ''obj.handles.samplesTxt'' instead.');
+            warning('iosr:boxPlot:deprecatedProp','''obj.sampleTxtHandes'' is deprecated. Use ''obj.handles.samplesTxt'' instead.');
             val = obj.handles.samplesTxt;
         end
         
         function val = get.groupTxtHandes(obj)
-            warning('''obj.groupTxtHandes'' is deprecated. Use ''obj.handles.groupsTxt'' instead.');
+            warning('iosr:boxPlot:deprecatedProp','''obj.groupTxtHandes'' is deprecated. Use ''obj.handles.groupsTxt'' instead.');
             val = obj.handles.groupsTxt;
         end
         
         function val = get.xsepHandles(obj)
-            warning('''obj.xsepHandles'' is deprecated. Use ''obj.handles.xseps'' instead.');
+            warning('iosr:boxPlot:deprecatedProp','''obj.xsepHandles'' is deprecated. Use ''obj.handles.xseps'' instead.');
             val = obj.handles.xseps;
         end
         
         function val = get.legendHandle(obj)
-            warning('''obj.legendHandle'' is deprecated. Use ''obj.handles.legend'' instead.');
+            warning('iosr:boxPlot:deprecatedProp','''obj.legendHandle'' is deprecated. Use ''obj.handles.legend'' instead.');
             val = obj.handles.legend;
         end
         
@@ -747,8 +746,8 @@ classdef (CaseInsensitiveProperties = true) boxPlot < iosr.statistics.statsPlot
         
         function set.addPrctiles(obj,val)
             if ~isempty(val)
-                assert(isvector(val) && isnumeric(val), '''ADDPRCTILES'' should be a numeric vector')
-                assert(all(val<=100) && all(val>=0), '''ADDPRCTILES'' values should be in the interval [0,100].')
+                assert(isvector(val) && isnumeric(val), 'iosr:boxPlot:addPrctilesVector', '''ADDPRCTILES'' should be a numeric vector')
+                assert(all(val<=100) && all(val>=0), 'iosr:boxPlot:addPrctilesRange', '''ADDPRCTILES'' values should be in the interval [0,100].')
             end
             obj.addPrctiles = val;
             obj.calculateStats();
@@ -763,7 +762,7 @@ classdef (CaseInsensitiveProperties = true) boxPlot < iosr.statistics.statsPlot
         
         function set.addPrctilesColors(obj,val)
             if ~isempty(val)
-                assert(iscell(val), '''ADDPRCTILESCOLORS'' should be a cell array')
+                assert(iscell(val), 'iosr:boxPlot:addPrctilesColors', '''ADDPRCTILESCOLORS'' should be a cell array')
             end
             obj.addPrctilesColors = val;
             obj.draw();
@@ -777,7 +776,7 @@ classdef (CaseInsensitiveProperties = true) boxPlot < iosr.statistics.statsPlot
         
         function set.addPrctilesLabels(obj,val)
             if ~isempty(val)
-                assert(iscellstr(val), '''ADDPRCTILESLABELS'' should be a cell array of strings')
+                assert(iscellstr(val), 'iosr:boxPlot:addPrctilesLabels', '''ADDPRCTILESLABELS'' should be a cell array of strings')
             end
             obj.addPrctilesLabels = val;
             obj.draw();
@@ -791,7 +790,7 @@ classdef (CaseInsensitiveProperties = true) boxPlot < iosr.statistics.statsPlot
         
         function set.addPrctilesMarkers(obj,val)
             if ~isempty(val)
-                assert(iscellstr(val), '''ADDPRCTILESMARKERS'' should be a cell array of strings')
+                assert(iscellstr(val), 'iosr:boxPlot:addPrctilesMarkers', '''ADDPRCTILESMARKERS'' should be a cell array of strings')
             end
             obj.addPrctilesMarkers = val;
             obj.draw();
@@ -805,7 +804,7 @@ classdef (CaseInsensitiveProperties = true) boxPlot < iosr.statistics.statsPlot
         
         function set.addPrctilesSize(obj,val)
             if ~isempty(val)
-                assert(isnumeric(val) && isvector(val), '''ADDPRCTILESSIZE'' should be a numeric vector')
+                assert(isnumeric(val) && isvector(val), 'iosr:boxPlot:addPrctilesSize', '''ADDPRCTILESSIZE'' should be a numeric vector')
             end
             obj.addPrctilesSize = val;
             obj.draw();
@@ -814,7 +813,7 @@ classdef (CaseInsensitiveProperties = true) boxPlot < iosr.statistics.statsPlot
         % set additional percentiles label font size
         
         function set.addPrctilesTxtSize(obj,val)
-            assert(isnumeric(val) && isscalar(val), '''ADDPRCTILESTXTSIZE'' should be a numeric scalar')
+            assert(isnumeric(val) && isscalar(val), 'iosr:boxPlot:addPrctilesTxtSize', '''ADDPRCTILESTXTSIZE'' should be a numeric scalar')
             obj.addPrctilesTxtSize = val;
             obj.draw();
         end
@@ -822,7 +821,7 @@ classdef (CaseInsensitiveProperties = true) boxPlot < iosr.statistics.statsPlot
         % set box alpha
         
         function set.boxAlpha(obj,val)
-            assert(isnumeric(val) && isscalar(val),'''BOXALPHA'' must be a numeric scalar')
+            assert(isnumeric(val) && isscalar(val), 'iosr:boxPlot:boxAlpha', '''BOXALPHA'' must be a numeric scalar')
             obj.boxAlpha = val;
             obj.draw('legend');
         end
@@ -842,7 +841,7 @@ classdef (CaseInsensitiveProperties = true) boxPlot < iosr.statistics.statsPlot
         % set box width
         
         function set.boxWidth(obj,val)
-            assert((isnumeric(val) && isscalar(val)) || strcmpi(val,'auto'),'''BOXWIDTH'' must be a numeric scalar or ''auto''.')
+            assert((isnumeric(val) && isscalar(val)) || strcmpi(val,'auto'), 'iosr:boxPlot:boxWidth', '''BOXWIDTH'' must be a numeric scalar or ''auto''.')
             obj.boxWidth = val;
             obj.draw('all');
         end
@@ -857,12 +856,15 @@ classdef (CaseInsensitiveProperties = true) boxPlot < iosr.statistics.statsPlot
             end
             if ~isempty(val) % use input
                 assert(isvector(val) && iscell(val),...
+                    'iosr:boxPlot:groupLabelsType', ...
                     'The GROUPLABELS option should be a cell vector');
                 valSize = cellfun(@length,val);
-                assert(prod(obj.outDims(3:end))==prod(valSize),...
+                assert(prod(obj.outDims(3:end))==prod(valSize), ...
+                    'iosr:boxPlot:groupLabelsSize', ...
                     ['The GROUPLABELS option should be a cell vector; ' ...
                     'the Nth element should contain a vector of length SIZE(Y,N+2)'])
-                assert(isequal(obj.outDims(3:end),valSize(1:length(obj.outDims)-2)),...
+                assert(isequal(obj.outDims(3:end),valSize(1:length(obj.outDims)-2)), ...
+                    'iosr:boxPlot:groupLabelsSize', ...
                     ['The GROUPLABELS option should be a cell vector; ' ...
                     'the Nth element should contain a vector of length SIZE(Y,N+2)'])
             else % create placeholder labels
@@ -886,7 +888,7 @@ classdef (CaseInsensitiveProperties = true) boxPlot < iosr.statistics.statsPlot
         % set group label font size
         
         function set.groupLabelFontSize(obj,val)
-            assert(isnumeric(val) && isscalar(val),'''GROUPLABELFONTSIZE'' must be a numeric scalar.')
+            assert(isnumeric(val) && isscalar(val), 'iosr:boxPlot:groupLabelsFontSize', '''GROUPLABELFONTSIZE'' must be a numeric scalar.')
             obj.groupLabelFontSize = val;
             obj.draw();
         end
@@ -894,7 +896,7 @@ classdef (CaseInsensitiveProperties = true) boxPlot < iosr.statistics.statsPlot
         % set group label height
         
         function set.groupLabelHeight(obj,val)
-            assert(strcmp(val,'auto') || (isnumeric(val) && isscalar(val)),'''GROUPLABELHEIGHT'' must be ''auto'' or a numeric scalar.')
+            assert(strcmp(val,'auto') || (isnumeric(val) && isscalar(val)), 'iosr:boxPlot:groupLabelHeight', '''GROUPLABELHEIGHT'' must be ''auto'' or a numeric scalar.')
             obj.groupLabelHeight = val;
             obj.draw('style');
         end
@@ -902,7 +904,7 @@ classdef (CaseInsensitiveProperties = true) boxPlot < iosr.statistics.statsPlot
         % set group width
         
         function set.groupWidth(obj,val)
-            assert(isnumeric(val) && isscalar(val),'''GROUPWIDTH'' must be a numeric scalar')
+            assert(isnumeric(val) && isscalar(val), 'iosr:boxPlot:groupWidth', '''GROUPWIDTH'' must be a numeric scalar')
             obj.groupWidth = val;
             obj.setXprops();
             obj.draw('all');
@@ -912,14 +914,14 @@ classdef (CaseInsensitiveProperties = true) boxPlot < iosr.statistics.statsPlot
         
         function set.limit(obj,val)
             if isnumeric(val)
-                assert(isnumeric(val) && numel(val)==2, '''LIMIT'' must be a two-element numeric vector.')
-                assert(all(val<=100) && all(val>=0), '''LIMIT'' values should be in the interval [0,100].')
+                assert(isnumeric(val) && numel(val)==2, 'iosr:boxPlot:limitSize', '''LIMIT'' must be a two-element numeric vector.')
+                assert(all(val<=100) && all(val>=0), 'iosr:boxPlot:limitRange', '''LIMIT'' values should be in the interval [0,100].')
                 if all(val<1)
-                    warning('''LIMIT'' values should be in the interval [0,100].')
+                    warning('iosr:boxPlot:limitRange','''LIMIT'' values should be in the interval [0,100].')
                 end
             else
-                assert(ischar(val), '''LIMIT'' must be a char array.')
-                assert(any(strcmpi(val,{'1.5IQR','3IQR','none'})),'''LIMIT'' parameter not recognised.')
+                assert(ischar(val), 'iosr:boxPlot:limitType', '''LIMIT'' must be a char or numeric array.')
+                assert(any(strcmpi(val,{'1.5IQR','3IQR','none'})), 'iosr:boxPlot:limitUnknownOption', '''LIMIT'' parameter not recognised.')
             end
             obj.limit = val;
             obj.calculateStats();
@@ -945,7 +947,7 @@ classdef (CaseInsensitiveProperties = true) boxPlot < iosr.statistics.statsPlot
         end
         
         function set.lineStyle(obj,val)
-            assert(ischar(val) || iscellstr(val), '''LINESTYLE'' must be a char array or cell array of strings.')
+            assert(ischar(val) || iscellstr(val), 'iosr:boxPlot:lineStyle', '''LINESTYLE'' must be a char array or cell array of strings.')
             obj.lineStyle = val;
             obj.draw('legend');
         end
@@ -953,7 +955,7 @@ classdef (CaseInsensitiveProperties = true) boxPlot < iosr.statistics.statsPlot
         % set line width
         
         function set.lineWidth(obj,val)
-            assert(isnumeric(val) && isscalar(val),'''LINEWIDTH'' must be a numeric scalar.')
+            assert(isnumeric(val) && isscalar(val), 'iosr:boxPlot:lineWidth', '''LINEWIDTH'' must be a numeric scalar.')
             obj.lineWidth = val;
             obj.draw('all');
         end
@@ -977,7 +979,7 @@ classdef (CaseInsensitiveProperties = true) boxPlot < iosr.statistics.statsPlot
         end
         
         function set.meanMarker(obj,val)
-            assert(ischar(val) || iscellstr(val), '''MEANMARKER'' must be a char array or cell array of strings.')
+            assert(ischar(val) || iscellstr(val), 'iosr:boxPlot:meanMarker', '''MEANMARKER'' must be a char array or cell array of strings.')
             obj.meanMarker = val;
             obj.draw();
         end
@@ -985,7 +987,7 @@ classdef (CaseInsensitiveProperties = true) boxPlot < iosr.statistics.statsPlot
         % set mean size
         
         function set.meanSize(obj,val)
-            assert(isnumeric(val) && isscalar(val), '''MEANSIZE'' must be a numeric scalar.')
+            assert(isnumeric(val) && isscalar(val), 'iosr:boxPlot:meanSize', '''MEANSIZE'' must be a numeric scalar.')
             obj.meanSize = val;
             obj.draw();
         end
@@ -1005,7 +1007,7 @@ classdef (CaseInsensitiveProperties = true) boxPlot < iosr.statistics.statsPlot
         % set stats method
         
         function set.method(obj,val)
-            assert(ischar(val), '''METHOD'' must be a char array.')
+            assert(ischar(val), 'iosr:boxPlot:method', '''METHOD'' must be a char array.')
             obj.method = val;
             obj.calculateStats();
             obj.draw('all');
@@ -1014,7 +1016,7 @@ classdef (CaseInsensitiveProperties = true) boxPlot < iosr.statistics.statsPlot
         % set notch
         
         function set.notch(obj,val)
-            assert(islogical(val) && numel(val)==1, '''NOTCH'' must be logical.')
+            assert(islogical(val) && numel(val)==1, 'iosr:boxPlot:notch', '''NOTCH'' must be logical.')
             obj.notch = val;
             obj.draw('boxes');
         end
@@ -1022,7 +1024,7 @@ classdef (CaseInsensitiveProperties = true) boxPlot < iosr.statistics.statsPlot
         % set notch depth
         
         function set.notchDepth(obj,val)
-            assert(isnumeric(val) && isscalar(val),'''NOTCHDEPTH'' must be a numeric scalar')
+            assert(isnumeric(val) && isscalar(val), 'iosr:boxPlot:notchDepth', '''NOTCHDEPTH'' must be a numeric scalar')
             obj.notchDepth = val;
             obj.draw('boxes');
         end
@@ -1046,7 +1048,7 @@ classdef (CaseInsensitiveProperties = true) boxPlot < iosr.statistics.statsPlot
         end
         
         function set.notchLineStyle(obj,val)
-            assert(ischar(val) || iscellstr(val), '''NOTCHLINESTYLE'' must be a char array or cell array of strings.')
+            assert(ischar(val) || iscellstr(val), 'iosr:boxPlot:notchLineStyle', '''NOTCHLINESTYLE'' must be a char array or cell array of strings.')
             obj.notchLineStyle = val;
             obj.draw();
         end
@@ -1054,7 +1056,7 @@ classdef (CaseInsensitiveProperties = true) boxPlot < iosr.statistics.statsPlot
         % set notch line
         
         function set.notchLine(obj,val)
-            assert(islogical(val) && numel(val)==1, '''NOTCHLINE'' must be logical.')
+            assert(islogical(val) && numel(val)==1, 'iosr:boxPlot:notchLine', '''NOTCHLINE'' must be logical.')
             obj.notchLine = val;
             obj.draw('boxes');
         end
@@ -1062,7 +1064,7 @@ classdef (CaseInsensitiveProperties = true) boxPlot < iosr.statistics.statsPlot
         % set outlier size
         
         function set.outlierSize(obj,val)
-            assert(isnumeric(val) && isscalar(val), '''OUTLIERSIZE'' must be a numeric scalar.')
+            assert(isnumeric(val) && isscalar(val), 'iosr:boxPlot:outlierSize', '''OUTLIERSIZE'' must be a numeric scalar.')
             obj.outlierSize = val;
             obj.draw();
         end
@@ -1070,10 +1072,10 @@ classdef (CaseInsensitiveProperties = true) boxPlot < iosr.statistics.statsPlot
         % set percentile
         
         function set.percentile(obj,val)
-            assert(isnumeric(val) && numel(val)==2, '''PERCENTILE'' must be a two-element numeric vector.')
-            assert(all(val<=100) && all(val>=0), '''PERCENTILE'' values should be in the interval [0,100].')
+            assert(isnumeric(val) && numel(val)==2, 'iosr:boxPlot:percentileSize', '''PERCENTILE'' must be a two-element numeric vector.')
+            assert(all(val<=100) && all(val>=0), 'iosr:boxPlot:percentileRange', '''PERCENTILE'' values should be in the interval [0,100].')
             if all(val<1)
-                warning('''PERCENTILE'' values should be in the interval [0,100].')
+                warning('iosr:boxPlot:percentileRange', '''PERCENTILE'' values should be in the interval [0,100].')
             end
             obj.percentile = val;
             obj.calculateStats();
@@ -1083,7 +1085,7 @@ classdef (CaseInsensitiveProperties = true) boxPlot < iosr.statistics.statsPlot
         % set sample font size
         
         function set.sampleFontSize(obj,val)
-            assert(isnumeric(val) && isscalar(val),'''SAMPLEFONTSIZE'' must be a numeric scalar.')
+            assert(isnumeric(val) && isscalar(val), 'iosr:boxPlot:sampleFontSize', '''SAMPLEFONTSIZE'' must be a numeric scalar.')
             obj.sampleFontSize = val;
             obj.draw();
         end
@@ -1091,7 +1093,7 @@ classdef (CaseInsensitiveProperties = true) boxPlot < iosr.statistics.statsPlot
         % set sample size option
         
         function set.sampleSize(obj,val)
-            assert(islogical(val) && numel(val)==1, '''SAMPLESIZE'' must be logical.')
+            assert(islogical(val) && numel(val)==1, 'iosr:boxPlot:sampleSize', '''SAMPLESIZE'' must be logical.')
             obj.sampleSize = val;
             obj.draw('boxes');
         end
@@ -1099,7 +1101,7 @@ classdef (CaseInsensitiveProperties = true) boxPlot < iosr.statistics.statsPlot
         % set scale width option
         
         function set.scaleWidth(obj,val)
-            assert(islogical(val) && numel(val)==1, '''SCALEWIDTH'' must be logical.')
+            assert(islogical(val) && numel(val)==1, 'iosr:boxPlot:scaleWidth', '''SCALEWIDTH'' must be logical.')
             obj.scaleWidth = val;
             obj.draw('boxes','scatter','outliers');
         end
@@ -1107,7 +1109,7 @@ classdef (CaseInsensitiveProperties = true) boxPlot < iosr.statistics.statsPlot
         % set legend
         
         function set.showLegend(obj,val)
-            assert(islogical(val) && numel(val)==1, '''SHOWLEGEND'' must be logical.')
+            assert(islogical(val) && numel(val)==1, 'iosr:boxPlot:showLegend', '''SHOWLEGEND'' must be logical.')
             obj.showLegend = val;
             obj.draw('legend');
         end
@@ -1115,7 +1117,7 @@ classdef (CaseInsensitiveProperties = true) boxPlot < iosr.statistics.statsPlot
         % set show mean option
         
         function set.showMean(obj,val)
-            assert(islogical(val) && numel(val)==1, '''SHOWMEAN'' must be logical.')
+            assert(islogical(val) && numel(val)==1, 'iosr:boxPlot:showMean', '''SHOWMEAN'' must be logical.')
             obj.showMean = val;
             obj.draw('means');
         end
@@ -1123,7 +1125,7 @@ classdef (CaseInsensitiveProperties = true) boxPlot < iosr.statistics.statsPlot
         % set show outliers option
         
         function set.showOutliers(obj,val)
-            assert(islogical(val) && numel(val)==1, '''SHOWOUTLIERS'' must be logical.')
+            assert(islogical(val) && numel(val)==1, 'iosr:boxPlot:showOutliers', '''SHOWOUTLIERS'' must be logical.')
             obj.showOutliers = val;
             obj.draw('outliers');
         end
@@ -1131,7 +1133,7 @@ classdef (CaseInsensitiveProperties = true) boxPlot < iosr.statistics.statsPlot
         % set show scatter option
         
         function set.showScatter(obj,val)
-            assert(islogical(val) && numel(val)==1, '''SHOWSCATTER'' must be logical.')
+            assert(islogical(val) && numel(val)==1, 'iosr:boxPlot:showScatter', '''SHOWSCATTER'' must be logical.')
             obj.showScatter = val;
             obj.draw('scatter');
         end
@@ -1139,7 +1141,7 @@ classdef (CaseInsensitiveProperties = true) boxPlot < iosr.statistics.statsPlot
         % set scatter alpha
         
         function set.scatterAlpha(obj,val)
-            assert(isnumeric(val) && isscalar(val),'''SCATTERALPHA'' must be a numeric scalar')
+            assert(isnumeric(val) && isscalar(val), 'iosr:boxPlot:scatterAlpha', '''SCATTERALPHA'' must be a numeric scalar')
             obj.scatterAlpha = val;
             obj.draw();
         end
@@ -1159,7 +1161,7 @@ classdef (CaseInsensitiveProperties = true) boxPlot < iosr.statistics.statsPlot
         % set scatter layer
         
         function set.scatterLayer(obj,val)
-            assert(ischar(val), '''SCATTERLAYER'' must be a char array.')
+            assert(ischar(val), 'iosr:boxPlot:scatterLayer', '''SCATTERLAYER'' must be a char array.')
             obj.scatterLayer = val;
             obj.draw();
         end
@@ -1171,7 +1173,7 @@ classdef (CaseInsensitiveProperties = true) boxPlot < iosr.statistics.statsPlot
         end
         
         function set.scatterMarker(obj,val)
-            assert(ischar(val) || iscellstr(val), '''SCATTERMARKER'' must be a char array or cell array of strings.')
+            assert(ischar(val) || iscellstr(val), 'iosr:boxPlot:scatterMarker', '''SCATTERMARKER'' must be a char array or cell array of strings.')
             obj.scatterMarker = val;
             obj.draw();
         end
@@ -1179,7 +1181,7 @@ classdef (CaseInsensitiveProperties = true) boxPlot < iosr.statistics.statsPlot
         % set scatter marker size
         
         function set.scatterSize(obj,val)
-            assert(isnumeric(val) && isscalar(val), '''SCATTERSIZE'' must be a numeric scalar.')
+            assert(isnumeric(val) && isscalar(val), 'iosr:boxPlot:scatterSize', '''SCATTERSIZE'' must be a numeric scalar.')
             obj.scatterSize = val;
             obj.draw();
         end
@@ -1187,16 +1189,16 @@ classdef (CaseInsensitiveProperties = true) boxPlot < iosr.statistics.statsPlot
         % violin
         
         function set.showViolin(obj,val)
-            assert(islogical(val) && isscalar(val),'''VIOLIN'' must be logical.')
+            assert(islogical(val) && isscalar(val), 'iosr:boxPlot:showViolin', '''VIOLIN'' must be logical.')
             obj.showViolin = val;
-            obj.draw();
+            obj.draw('violin','whiskers');
         end
         
         % set style
         
         function set.style(obj,val)
-            assert(ischar(val), '''STYLE'' must be a char array.')
-            assert(any(strcmpi(val,{'normal','hierarchy'})), '''STYLE'' must be either ''normal'' or ''hierarchy''.')
+            assert(ischar(val), 'iosr:boxPlot:styleType', '''STYLE'' must be a char array.')
+            assert(any(strcmpi(val,{'normal','hierarchy'})), 'iosr:boxPlot:styleOption', '''STYLE'' must be either ''normal'' or ''hierarchy''.')
             obj.style = val;
             obj.draw('style');
         end
@@ -1220,7 +1222,7 @@ classdef (CaseInsensitiveProperties = true) boxPlot < iosr.statistics.statsPlot
         end
         
         function set.symbolMarker(obj,val)
-            assert(ischar(val) || iscellstr(val), '''SYMBOLMARKER'' must be a char array or cell array of strings.')
+            assert(ischar(val) || iscellstr(val), 'iosr:boxPlot:symbolMarker', '''SYMBOLMARKER'' must be a char array or cell array of strings.')
             obj.symbolMarker = val;
             obj.draw();
         end
@@ -1228,7 +1230,7 @@ classdef (CaseInsensitiveProperties = true) boxPlot < iosr.statistics.statsPlot
         % set theme
         
         function set.theme(obj,val)
-            assert(ischar(val),'''THEME'' must be a char array.')
+            assert(ischar(val), 'iosr:boxPlot:theme', '''THEME'' must be a char array.')
             obj.theme = val;
             obj.createTheme();
             obj.draw('legend');
@@ -1237,27 +1239,33 @@ classdef (CaseInsensitiveProperties = true) boxPlot < iosr.statistics.statsPlot
         % set violin props
         
         function set.violinBins(obj,val)
-            assert(isnumeric(val) || strcmpi(val,'auto'),'''VIOLINBINS'' must be numeric or ''auto''.')
+            assert(isnumeric(val) || strcmpi(val,'auto'), 'iosr:boxPlot:violinBins', '''VIOLINBINS'' must be numeric or ''auto''.')
             obj.violinBins = val;
-            obj.draw('violin');
+            obj.draw('violin','whiskers');
         end
         
         function set.violinBinWidth(obj,val)
-            assert((isnumeric(val) && isscalar(val)) || strcmpi(val,'auto'),'''VIOLINBINWIDTH'' must be a numeric scalar or ''auto''.')
+            assert((isnumeric(val) && isscalar(val)) || strcmpi(val,'auto'), 'iosr:boxPlot:violinBinWidth', '''VIOLINBINWIDTH'' must be a numeric scalar or ''auto''.')
             obj.violinBinWidth = val;
-            obj.draw('violin');
+            obj.draw('violin','whiskers');
+        end
+        
+        function set.violinKernel(obj,val)
+            assert(ischar(val), 'iosr:boxPlot:violinKernel', '''VIOLINKERNEL'' must be a string.')
+            obj.violinKernel = val;
+            obj.draw('violin','whiskers');
         end
         
         function set.violinWidth(obj,val)
-            assert((isnumeric(val) && isscalar(val)) || strcmpi(val,'auto'),'''VIOLINWIDTH'' must be a numeric scalar or ''auto''.')
+            assert((isnumeric(val) && isscalar(val)) || strcmpi(val,'auto'), 'iosr:boxPlot:violinWidth', '''VIOLINWIDTH'' must be a numeric scalar or ''auto''.')
             obj.violinWidth = val;
-            obj.draw('violin');
+            obj.draw('violin','whiskers');
         end
         
         % set x separator option
         
         function set.xSeparator(obj,val)
-            assert(islogical(val) && isscalar(val),'''XSEPARATOR'' must be logical.')
+            assert(islogical(val) && isscalar(val), 'iosr:boxPlot:xSeparator', '''XSEPARATOR'' must be logical.')
             obj.xSeparator = val;
             obj.draw('xsep');
         end
@@ -1265,7 +1273,7 @@ classdef (CaseInsensitiveProperties = true) boxPlot < iosr.statistics.statsPlot
         % set x spacing option
         
         function set.xSpacing(obj,val)
-            assert(any(strcmpi(val,{'x','equal'})),'''XSPACING'' parameter not recognised.')
+            assert(any(strcmpi(val,{'x','equal'})), 'iosr:boxPlot:xSpacing', '''XSPACING'' parameter not recognised.')
             obj.xSpacing = val;
             obj.setXprops();
             obj.draw('all');
@@ -1350,24 +1358,25 @@ classdef (CaseInsensitiveProperties = true) boxPlot < iosr.statistics.statsPlot
         
         function drawViolin(obj,subidx,subidxAll)
         %DRAWVIOLIN Draw the violin
+        
+            try % to delete the handles first
+                delete(obj.handles.violin(subidx{:}));
+            catch
+            end
             
             if obj.showViolin
-                try % to delete the handles first
-                    delete(obj.handles.violin(subidx{:}));
-                catch
-                end
                 
                 vBinWidth = obj.replaceAuto(...
                     obj.violinBinWidth, ...
-                    0.15 * (max(obj.y(subidxAll{:})) - min(obj.y(subidxAll{:}))), ...
+                    [], ...
                     'Unknown ''VIOLINBINWIDTH'' parameter.');
                 
                 vBins = obj.replaceAuto(...
                     obj.violinBins, ...
-                    100, ...
+                    [], ...
                     'Unknown ''VIOLINBINS'' parameter.');
 
-                [d, xd] = iosr.statistics.densityTrace(obj.y(subidxAll{:}), vBins, vBinWidth);
+                [d, xd] = iosr.statistics.kernelDensity(obj.y(subidxAll{:}), vBins, vBinWidth, obj.violinKernel);
                 halfviolinwidth = obj.calcHalfViolinWidth(subidx);
                 d = halfviolinwidth .* (d ./ max(d));
                 obj.handles.violin(subidx{:}) = patch(...
@@ -1491,13 +1500,15 @@ classdef (CaseInsensitiveProperties = true) boxPlot < iosr.statistics.statsPlot
             % UQ
             obj.handles.upperWhiskers(subidx{:}) = ...
                 line([X X],[obj.statistics.max(subidx{:}) obj.statistics.PU(subidx{:})],'Parent',obj.handles.axes);
-            % whisker tips
-            obj.handles.lowerWhiskerTips(subidx{:}) = ...
-                line([X-0.5*halfboxwidth X+0.5*halfboxwidth],[obj.statistics.min(subidx{:}) obj.statistics.min(subidx{:})],...
-                'linestyle','-','Parent',obj.handles.axes);
-            obj.handles.upperWhiskerTips(subidx{:}) = ...
-                line([X-0.5*halfboxwidth X+0.5*halfboxwidth],[obj.statistics.max(subidx{:}) obj.statistics.max(subidx{:})],...
-                'linestyle','-','Parent',obj.handles.axes);
+            if ~obj.showViolin
+                % whisker tips
+                obj.handles.lowerWhiskerTips(subidx{:}) = ...
+                    line([X-0.5*halfboxwidth X+0.5*halfboxwidth],[obj.statistics.min(subidx{:}) obj.statistics.min(subidx{:})],...
+                    'linestyle','-','Parent',obj.handles.axes);
+                obj.handles.upperWhiskerTips(subidx{:}) = ...
+                    line([X-0.5*halfboxwidth X+0.5*halfboxwidth],[obj.statistics.max(subidx{:}) obj.statistics.max(subidx{:})],...
+                    'linestyle','-','Parent',obj.handles.axes);
+            end
             
         end
         
@@ -1621,11 +1632,14 @@ classdef (CaseInsensitiveProperties = true) boxPlot < iosr.statistics.statsPlot
             set(obj.handles.medianLines(subidx{:}),'color',obj.medianColor{gidx{:}});
             
             % whiskers
-            set([obj.handles.lowerWhiskers(subidx{:}) obj.handles.upperWhiskers(subidx{:}) ...
-                obj.handles.lowerWhiskerTips(subidx{:}) obj.handles.upperWhiskerTips(subidx{:})],...
+            set([obj.handles.lowerWhiskers(subidx{:}) obj.handles.upperWhiskers(subidx{:})],...
                 'color',obj.lineColor{gidx{:}});
             set([obj.handles.lowerWhiskers(subidx{:}) obj.handles.upperWhiskers(subidx{:})],...
                 'linestyle',obj.lineStyle{gidx{:}});
+            if ~obj.showViolin
+                set([obj.handles.lowerWhiskerTips(subidx{:}) obj.handles.upperWhiskerTips(subidx{:})],...
+                    'color',obj.lineColor{gidx{:}});
+            end
             
             % outliers
             if ~isempty(obj.statistics.outliers{subidx{:}}) && obj.showOutliers % don't bother if no data
@@ -1662,7 +1676,9 @@ classdef (CaseInsensitiveProperties = true) boxPlot < iosr.statistics.statsPlot
         %DRAWGLOBALGRAPHICS set global graphics options
         
             % violin
-            set(obj.handles.violin, 'LineWidth',obj.lineWidth);
+            if obj.showViolin
+                set(obj.handles.violin, 'LineWidth',obj.lineWidth);
+            end
             
             % box colors
             set(obj.handles.box,...
@@ -1684,9 +1700,12 @@ classdef (CaseInsensitiveProperties = true) boxPlot < iosr.statistics.statsPlot
             set(obj.handles.medianLines,'linewidth',obj.lineWidth);
             
             % whiskers
-            set([obj.handles.lowerWhiskers obj.handles.upperWhiskers ...
-                obj.handles.lowerWhiskerTips obj.handles.upperWhiskerTips],...
+            set([obj.handles.lowerWhiskers obj.handles.upperWhiskers],...
                 'linewidth',obj.lineWidth);
+            if ~obj.showViolin
+                set([obj.handles.lowerWhiskerTips obj.handles.upperWhiskerTips],...
+                    'linewidth',obj.lineWidth);
+            end
             
             % outliers
             if obj.showOutliers && isfield(obj.handles,'outliers')
@@ -1768,14 +1787,17 @@ classdef (CaseInsensitiveProperties = true) boxPlot < iosr.statistics.statsPlot
                     % check grouplabels options
                     if ~isempty(obj.groupLabels)
                         assert(isvector(obj.groupLabels) && iscell(obj.groupLabels),...
+                            'iosr:boxPlot:groupLabelsType', ...
                             'The GROUPLABELS option should be a cell vector');
                         if ~isempty(obj.outDims(3:end))
                             assert(isequal(obj.outDims(3:end),cellfun(@length,obj.groupLabels)),...
+                                'iosr:boxPlot:groupLabelsSize', ...
                                 ['The GROUPLABELS option should be a cell vector; ' ...
                                 'the Nth element should contain a vector of length SIZE(Y,N+2)'])
                         else
                             assert(cellfun(@length,obj.groupLabels)==1,...
-                                'The GROUPLABELS option should have length if no grouping dimensions are specified.')
+                                'iosr:boxPlot:groupLabelsSize', ...
+                                'The GROUPLABELS option should have length 1 if no grouping dimensions are specified.')
                         end
                     end
 
@@ -1833,7 +1855,7 @@ classdef (CaseInsensitiveProperties = true) boxPlot < iosr.statistics.statsPlot
 
                     end
                 otherwise
-                    error('Unkown ''style'' option.')
+                    error('iosr:boxPlot:unknownStyle','Unkown ''style'' option.')
             end
             
         end
@@ -1883,7 +1905,7 @@ classdef (CaseInsensitiveProperties = true) boxPlot < iosr.statistics.statsPlot
                 elseif ~obj.arrayElementsEqual(obj.medianColor)
                     legendTarget = obj.handles.medianLines;
                 else
-                    error('The legend uses the box or median line colors to create legend entries. However, these items appear to be identical, which would make the legend impossible to interpret. Change the ''boxColor'' or ''medianColor'' option.');
+                    error('iosr:boxPlot:legend','The legend uses the box or median line colors to create legend entries. However, these items appear to be identical, which would make the legend impossible to interpret. Change the ''boxColor'' or ''medianColor'' option.');
                 end
                 % create legend in specified order
                 if ~isempty(legendTarget)
@@ -2038,7 +2060,7 @@ classdef (CaseInsensitiveProperties = true) boxPlot < iosr.statistics.statsPlot
                         obj.xticks = 1:length(obj.x);
                         obj.diffx = 1;
                     otherwise
-                        error('Unknown xSpacing option specified.')
+                        error('iosr:boxPlot:xSpacing','Unknown xSpacing option specified.')
                 end
             else % x is not numeric
                 obj.xlabels = obj.x;
@@ -2076,11 +2098,11 @@ classdef (CaseInsensitiveProperties = true) boxPlot < iosr.statistics.statsPlot
                 end
             elseif isequal(gDims,size(option)) % put into cell array
                 for n = 1:prod(gDims)
-                    assert(ischar(option{n}) || size(option{n},2)==3,['Option ''' name ''' is not in the correct format.'])
+                    assert(ischar(option{n}) || size(option{n},2)==3, 'iosr:boxPlot:groupOptionFormat', ['Option ''' name ''' is not in the correct format.'])
                     out(n) = option(n);
                 end
             else
-                error('Option ''%s'' is not the correct size.',name)
+                error('iosr:boxPlot:groupOptionSize','Option ''%s'' is not the correct size.',name)
             end
 
         end
@@ -2298,7 +2320,7 @@ classdef (CaseInsensitiveProperties = true) boxPlot < iosr.statistics.statsPlot
             elseif iscellstr(val)
                 str = char(val);
             else
-                error('Unable to convert data type to string.')
+                error('iosr:boxPlot:ensureString','Unable to convert data type to string.')
             end
             
         end
@@ -2318,9 +2340,9 @@ classdef (CaseInsensitiveProperties = true) boxPlot < iosr.statistics.statsPlot
         %CHECKCOLORHANDLE check whether function handle reurns valid color output
             
             for N = [1 4 8 16]
-                assert(isequal(size(fHandle(N)),[N 3]),['The color function ''' char(fHandle) ''' does not appear to return a color array of the correct size.'])
+                assert(isequal(size(fHandle(N)),[N 3]), 'iosr:boxPlot:colorFhandle', ['The color function ''' char(fHandle) ''' does not appear to return a color array of the correct size.'])
                 cOutput = fHandle(N);
-                assert(all(cOutput(:)>=0) && all(cOutput(:)<=1),['The color ''' char(fHandle) ''' function does not appear to return RGB values in the interval [0,1].'])
+                assert(all(cOutput(:)>=0) && all(cOutput(:)<=1), 'iosr:boxPlot:colorFhandleRange', ['The color ''' char(fHandle) ''' function does not appear to return RGB values in the interval [0,1].'])
             end
         end
         
@@ -2330,7 +2352,7 @@ classdef (CaseInsensitiveProperties = true) boxPlot < iosr.statistics.statsPlot
                 if strcmpi(option, 'auto')
                     option = default;
                 else
-                    error(errorMsg)
+                    error('iosr:boxPlot:invalidOption',errorMsg)
                 end
             end
         end
