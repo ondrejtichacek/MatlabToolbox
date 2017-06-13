@@ -417,6 +417,8 @@ classdef (CaseInsensitiveProperties = true) boxPlot < iosr.statistics.statsPlot
        theme = 'default'            % Control a range of display properties.
        violinBins = 'auto'          % The bins used to calculate the violins.
        violinBinWidth = 'auto'      % The width of the bins used to calculate the violins.
+       violinAlpha = 1              % Alpha of the violins.
+       violinColor = 'none'         % Color of the violins.
        violinWidth = 'auto'         % The width of the violins.
        violinKernel = 'normal'      % The violin kernel used to calculate the kernel density.
        xSeparator = false           % Add a separator line between x groups.
@@ -1256,6 +1258,22 @@ classdef (CaseInsensitiveProperties = true) boxPlot < iosr.statistics.statsPlot
             obj.draw('violin','whiskers');
         end
         
+        function set.violinAlpha(obj,val)
+            assert(isnumeric(val) && isscalar(val), 'iosr:boxPlot:violinAlpha', '''VIOLINALPHA'' must be a numeric scalar')
+            obj.violinAlpha = val;
+            obj.draw('legend');
+        end
+        
+        function val = get.violinColor(obj)
+            val = obj.checkColor(obj.violinColor,'fill');
+            val = obj.groupOption(val,'violinColor');
+        end
+        
+        function set.violinColor(obj,val)
+            obj.violinColor = val;
+            obj.draw('legend');
+        end
+        
         function set.violinWidth(obj,val)
             assert((isnumeric(val) && isscalar(val)) || strcmpi(val,'auto'), 'iosr:boxPlot:violinWidth', '''VIOLINWIDTH'' must be a numeric scalar or ''auto''.')
             obj.violinWidth = val;
@@ -1526,7 +1544,15 @@ classdef (CaseInsensitiveProperties = true) boxPlot < iosr.statistics.statsPlot
                     [~, halfboxwidth] = obj.calcBoxWidths(subidx);
                     X = obj.xticks(subidx{2}) + obj.getOffset(subidx);
                     % add a random x offset based on data distribution
-                    xScatter = X + (0.8.*halfboxwidth.*obj.xOffset(obj.statistics.outliers{subidx{:}}));
+                    % use full data to calculate offset
+                    subidxAll = subidx;
+                    subidxAll{1} = ':';
+                    yScatter = obj.y(subidxAll{':'});
+                    randOffset = obj.xOffset(yScatter);
+                    ix = obj.statistics.outliers_IX(subidxAll{:});
+                    ix = ix(~isnan(yScatter));
+                    randOffset = randOffset(ix);
+                    xScatter = X + (0.8.*halfboxwidth.*randOffset);
                     obj.handles.outliers(subidx{:}) = scatter(xScatter,obj.statistics.outliers{subidx{:}},...
                         'Parent',obj.handles.axes);
                 end
@@ -1615,6 +1641,13 @@ classdef (CaseInsensitiveProperties = true) boxPlot < iosr.statistics.statsPlot
         function drawGroupGraphics(obj,subidx,gidx)
         %DRAWGROUPGRAPHICS set graphics options for each group
         
+            % violin colors
+            if obj.showViolin
+                set(obj.handles.violin(subidx{:}),...
+                    'FaceColor',obj.violinColor{gidx{:}},...
+                    'EdgeColor',obj.lineColor{gidx{:}});
+            end
+        
             % box colors
             set(obj.handles.box(subidx{:}),...
                 'FaceColor',obj.boxColor{gidx{:}},...
@@ -1677,7 +1710,9 @@ classdef (CaseInsensitiveProperties = true) boxPlot < iosr.statistics.statsPlot
         
             % violin
             if obj.showViolin
-                set(obj.handles.violin, 'LineWidth',obj.lineWidth);
+                set(obj.handles.violin, ...
+                    'LineWidth',obj.lineWidth, ...
+                    'FaceAlpha',obj.violinAlpha);
             end
             
             % box colors
@@ -1902,10 +1937,15 @@ classdef (CaseInsensitiveProperties = true) boxPlot < iosr.statistics.statsPlot
                 % choose target for the legend
                 if ~obj.arrayElementsEqual(obj.boxColor)
                     legendTarget = obj.handles.box;
+                    target = 'box';
                 elseif ~obj.arrayElementsEqual(obj.medianColor)
                     legendTarget = obj.handles.medianLines;
+                    target = 'medianLines';
+                elseif obj.showViolin && ~obj.arrayElementsEqual(obj.violinColor)
+                    legendTarget = obj.handles.violin;
+                    target = 'violin';
                 else
-                    error('iosr:boxPlot:legend','The legend uses the box or median line colors to create legend entries. However, these items appear to be identical, which would make the legend impossible to interpret. Change the ''boxColor'' or ''medianColor'' option.');
+                    error('iosr:boxPlot:legend','The legend uses the box, median line colors, or violins to create legend entries. However, these items appear to be identical, which would make the legend impossible to interpret. Change the ''boxColor'', ''medianColor'', or ''violinColor'' option.');
                 end
                 % create legend in specified order
                 if ~isempty(legendTarget)
@@ -1914,7 +1954,12 @@ classdef (CaseInsensitiveProperties = true) boxPlot < iosr.statistics.statsPlot
                     % add alpha to legend entries
                     PatchInLegend = findobj([obj.handles.legend; icons(:)], 'type', 'patch');
                     if ~isempty(PatchInLegend)
-                        set(PatchInLegend, 'facealpha', obj.boxAlpha);
+                        switch lower(target)
+                            case 'box'
+                                set(PatchInLegend, 'facealpha', obj.boxAlpha);
+                            case 'violin'
+                                set(PatchInLegend, 'facealpha', obj.violinAlpha);
+                        end
                     end
                 end
             end
@@ -2023,8 +2068,6 @@ classdef (CaseInsensitiveProperties = true) boxPlot < iosr.statistics.statsPlot
             obj.statistics.addPrctiles = zeros([length(obj.addPrctiles) outsize(2:end)]);
             obj.statistics.PL = zeros(outsize); % lower percentile
             obj.statistics.PU = zeros(outsize); % upper percentile
-            obj.statistics.outliers = cell(outsize); % outliers (defined as more than 1.5 IQRs above/below each quartile)
-            obj.statistics.outliers_IX = false(size(obj.y)); % outlier logical index
             subidx = cell(1,length(obj.outDims));
             for n = 1:prod(obj.outDims)
                 [subidx{:}] = ind2sub(obj.outDims, n);
@@ -2294,20 +2337,15 @@ classdef (CaseInsensitiveProperties = true) boxPlot < iosr.statistics.statsPlot
         %XOFFSET create an x offset based on data distribution
 
             y = y(~isnan(y));
-            [N,~,bin] = histcounts(y); % create a histogram
-            xShaping = (N(bin)-1)./max(1,max(N-1));
-            offset = zeros(size(xShaping));
-            for n = 1:max(bin)                
-                IX = bin==n;
-                if sum(IX)<=1
-                    offset(IX) = 0;
-                else
-                    % ensures that the offset uses the full width, and that
-                    % the placement of each marker is unique
-                    offset(IX) = (2*(randperm(sum(IX))-1)./(sum(IX)-1))-1;
-                end
-            end
-            offset = offset.*xShaping;
+            [d, xd] = iosr.statistics.kernelDensity(y);
+            d = d./max(d);
+            
+            maxDisplacement = interp1(xd, d, y);
+            randOffset = rand(size(y));%randperm(numel(y))-1;
+            randOffset = (2*randOffset) - 1;
+            % randOffset = (2*randOffset./max(randOffset)) - 1;
+            offset = randOffset(:) .* maxDisplacement;
+            
         end
         
         function str = ensureString(val)
