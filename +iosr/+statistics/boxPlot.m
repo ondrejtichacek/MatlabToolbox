@@ -157,10 +157,11 @@ classdef (CaseInsensitiveProperties = true) boxPlot < iosr.statistics.statsPlot
 %                             36.
 %       showLegend          - Display a legend of the data. The labels can
 %                             be set using the 'groupLabels' option. Note
-%                             that the legend uses the box color or median
-%                             line to distinguish legend entries. If these
-%                             properties do not differ between boxes then
-%                             an error will be returned.
+%                             that the legend uses the box color, median
+%                             line, or violin fill color to distinguish
+%                             legend entries. If these properties do not
+%                             differ between boxes then an error will be
+%                             returned.
 %       showMean            - Logical value determines whether to display
 %                             the mean of the data for each box. The
 %                             default is false.
@@ -204,18 +205,18 @@ classdef (CaseInsensitiveProperties = true) boxPlot < iosr.statistics.statsPlot
 %                                 'default'     : clear boxes, colored
 %                                                 median lines and markers,
 %                                                 gray scatter markers
-%                                 'graylines'   : clear boxes, black mean
-%                                                 marker, grayscale lines
-%                                                 and scatter markers
-%                                 'grayboxes'   : grayscale boxes, black
-%                                                 lines and markers, gray
-%                                                 scatter markers
+%                             Use the 'themeColors' property to specify the
+%                             color(s) that are used.
+%       themeColors           Colors used when creating the theme. The
+%                             default is 'auto' (see boxColor).
 %       violinBins          - If 'showViolin' is true, this specifes the
 %                             bins used to calculate the kernel density.
 %                             See IOSR.STATISTICS.KERNELDENSITY.
 %       violinBinWidth      - If 'showViolin' is true, this specifes the
 %                             bin width used to calculate the kernel
 %                             density. See IOSR.STATISTICS.KERNELDENSITY.
+%       violinColor         - Fill color for the violins. The default is
+%                             'none' (see boxColor).
 %       violinKernel        - If 'showViolin' is true, this specifes the
 %                             kernel used to calculate the kernel density.
 %                             See IOSR.STATISTICS.KERNELDENSITY.
@@ -339,7 +340,7 @@ classdef (CaseInsensitiveProperties = true) boxPlot < iosr.statistics.statsPlot
 %   G-by-I-by-J... . These options are: 'boxColor', 'lineColor',
 %   'lineStyle', 'meanColor', 'meanMarker, 'medianColor', 'notchLineColor',
 %   'notchLineStyle', 'scatterMarker', 'scatterColor', 'symbolColor',
-%   'symbolMarker'.
+%   'symbolMarker', 'themeColor', and 'violinColor'.
 % 
 %   As noted above, colors may be specified as a colormap function handle
 %   (e.g. @gray for grayscale colors). The function handle can refer to one
@@ -415,6 +416,7 @@ classdef (CaseInsensitiveProperties = true) boxPlot < iosr.statistics.statsPlot
        symbolColor = 'auto'         % Outlier marker color.
        symbolMarker = 'o'           % Marker used to denote outliers.
        theme = 'default'            % Control a range of display properties.
+       themeColors = 'auto'         % Colors used when creating the theme.
        violinBins = 'auto'          % The bins used to calculate the violins.
        violinBinWidth = 'auto'      % The width of the bins used to calculate the violins.
        violinAlpha = 1              % Alpha of the violins.
@@ -1238,6 +1240,24 @@ classdef (CaseInsensitiveProperties = true) boxPlot < iosr.statistics.statsPlot
             obj.draw('legend');
         end
         
+        % theme color
+        
+        function val = get.themeColors(obj)
+            switch lower(obj.theme)
+                case {'graylines', 'colorlines', 'default'}
+                    val = obj.checkColor(obj.themeColors,'lines');
+                case {'grayboxes', 'colorall', 'colorboxes'}
+                    val = obj.checkColor(obj.themeColors,'fill');
+            end
+            val = obj.groupOption(val,'themeColors');
+        end
+        
+        function set.themeColors(obj,val)
+            obj.themeColors = val;
+            obj.createTheme();
+            obj.draw('all');
+        end
+        
         % set violin props
         
         function set.violinBins(obj,val)
@@ -1971,51 +1991,35 @@ classdef (CaseInsensitiveProperties = true) boxPlot < iosr.statistics.statsPlot
             switch lower(obj.theme) % choose scheme
                 case 'colorall'
                     boxalpha = 0.4;
-                    boxcolor = @lines;
+                    boxcolor = obj.themeColors;
                     linecolor = 'k';
                     linestyle = '-';
                     meancolor = 'k';
                     mediancolor = 'k';
-                    notchlinecolor = @lines;
+                    notchlinecolor = obj.themeColors;
                     notchlinestyle = ':';
-                    scattercolor = @lines;
-                    symbolcolor = @lines;
-                case 'colorlines'
+                    scattercolor = obj.themeColors;
+                    symbolcolor = obj.themeColors;
+                case {'colorlines', 'graylines'}
+                    if strcmpi(obj.theme,'graylines')
+                        warning('iosr:boxPlot:graylines', 'The ''graylines'' theme is deprecated. Use the ''colorlines'' theme instead, and specify ''themeColors'' as @gray.')
+                    end
                     boxalpha = obj.boxAlpha;
                     boxcolor = 'none';
                     linecolor = 'k';
                     linestyle = '-';
                     meancolor = 'k';
-                    mediancolor = @lines;
-                    notchlinecolor = @lines;
+                    mediancolor = obj.themeColors;
+                    notchlinecolor = obj.themeColors;
                     notchlinestyle = ':';
-                    scattercolor = @lines;
-                    symbolcolor = @lines;
-                case 'colorboxes'
+                    scattercolor = obj.themeColors;
+                    symbolcolor = obj.themeColors;
+                case {'colorboxes', 'grayboxes'}
+                    if strcmpi(obj.theme,'grayboxes')
+                        warning('iosr:boxPlot:grayboxes', 'The ''grayboxes'' theme is deprecated. Use the ''colorboxes'' theme instead, and specify ''themeColors'' as @gray.')
+                    end
                     boxalpha = obj.boxAlpha;
-                    boxcolor = @lines;
-                    linecolor = 'k';
-                    linestyle = '-';
-                    meancolor = 'k';
-                    mediancolor = 'k';
-                    notchlinecolor = 'k';
-                    notchlinestyle = ':';
-                    scattercolor = [.5 .5 .5];
-                    symbolcolor = 'k';
-                case 'graylines'
-                    boxalpha = obj.boxAlpha;
-                    boxcolor = 'none';
-                    linecolor = 'k';
-                    linestyle = '-';
-                    meancolor = 'k';
-                    mediancolor = @gray;
-                    notchlinecolor = @gray;
-                    notchlinestyle = ':';
-                    scattercolor = @gray;
-                    symbolcolor = @gray;
-                case 'grayboxes'
-                    boxalpha = obj.boxAlpha;
-                    boxcolor = @gray;
+                    boxcolor = obj.themeColors;
                     linecolor = 'k';
                     linestyle = '-';
                     meancolor = 'k';
@@ -2032,12 +2036,12 @@ classdef (CaseInsensitiveProperties = true) boxPlot < iosr.statistics.statsPlot
                     boxcolor = 'none';
                     linecolor = 'k';
                     linestyle = '-';
-                    meancolor = 'auto';
-                    mediancolor = 'auto';
+                    meancolor = obj.themeColors;
+                    mediancolor = obj.themeColors;
                     notchlinecolor = 'k';
                     notchlinestyle = ':';
                     scattercolor = [.5 .5 .5];
-                    symbolcolor = 'auto';
+                    symbolcolor = obj.themeColors;
             end
             % turn off legend while changing parameters
             legendState = obj.showLegend;
