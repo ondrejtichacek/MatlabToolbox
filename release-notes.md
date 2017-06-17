@@ -1,3 +1,11 @@
+# v2.8 - 17th June 2017
+
+- Added kernelDensity function.
+- boxPlot: Added ‘violin’ methods and properties for making violin plots.
+- boxPlot: Added various violin-related options. Also modified the scatter offset to use kernel density rather than histogram.
+- boxPlot: Added themeColor property, allowing the various colours for the theme to be changed via a single property.
+- calcSnr: Prevent rank deficient warning when output is zeros.
+
 # v2.7 - 28th March 2017
 
 - Added true functional boxplot.
