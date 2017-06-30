@@ -2344,7 +2344,11 @@ classdef (CaseInsensitiveProperties = true) boxPlot < iosr.statistics.statsPlot
             [d, xd] = iosr.statistics.kernelDensity(y);
             d = d./max(d);
             
-            maxDisplacement = interp1(xd, d, y);
+            try
+                maxDisplacement = interp1(xd, d, y);
+            catch
+                maxDisplacement = zeros(size(y));
+            end
             randOffset = rand(size(y));%randperm(numel(y))-1;
             randOffset = (2*randOffset) - 1;
             % randOffset = (2*randOffset./max(randOffset)) - 1;
