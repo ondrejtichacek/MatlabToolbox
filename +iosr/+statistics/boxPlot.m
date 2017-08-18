@@ -1785,11 +1785,12 @@ classdef (CaseInsensitiveProperties = true) boxPlot < iosr.statistics.statsPlot
                 set(obj.handles.means,'markersize',obj.meanSize);
             end
             
-            % sample size
-            if obj.sampleSize && isfield(obj.handles,'groupsTxt')
+            % set group label font size
+            if isfield(obj.handles,'groupsTxt')
                 set(obj.handles.groupsTxt,'FontSize',obj.groupLabelFontSize);
             end
             
+            % set additional percentile font size
             if ~isempty(obj.addPrctiles) && isfield(obj.handles,'addPrctilesTxt')
                 set(obj.handles.addPrctilesTxt,'FontSize',obj.addPrctilesTxtSize);
             end
