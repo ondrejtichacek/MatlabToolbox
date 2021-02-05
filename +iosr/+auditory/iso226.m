@@ -1,4 +1,10 @@
-function [spl, f, params] = iso226(phon,fq,sq)
+function [spl, f, params] = iso226(phon,fq,sq,args)
+arguments
+    phon
+    fq = []
+    sq (1,1) logical = false
+    args.warn (1,1) logical = false
+end
 %ISO226 ISO 226:2003 Normal equal-loudness-level contours
 %   
 %   [SPL,F] = IOSR.AUDITORY.ISO226(PHON) returns the sound pressure level
@@ -60,14 +66,16 @@ function [spl, f, params] = iso226(phon,fq,sq)
 
     %% Check input
 
-    if any(phon > 80)
-        warning('iosr:iso226:phonRange','SPL values may not be accurate for loudness levels above 80 phon.')
-    elseif any(phon(phon~=0) < 20)
-        warning('iosr:iso226:phonRange','SPL values may not be accurate for loudness levels below 20 phon.')
+    if args.warn == true
+        if any(phon > 80)
+            warning('iosr:iso226:phonRange','SPL values may not be accurate for loudness levels above 80 phon.')
+        elseif any(phon(phon~=0) < 20)
+            warning('iosr:iso226:phonRange','SPL values may not be accurate for loudness levels below 20 phon.')
+        end
     end
 
-    if nargin>1
-        if ~isempty(fq)
+    if ~isempty(fq)
+        if args.warn == true
             if any(fq(:) < 20 | fq(:) > 4000) && any(phon > 90)
                 warning('iosr:iso226:frequencyRange','ISO 226:2003 is valid for 20?4000 Hz only up to 90 phon. SPL values may be inaccurate.')
             elseif any(fq(:) < 5000 | fq(:) > 12500) && any(phon > 80)
@@ -75,17 +83,11 @@ function [spl, f, params] = iso226(phon,fq,sq)
             elseif any(fq(:)>12500)
                 warning('iosr:iso226:frequencyRange','ISO 226:2003 defines loudness levels up to 12.5 kHz. SPL values for frequencies above 12.5 kHz may be inaccurate.')
             end
-            assert(all(fq(:)>=0), 'iosr:iso226:invalidFrequencies', 'Frequencies must be greater than or equal to 0 Hz.')
         end
-    else
-        fq = [];
+        assert(all(fq(:)>=0), 'iosr:iso226:invalidFrequencies', 'Frequencies must be greater than or equal to 0 Hz.')
     end
 
-    if nargin<3
-        sq = false;
-    else
-        assert(islogical(sq), 'iosr:iso226:invalidSq', 'sq must be logical.')
-    end
+    assert(islogical(sq), 'iosr:iso226:invalidSq', 'sq must be logical.')
 
     %% References
 
